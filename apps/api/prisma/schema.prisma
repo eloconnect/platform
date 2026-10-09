@@ -1,0 +1,12 @@
+// Schema do banco do Elo Connect.
+// Os modelos entram a partir do DER (issue MODELAGEM).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
