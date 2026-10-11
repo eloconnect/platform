@@ -1,0 +1,42 @@
+# Reabre issues fechadas à mão por quem não é responsável pelo repositório.
+# Issue só fecha pelo merge de um PR (Closes #N) ou por um responsável,
+# que fecha pendências e estudos que não têm código. Ver CONTRIBUTING.md.
+name: Guarda de issues
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RESPONSAVEIS: LKScripts
+      QUEM_FECHOU: ${{ github.event.sender.login }}
+      ISSUE: ${{ github.event.issue.number }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Conferir quem fechou
+        run: |
+          if [[ " $RESPONSAVEIS " == *" $QUEM_FECHOU "* ]]; then
+            echo "Fechada por responsável ($QUEM_FECHOU)."
+            exit 0
+          fi
+
+          # Fechada pelo merge de um PR ou por commit no main (que só chega por PR)?
+          # Qualquer outro caso (à mão, ou arrastando o card para Done no Project) conta como manual.
+          fechador=$(gh api graphql \
+            -f query='query($dono:String!,$nome:String!,$num:Int!){repository(owner:$dono,name:$nome){issue(number:$num){timelineItems(last:1,itemTypes:[CLOSED_EVENT]){nodes{... on ClosedEvent{closer{__typename ... on PullRequest{merged}}}}}}}}' \
+            -f dono="${REPO%/*}" -f nome="${REPO#*/}" -F num="$ISSUE" \
+            --jq '.data.repository.issue.timelineItems.nodes[0].closer | if .__typename == "PullRequest" and .merged then "pr" elif .__typename == "Commit" then "commit" else "manual" end')
+          echo "Fechamento: $fechador por $QUEM_FECHOU"
+
+          if [[ "$fechador" == "pr" || "$fechador" == "commit" ]]; then
+            exit 0
+          fi
+
+          gh issue reopen "$ISSUE" -R "$REPO" -c "Issue reaberta automaticamente: @$QUEM_FECHOU fechou à mão. Issues fecham pelo merge do PR (\`Closes #$ISSUE\`), depois da revisão. Veja o [CONTRIBUTING]($GITHUB_SERVER_URL/$REPO/blob/main/CONTRIBUTING.md#regras)."
