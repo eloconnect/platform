@@ -1,0 +1,63 @@
+// Tema do Elo Connect. Público majoritariamente idoso (RNF01, RNF02):
+// fonte grande, alto contraste, botões grandes e foco bem visível.
+
+// Cores com contraste calculado contra texto branco (WCAG AA exige 4,5:1).
+// As cores padrão do Bootstrap ficam no limite (4,5:1); estas têm folga.
+$primary: #0b4f8c; //   8,4:1
+$secondary: #495057; // 8,2:1
+$success: #146c43; //   6,5:1
+$danger: #b02a37; //    6,5:1
+$info: #055160; //      8,9:1
+$body-color: #1b1f23; // 16,6:1 sobre branco
+
+// 1rem = 18px: tudo que o Bootstrap mede em rem cresce junto.
+// Em porcentagem, respeita quem aumentou a fonte no navegador.
+$font-size-root: 112.5%;
+$line-height-base: 1.6;
+
+$link-decoration: underline;
+$navbar-nav-link-padding-x: 0.75rem;
+
+@import 'bootstrap/scss/bootstrap';
+
+#raiz {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+// Alvo de toque confortável (mínimo de 44px).
+.btn,
+.form-control,
+.form-select,
+.nav-link {
+  min-height: 2.75rem;
+}
+
+// Foco visível em qualquer fundo: anel preto por dentro e amarelo por fora.
+// Substitui o foco padrão do Bootstrap, que é fraco (sombra translúcida).
+:focus-visible {
+  outline: 3px solid #ffbf47 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 5px #1b1f23 !important;
+}
+
+// Link "Pular para o conteúdo": aparece só quando recebe foco pelo teclado.
+.link-pular:focus {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1100;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  color: $body-color;
+  font-weight: 600;
+}
