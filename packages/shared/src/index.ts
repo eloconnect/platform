@@ -1,5 +1,2 @@
-export interface HealthResponse {
-  status: 'ok';
-  database: 'ok' | 'erro';
-  timestamp: string;
-}
+export type { HealthResponse } from './health.js';
+export { ApiError, createApiClient, type ApiClient } from './api-client.js';
