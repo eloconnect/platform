@@ -9,13 +9,13 @@ Guia de trabalho da equipe do Elo Connect. Leia antes de abrir a primeira branch
 3. Crie uma branch a partir do `main` atualizado.
 4. Faça commits pequenos, no padrão [Conventional Commits](#commits).
 5. Abra um Pull Request com `Closes #N` na descrição.
-6. Espere a revisão de pelo menos 1 colega e resolva as conversas.
+6. Espere a revisão e resolva as conversas. O merge é feito pelo responsável pelo repositório.
 7. Depois do merge, a issue fecha sozinha.
 
 ## Regras
 
-- **Nada vai direto para o `main`.** O `main` é protegido: todo código entra por PR com 1 aprovação, inclusive o dos administradores.
-- **Nunca feche uma issue à mão nem marque o checklist dela sem o código estar no `main`.** A issue fecha pelo merge do PR (`Closes #N`). O checklist é marcado conforme o PR é revisado.
+- **Nada vai direto para o `main`.** O `main` é protegido: todo código entra por PR, e só o responsável pelo repositório (@LKScripts) faz o merge, depois de revisar. Ele é chamado automaticamente como revisor em todo PR (`.github/CODEOWNERS`).
+- **Nunca feche uma issue à mão nem marque o checklist dela sem o código estar no `main`.** A issue fecha pelo merge do PR (`Closes #N`). O checklist é marcado conforme o PR é revisado. Issue fechada à mão, ou arrastando o card para Done no board, é reaberta automaticamente (`.github/workflows/guarda-issues.yml`).
 - **Issue com label `a-confirmar` não sai do backlog.** Ela depende de uma pendência com o cliente ou com os professores (issues `tipo:pendencia`). Não invente regra de negócio para cobrir uma pendência: cite o ID dela (ex: P10) e deixe o ponto configurável ou com `TODO(P10)`.
 - **Consulte [docs/requisitos.md](docs/requisitos.md) antes de implementar uma regra de negócio.** Cada regra tem ID (RN, RF, RNF) e status ([Validado] ou [A confirmar]).
 - **Público majoritariamente idoso** (RNF01, RNF02): fonte base de no mínimo 18px, alto contraste, botões grandes, poucos passos por tela, linguagem direta, todos os campos com rótulo visível e navegação por teclado.
@@ -64,7 +64,7 @@ tipo(escopo): descrição curta no imperativo ou no particípio
 - **PR pequeno:** uma issue por PR. Se a issue for grande, divida em mais PRs.
 - Preencha o template: o que muda, como testar e o checklist.
 - A descrição precisa ter `Closes #N` para a issue fechar no merge.
-- Revisor: confira o código, rode localmente se precisar e comente. Quem abriu o PR responde e resolve as conversas.
+- Revisor: confira o código, rode localmente se precisar e comente. Quem abriu o PR responde e resolve as conversas. Qualquer colega pode revisar e comentar; o merge fica com o responsável pelo repositório.
 - Antes de pedir revisão, rode `pnpm lint`, `pnpm format:check`, `pnpm build` e `pnpm test`.
 
 ## Lint e formatação
