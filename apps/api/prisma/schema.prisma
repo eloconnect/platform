@@ -1,5 +1,6 @@
 // Schema do banco do Elo Connect.
-// Os modelos entram a partir do DER (issue MODELAGEM).
+// Documentação, diagrama e decisões: docs/modelo-dados.md.
+// Nomes em português, iguais ao glossário de docs/requisitos.md.
 
 generator client {
   provider     = "prisma-client"
@@ -9,4 +10,354 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Acesso
+// ---------------------------------------------------------------------------
+
+enum Perfil {
+  ADMIN
+  ASSOCIADO
+}
+
+/// Conta de acesso. Admin é funcionário da sede; associado é a conta da
+/// farmácia, também usada pelo contador (RN29).
+model Usuario {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  email             String    @unique
+  senhaHash         String
+  nome              String
+  perfil            Perfil
+  ativo             Boolean   @default(true)
+  emailConfirmadoEm DateTime?
+  /// Só para perfil ASSOCIADO: uma conta por farmácia (RN29).
+  associadoId       String?   @unique @db.Uuid
+  criadoEm          DateTime  @default(now())
+  atualizadoEm      DateTime  @updatedAt
+
+  associado              Associado?                @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  tokens                 TokenUsuario[]
+  valoresAlterados       ValorContribuicao[]
+  lotesEnviados          LoteMensal[]
+  transacoes             Transacao[]
+  logs                   LogAuditoria[]
+  convencoes             Convencao[]
+  noticias               Noticia[]
+  cancelamentosDecididos SolicitacaoCancelamento[]
+}
+
+enum TipoToken {
+  RECUPERACAO_SENHA
+  CONFIRMACAO_EMAIL
+}
+
+/// Tokens de uso único enviados por e-mail (RF03, RF04). Guarda só o hash.
+model TokenUsuario {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  usuarioId String    @db.Uuid
+  tipo      TipoToken
+  tokenHash String    @unique
+  expiraEm  DateTime
+  usadoEm   DateTime?
+  criadoEm  DateTime  @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+}
+
+// ---------------------------------------------------------------------------
+// Associados
+// ---------------------------------------------------------------------------
+
+enum SituacaoAssociado {
+  ADIMPLENTE
+  INADIMPLENTE
+}
+
+/// Decisão manual da sede, que prevalece sobre a situação automática (RN11).
+enum AcessoManual {
+  LIBERADO
+  BLOQUEADO
+}
+
+/// Farmácia ou drogaria do universo do sindicato (~2.000). Pode existir sem
+/// conta de acesso (ex.: importada para a cobrança formal).
+model Associado {
+  id                String            @id @default(uuid(7)) @db.Uuid
+  /// Só dígitos, sem máscara.
+  cnpj              String            @unique @db.Char(14)
+  // Campos cadastrais provisórios: dependem da resposta do cliente sobre os
+  // dados que a sede usa hoje (P02, P09). Novos campos entram por migration.
+  razaoSocial       String
+  nomeFantasia      String?
+  email             String?
+  telefone          String?
+  municipio         String?
+  /// "Recebe boleto mensal: sim/não" no painel da sede (RN22, RN23, RN25).
+  contribuicaoAtiva Boolean           @default(false)
+  /// Situação automática: o pagamento torna ADIMPLENTE, o vencimento sem
+  /// pagamento torna INADIMPLENTE (RN09, RN10).
+  situacao          SituacaoAssociado @default(INADIMPLENTE)
+  /// Nulo = segue a situação automática (RN11).
+  acessoManual      AcessoManual?
+  /// Inativação manual pela sede (RF08). Não há exclusão de associado.
+  inativadoEm       DateTime?
+  criadoEm          DateTime          @default(now())
+  atualizadoEm      DateTime          @updatedAt
+
+  usuario       Usuario?
+  boletos       Boleto[]
+  transacoes    Transacao[]
+  logs          LogAuditoria[]
+  cancelamentos SolicitacaoCancelamento[]
+
+  @@index([situacao])
+  @@index([contribuicaoAtiva])
+}
+
+enum StatusCancelamento {
+  PENDENTE
+  APROVADA
+  RECUSADA
+}
+
+/// Pedido de cancelamento da cobrança recorrente, validado pela sede (RN18).
+model SolicitacaoCancelamento {
+  id             String             @id @default(uuid(7)) @db.Uuid
+  associadoId    String             @db.Uuid
+  status         StatusCancelamento @default(PENDENTE)
+  motivo         String?
+  observacaoSede String?
+  solicitadaEm   DateTime           @default(now())
+  decididaEm     DateTime?
+  decididaPorId  String?            @db.Uuid
+
+  associado   Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  decididaPor Usuario?  @relation(fields: [decididaPorId], references: [id], onDelete: Restrict)
+
+  @@index([associadoId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Cobrança
+// ---------------------------------------------------------------------------
+
+/// Histórico imutável de valores (RN01, RN13 a RN16, RF18 a RF20).
+/// O valor vigente é o registro mais recente; o anterior é o registro de antes.
+model ValorContribuicao {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  valorMensal   Decimal  @db.Decimal(10, 2)
+  /// Plano anual à vista, com 20% de desconto (RN13). Guardado à parte porque
+  /// a sede edita os dois valores (RF18).
+  valorAnual    Decimal  @db.Decimal(10, 2)
+  alteradoPorId String   @db.Uuid
+  criadoEm      DateTime @default(now())
+
+  alteradoPor Usuario @relation(fields: [alteradoPorId], references: [id], onDelete: Restrict)
+}
+
+enum StatusLote {
+  RASCUNHO
+  ENVIADO
+}
+
+/// Lote mensal de boletos: gerado em rascunho, revisado e enviado pela sede
+/// com um botão (RN04, RF10, RF11).
+model LoteMensal {
+  id           String     @id @default(uuid(7)) @db.Uuid
+  /// Primeiro dia do mês de referência.
+  competencia  DateTime   @unique @db.Date
+  status       StatusLote @default(RASCUNHO)
+  geradoEm     DateTime   @default(now())
+  enviadoEm    DateTime?
+  enviadoPorId String?    @db.Uuid
+
+  enviadoPor Usuario? @relation(fields: [enviadoPorId], references: [id], onDelete: Restrict)
+  boletos    Boleto[]
+}
+
+enum TipoBoleto {
+  /// Cobrança recorrente, gerada no lote mensal.
+  MENSAL
+  /// Pagamento de um único mês (RN24). Regras em P10.
+  AVULSO
+  /// Plano anual à vista (RN13). Regras em P04.
+  ANUAL
+}
+
+enum StatusBoleto {
+  RASCUNHO
+  /// Emitido no Sicredi e enviado ao associado. Vencido = EM_ABERTO com
+  /// vencimento no passado (calculado, não guardado).
+  EM_ABERTO
+  PAGO
+  CANCELADO
+  // TODO(P01): o que acontece depois dos 30 dias de validade pode exigir
+  // um status a mais (ex.: EXPIRADO).
+}
+
+model Boleto {
+  id                 String       @id @default(uuid(7)) @db.Uuid
+  associadoId        String       @db.Uuid
+  /// Nulo para boletos fora do lote mensal (avulso e anual: P10, P04).
+  loteId             String?      @db.Uuid
+  tipo               TipoBoleto
+  /// Primeiro dia do mês de referência.
+  competencia        DateTime     @db.Date
+  valor              Decimal      @db.Decimal(10, 2)
+  /// Dia 10 do mês (RN02).
+  vencimento         DateTime     @db.Date
+  status             StatusBoleto @default(RASCUNHO)
+  // Dados do Sicredi: provisórios até o estudo da API (#40).
+  sicrediNossoNumero String?      @unique
+  linhaDigitavel     String?
+  pixCopiaECola      String?
+  emitidoEm          DateTime?
+  pagoEm             DateTime?
+  /// Controle dos lembretes a cada 48h (RN07).
+  ultimoLembreteEm   DateTime?
+  criadoEm           DateTime     @default(now())
+  atualizadoEm       DateTime     @updatedAt
+
+  associado  Associado   @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  lote       LoteMensal? @relation(fields: [loteId], references: [id], onDelete: Restrict)
+  transacoes Transacao[]
+
+  @@index([associadoId, competencia])
+  @@index([status, vencimento])
+}
+
+enum EventoTransacao {
+  GERADO
+  EDITADO
+  EMITIDO
+  PAGO
+  CANCELADO
+}
+
+enum FormaPagamento {
+  BOLETO
+  PIX
+}
+
+/// Histórico imutável de transações, usado como prova em divergências
+/// (RN17, RF30). Cada mudança de um boleto gera um registro novo.
+model Transacao {
+  id                 String          @id @default(uuid(7)) @db.Uuid
+  boletoId           String          @db.Uuid
+  associadoId        String          @db.Uuid
+  evento             EventoTransacao
+  /// Cópia dos dados do boleto no momento do evento.
+  valor              Decimal         @db.Decimal(10, 2)
+  sicrediNossoNumero String?
+  formaPagamento     FormaPagamento?
+  /// Nulo = ação automática do sistema.
+  usuarioId          String?         @db.Uuid
+  detalhes           Json?
+  ocorridoEm         DateTime        @default(now())
+
+  boleto    Boleto    @relation(fields: [boletoId], references: [id], onDelete: Restrict)
+  associado Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  usuario   Usuario?  @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([associadoId, ocorridoEm])
+  @@index([boletoId])
+}
+
+// ---------------------------------------------------------------------------
+// Auditoria
+// ---------------------------------------------------------------------------
+
+/// Log imutável de toda ação dos usuários da sede (RN26, RF39, RF40).
+model LogAuditoria {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  usuarioId     String   @db.Uuid
+  /// Ex.: ASSOCIADO_EDITADO, LOTE_ENVIADO. O catálogo fica em
+  /// packages/shared (#15).
+  acao          String
+  /// Nome do modelo afetado (ex.: Associado) e o id do registro.
+  entidade      String
+  entidadeId    String?
+  /// Preenchido quando a ação envolve um associado, para o filtro do RF40.
+  associadoId   String?  @db.Uuid
+  valorAnterior Json?
+  valorNovo     Json?
+  ocorridoEm    DateTime @default(now())
+
+  usuario   Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  associado Associado? @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+
+  @@index([usuarioId, ocorridoEm])
+  @@index([associadoId, ocorridoEm])
+  @@index([acao, ocorridoEm])
+}
+
+// ---------------------------------------------------------------------------
+// Conteúdo
+// ---------------------------------------------------------------------------
+
+/// Convenção coletiva (RF21, RF22). Inscrição em convenção fica fora até P05.
+model Convencao {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  titulo         String
+  ano            Int
+  resumo         String    @db.Text
+  /// Tabela de reajuste salarial. Formato livre até a primeira convenção real.
+  tabelaReajuste Json?
+  /// Nulo = rascunho, não aparece para os associados.
+  publicadaEm    DateTime?
+  autorId        String    @db.Uuid
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+
+  autor  Usuario          @relation(fields: [autorId], references: [id], onDelete: Restrict)
+  anexos ConvencaoAnexo[]
+
+  @@index([ano])
+}
+
+/// PDF anexado a uma convenção. Onde os arquivos ficam depende da
+/// hospedagem (#28).
+model ConvencaoAnexo {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  convencaoId  String   @db.Uuid
+  nomeArquivo  String
+  arquivoUrl   String
+  tamanhoBytes Int
+  criadoEm     DateTime @default(now())
+
+  convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Cascade)
+
+  @@index([convencaoId])
+}
+
+/// Feed de notícias, visível a qualquer associado logado (RN28, RF35, RF41).
+model Noticia {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  titulo       String
+  conteudo     String    @db.Text
+  /// Nulo = rascunho.
+  publicadaEm  DateTime?
+  /// Remoção lógica: o registro fica para o log de auditoria.
+  removidaEm   DateTime?
+  autorId      String    @db.Uuid
+  criadoEm     DateTime  @default(now())
+  atualizadoEm DateTime  @updatedAt
+
+  autor Usuario @relation(fields: [autorId], references: [id], onDelete: Restrict)
+
+  @@index([publicadaEm])
+}
+
+/// Benefício exibido no app e na landing page (RF24). Lista real em P06.
+model Beneficio {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  titulo       String
+  descricao    String   @db.Text
+  ativo        Boolean  @default(true)
+  ordem        Int      @default(0)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
 }
