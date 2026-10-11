@@ -4,9 +4,8 @@ import ts from 'typescript';
 
 // Path aliases (e.g. the ones added by `nest g library`) live in tsconfig.json,
 // so they are read from there instead of being duplicated here.
-const { config: tsconfig } = ts.readConfigFile(
-  './tsconfig.json',
-  ts.sys.readFile,
+const { config: tsconfig } = ts.readConfigFile('./tsconfig.json', (path) =>
+  ts.sys.readFile(path),
 );
 const paths = tsconfig?.compilerOptions?.paths ?? {};
 

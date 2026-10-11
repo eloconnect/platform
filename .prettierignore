@@ -1,0 +1,8 @@
+dist/
+coverage/
+pnpm-lock.yaml
+apps/api/src/generated/
+
+# Markdown fica fora: o Prettier alinha tabelas com espaços, e uma edição numa
+# célula reformata a tabela inteira, poluindo o diff dos PRs.
+*.md
