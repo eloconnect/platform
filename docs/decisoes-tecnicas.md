@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 10/10/2026.
+Última atualização: 11/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end) e o backlog no GitHub Projects da organização.
 
@@ -115,11 +115,15 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Acesso ao banco (ORM): **Prisma 7**. Alternativa avaliada: TypeORM. Motivos da escolha: schema legível num arquivo único, tipagem forte gerada a partir do schema e migrations simples. O Prisma 8 foi descartado por estar em release candidate; o Prisma 7 recebe suporte por 18 meses após o lançamento oficial do 8, o que cobre a duração do PI. A conexão usa o `@prisma/adapter-pg`, acessada pela API através de um `PrismaService`. O client é gerado automaticamente no `postinstall`, em `apps/api/src/generated/prisma`, e fica fora do Git.
 
-- Migrations e seed: a primeira migration e o script de seed (com dados fictícios) dependem do modelo de dados e ficam na issue de modelagem (DER).
+- Modelo de dados: documentado em [Modelo de Dados](modelo-dados.md) (DER em Mermaid, decisões e pendências). Nomes de tabelas e colunas em português, iguais ao glossário. Situação do associado armazenada (`situacao`), com override manual separado (`acessoManual`). Histórico de valores, transações e log de auditoria são imutáveis por triggers no banco.
+
+- Migrations e seed: migrations versionadas em `apps/api/prisma/migrations` (a primeira é a `init`). O seed (`apps/api/prisma/seed.ts`, executado com `tsx`) cria só dados fictícios. No Prisma 7, o `migrate reset` não roda o seed sozinho, por isso o script `db:reset` chama os dois.
+
+- Hash de senha: **argon2id**, com o pacote `@node-rs/argon2` (binários prontos, sem compilação na instalação), conforme o RNF04. O seed já usa esse pacote, e o login (US03) deve usar o mesmo.
 
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
 
-- Lint: o gerador do NestJS trouxe o **oxlint**; avaliar adotá-lo no monorepo inteiro (issue de lint).
+- Lint e formatação: **oxlint** (com regras de React e jsx-a11y) e **Prettier** no monorepo inteiro, com hooks de commit (husky, lint-staged e commitlint). Arquivos Markdown ficam fora do Prettier. Detalhes no CONTRIBUTING.
 
 - Ambiente de desenvolvimento: o projeto fica no sistema de arquivos do WSL (ex.: `~/projetos`), não em `/mnt/c`, por desempenho.
 
