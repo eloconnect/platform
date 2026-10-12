@@ -157,6 +157,15 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Login com e-mail + senha [validado].
 
+- Senhas verificadas com Argon2id (`@node-rs/argon2`). A autenticação usa
+  sessões opacas no servidor, com token aleatório enviado apenas em cookie
+  `HttpOnly`, `SameSite=Lax` e `Secure` em produção. O banco guarda somente
+  SHA-256 do token; sessões expiram após sete dias e podem ser revogadas no
+  logout.
+
+- O endpoint de login limita tentativas por IP. O controle de acesso usa guards
+  de sessão e de perfil (`ADMIN`/`ASSOCIADO`).
+
 - Recuperação de senha por link enviado ao e-mail [validado].
 
 - Confirmação de 5 dígitos aleatórios do CNPJ apenas no primeiro cadastro, junto com confirmação por e-mail [validado]. O CNPJ é público, então não serve como verificação a cada login. Comunicar o ajuste ao cliente, que havia pedido a verificação para garantir a identidade.

@@ -1,6 +1,6 @@
 # Elo Connect — Modelo de Dados (DER)
 
-Última atualização: 11/10/2026.
+Última atualização: 12/10/2026.
 
 Fonte da verdade do banco: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma). Este documento explica o modelo e as decisões; se os dois divergirem, vale o schema, e este documento deve ser corrigido no mesmo PR.
 
@@ -12,6 +12,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras RN, requisitos RF e
 erDiagram
     Associado ||--o| Usuario : "tem conta"
     Usuario ||--o{ TokenUsuario : "recebe"
+    Usuario ||--o{ SessaoAutenticacao : "mantém"
     Associado ||--o{ SolicitacaoCancelamento : "pede"
     Usuario |o--o{ SolicitacaoCancelamento : "decide"
     Usuario ||--o{ ValorContribuicao : "altera"
@@ -44,6 +45,13 @@ erDiagram
         string tokenHash UK
         datetime expiraEm
         datetime usadoEm
+    }
+    SessaoAutenticacao {
+        uuid id PK
+        uuid usuarioId FK
+        string tokenHash UK
+        datetime expiraEm
+        datetime criadoEm
     }
     Associado {
         uuid id PK
