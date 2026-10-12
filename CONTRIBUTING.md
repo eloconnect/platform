@@ -66,6 +66,7 @@ tipo(escopo): descrição curta no imperativo ou no particípio
 - A descrição precisa ter `Closes #N` para a issue fechar no merge.
 - Revisor: confira o código, rode localmente se precisar e comente. Quem abriu o PR responde e resolve as conversas. Qualquer colega pode revisar e comentar; o merge fica com o responsável pelo repositório.
 - Antes de pedir revisão, rode `pnpm lint`, `pnpm format:check`, `pnpm build` e `pnpm test`.
+- O CI (`.github/workflows/ci.yml`) roda esses mesmos comandos em todo PR, mais os testes e2e da API com um Postgres descartável. PR com o CI vermelho não entra no `main`.
 
 ## Lint e formatação
 
