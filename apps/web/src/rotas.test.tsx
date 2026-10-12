@@ -22,10 +22,13 @@ describe('Rotas', () => {
     vi.mocked(api.getHealth).mockReset();
   });
 
-  it('abre a página inicial com o link para pular ao conteúdo', () => {
+  it('abre a landing page com os serviços e as ações de acesso', () => {
     abrir('/');
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Elo Connect' }),
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Informação e apoio para fortalecer o setor farmacêutico',
+      }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Pular para o conteúdo' }),
@@ -33,6 +36,19 @@ describe('Rotas', () => {
     expect(
       screen.getByRole('navigation', { name: 'Menu principal' }),
     ).toBeInTheDocument();
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Entrar' })
+        .every((link) => link.getAttribute('href') === '/entrar'),
+    ).toBe(true);
+    expect(screen.getByRole('link', { name: 'Criar conta' })).toHaveAttribute(
+      'href',
+      '/#cadastro',
+    );
+    expect(
+      screen.getByRole('heading', { name: 'Convenções coletivas' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Conteúdo provisório')).toBeInTheDocument();
   });
 
   it.each([

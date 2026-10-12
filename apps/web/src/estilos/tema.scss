@@ -61,3 +61,27 @@ main {
   color: $body-color;
   font-weight: 600;
 }
+
+.inicio-hero {
+  border-radius: 1rem;
+  background: $primary;
+  color: #fff;
+}
+
+.inicio-hero h1,
+.inicio-hero p {
+  max-width: 52rem;
+}
+
+.inicio-destaque {
+  color: $body-color;
+}
+
+.inicio-card {
+  border-color: #d5dce2;
+}
+
+.cadastro-info {
+  border-left: 0.4rem solid $primary;
+  background: #eef4f8;
+}
