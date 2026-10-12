@@ -108,8 +108,8 @@ Uma observação sobre o back-end: NestJS e Laravel são uma decisão separada. 
 ## Ações
 
 1. Fazer um spike de 1 semana: tela de login e lista de associados em React + Vite consumindo um endpoint NestJS, para medir a curva real de aprendizado do grupo.
-2. Montar a estrutura do monorepo: `apps/web`, `apps/api`, `packages/shared` (com `apps/mobile` no próximo semestre). Feito em 09/10/2026 (`packages/shared` e `apps/api`; `apps/web` ainda não iniciado).
-3. Escolher uma biblioteca de componentes acessível. React Bootstrap aproveita o que a equipe já sabe; Mantine é outra opção.
+2. Montar a estrutura do monorepo: `apps/web`, `apps/api`, `packages/shared` (com `apps/mobile` no próximo semestre). Feito em 10/10/2026.
+3. Escolher uma biblioteca de componentes acessível. **React Bootstrap** foi escolhido em 10/10/2026 e adotado na vitrine e na tela de login.
 4. Registrar esta decisão em `docs/decisoes-tecnicas.md` e mudar o status para "Aceito". Feito em 09/10/2026.
 
 ## Referências

@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 10/10/2026.
+Última atualização: 12/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end) e o backlog no GitHub Projects da organização.
 
@@ -12,16 +12,17 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - **Associado**: qualquer farmácia/drogaria do universo do sindicato em MT (~2.000), identificada pelo CNAE. Não é obrigada a pagar. É o único tipo de usuário do lado do cliente.
 
-- **Adimplente**: associado com a contribuição em dia. Acessa benefícios, suporte e inscrição em convenções.
+- **Adimplente**: associado com a contribuição em dia e sem bloqueio manual. Acessa benefícios, suporte e documentos de convenções.
 
-- **Inadimplente**: associado que não está em dia (boleto vencido e não pago, ou que não contribui). Vê apenas as informações gerais das convenções.
+- **Inadimplente**: associado que não está em dia (boleto vencido e não pago, ou que não contribui). Consulta seus boletos e pagamentos, notícias e informações gerais das convenções, sem acesso a benefícios, documentos de convenções ou suporte.
+
+- **Associação desativada**: mantém a conta de login e a consulta financeira, mas não permite acesso a benefícios, convenções ou suporte.
 
 - **Contribuição ativa** (atributo interno do cadastro, nome técnico livre): marca os associados com cobrança recorrente (~150) e define quem recebe boleto e lembretes. É ativada pelo próprio associado ao pedir a cobrança recorrente no app. Não é um tipo de usuário e não aparece para o associado. No painel da sede, aparece como filtro com o rótulo "Recebe boleto mensal: sim/não".
 
 - **Contador**: não é tipo de usuário. O contador de uma farmácia acessa o sistema com a conta do associado (ver Acesso).
 
 - Decisão do cliente: não usar a separação entre "associado" e "afiliado". O termo "afiliado" foi abandonado e a separação é feita por adimplente/inadimplente.
-
 
 ## Escopo do MVP (fase atual)
 
@@ -35,7 +36,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Landing page pública com o que o sindicato oferece, login e cadastro.
 
-  - Cadastro/gestão de associados, com status (adimplente / inadimplente / cancelamento solicitado) e perfil completo rastreável pela sede.
+  - Cadastro/gestão de associados, com status (adimplente / inadimplente / associação desativada) e perfil completo rastreável pela sede.
 
   - **Cobrança mensal via Sicredi**: o sistema gera o lote de boletos (com Pix QR Code), um administrador revisa/edita e envia com um único botão, **só para associados com contribuição ativa**.
 
@@ -51,7 +52,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Bloqueio automático e imediato de benefícios/suporte após o vencimento sem pagamento; desbloqueio automático após o pagamento; controle manual pelo admin.
 
-  - Painel de valores (só admin): valor único para todos, plano anual à vista com 20% de desconto, reajuste a cada 5 anos para todos; toda alteração gera e-mail de aviso, vale para o próximo boleto e fica em histórico.
+  - Painel de valores (só admin): valor único para todos, plano anual à vista com 20% de desconto; o administrador propõe o valor anual, encaminha para homologação da diretoria e, se aprovado, o reajuste anual passa a valer em 1º de janeiro do próximo ano. Propostas, decisões e vigências ficam no histórico.
 
   - Central de convenções coletivas (conteúdo atualizado por funcionário da sede); inadimplente vê informações gerais, mas não se inscreve.
 
@@ -59,7 +60,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Módulo de benefícios separado do de convenções (lista de benefícios a definir em reunião futura do cliente).
 
-  - Cancelamento pelo app: mostra os benefícios que serão perdidos, a sede valida.
+  - Desativação pelo app: após confirmação do associado, é imediata, interrompe a cobrança recorrente e remove os acessos a benefícios, convenções e suporte. A conta e o histórico financeiro permanecem disponíveis; o evento é registrado em auditoria.
 
   - Cobrança formal obrigatória a todos os associados (~2.000) por e-mail, **sem boleto**.
 
@@ -69,7 +70,39 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - Fora do escopo desta entrega: chatbot WhatsApp [confirmado pelo cliente], app mobile nativo, módulos de gestão fiscal/contábil.
 
+- A tela administrativa registra a proposta como pendente e permite registrar a decisão formal recebida da diretoria. A aplicação não envia a proposta por e-mail nem faz comunicação externa, e não substitui a homologação real da diretoria.
+
 - Em avaliação: importação automática da base de associados via XML da JUCEMAT (depende da pendência P02).
+
+# ADR-001: Escolha da Biblioteca de Componentes Web
+
+## Contexto
+
+Necessidade de definir a biblioteca de componentes visuais para a aplicação web do Elo Connect. O público-alvo principal inclui pessoas idosas, exigindo foco estrito em acessibilidade (WCAG 2.1 AA), facilidade para botões e fontes grandes, formulários claros e baixa curva de aprendizado para a equipe.
+
+## Opções Avaliadas
+
+- **React Bootstrap:** Aproveita o conhecimento prévio da equipe em Bootstrap, possui excelente suporte a classes utilitárias para ajuste rápido de tamanho/espaçamento e integração simples com React.
+- **Mantine:** Biblioteca nativa para React com ecossistema rico e hooks integrados[cite: 2], porém exige maior tempo de adaptação da equipe[cite: 2].
+
+## Decisão
+
+Opção escolhida: **React Bootstrap**.
+
+### Justificativa
+
+1. **Curva de Aprendizado Zero:** A equipe já domina a sintaxe do Bootstrap[cite: 2], acelerando a entrega do painel admin, tabelas e formulários[cite: 2].
+2. **Acessibilidade e Ajuste de UX (Público Idoso):** Facilita o aumento da fonte base para 18px[cite: 2] e o uso de botões grandes (`btn-lg`) e campos com alto contraste (RNF01)[cite: 2].
+3. **Simplicidade de Layout:** Facilita a criação de telas diretas com poucos passos e navegação clara por teclado (RNF02)[cite: 2].
+
+---
+
+## Checklist de UX e Acessibilidade (RNFs)
+
+- [x] Fonte base de no mínimo 18px e contraste AA (RNF01)[cite: 2]
+- [x] Navegável por teclado, todos os campos com rótulo visível (RNF02)[cite: 2]
+- [x] Layout responsivo focado em telas móveis (RNF03)[cite: 2]
+- [x] Interface limpa, com poucos passos por tela e linguagem direta[cite: 2]
 
 ## Roadmap (18 meses, 3 semestres)
 
@@ -93,7 +126,19 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 - Organização: monorepo com apps/web, apps/api, packages/shared (tipos, validações e cliente da API) e, depois, apps/mobile.
 
-- Biblioteca de componentes: acessível (React Bootstrap ou Mantine), a definir.
+- Biblioteca de componentes web: **React Bootstrap** com Bootstrap 5. A escolha
+  foi confirmada no setup do front-end em 10/10/2026; a interface usa HTML
+  semântico, navegação por teclado e estilos responsivos.
+
+- Estado da web (12/10/2026): `apps/web` contém a vitrine pública (`/`), o
+  login (`/login`), a tela informativa de criação de conta (`/cadastro`) e as
+  telas de recuperação e redefinição de senha (`/recuperar-senha` e
+  `/redefinir-senha`) em React, TypeScript, Vite e React Bootstrap. O login usa
+  a API e sessão em cookie `HttpOnly`; as contas são provisionadas pela equipe
+  autorizada, sem cadastro público enquanto a pendência P03 não for respondida.
+  A vitrine não coleta dados pessoais; a lista de benefícios é provisória e
+  depende de definição com o cliente (P06). A fotografia da vitrine é um ativo
+  visual derivado da referência do wireframe, sem dados reais de associados.
 
 - Hospedagem: free tier. Volume estimado: até ~2.000 associados, ~150 com contribuição ativa, menos de 400 acessos mensais. Verificar os termos dos planos gratuitos, pois alguns proíbem uso comercial.
 
@@ -103,7 +148,7 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 Decididas no setup inicial do repositório (09/10/2026):
 
-- Gerenciador de pacotes: **pnpm** (workspaces). Scripts de instalação de dependências precisam ser aprovados com `pnpm approve-builds`; a lista de aprovados fica no `pnpm-workspace.yaml`.
+- Gerenciador de pacotes: **npm** com workspaces; dependências e lockfile são gerenciados a partir da raiz do monorepo. Scripts de instalação necessários ficam aprovados no campo `allowScripts` do `package.json`.
 
 - Node.js **24 (LTS)**, fixado no `.nvmrc`.
 
@@ -115,7 +160,19 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Acesso ao banco (ORM): **Prisma 7**. Alternativa avaliada: TypeORM. Motivos da escolha: schema legível num arquivo único, tipagem forte gerada a partir do schema e migrations simples. O Prisma 8 foi descartado por estar em release candidate; o Prisma 7 recebe suporte por 18 meses após o lançamento oficial do 8, o que cobre a duração do PI. A conexão usa o `@prisma/adapter-pg`, acessada pela API através de um `PrismaService`. O client é gerado automaticamente no `postinstall`, em `apps/api/src/generated/prisma`, e fica fora do Git.
 
-- Migrations e seed: a primeira migration e o script de seed (com dados fictícios) dependem do modelo de dados e ficam na issue de modelagem (DER).
+- Modelo de dados: 14 tabelas físicas com nomes em português; detalhes e
+  diagrama ER em [Modelo de Dados](modelo-dados.md). Registros de transação,
+  valores homologados de contribuição e auditoria são append-only, protegidos
+  por triggers PostgreSQL contra UPDATE, DELETE e TRUNCATE. Propostas de
+  reajuste aguardando homologação ficam em tabela separada.
+
+- Migration do modelo inicial: `apps/api/prisma/migrations/20261012123000_initial_data_model`;
+  a área administrativa e propostas de reajuste ficam em
+  `apps/api/prisma/migrations/20261012133000_admin_portal`.
+  Preserva e renomeia as tabelas de autenticação já existentes. O seed
+  (`npm run db:seed`) só cria contas e associados de demonstração fictícios,
+  exige `ALLOW_DEMO_SEED=true` e recusa produção; também inclui valores e
+  boletos demonstrativos sem dados bancários reais.
 
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
 
@@ -151,11 +208,16 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 ## Acesso
 
-- Login com e-mail + senha [validado].
+- Login com e-mail + senha e código OTP enviado ao e-mail para todos os perfis;
+  a sessão só é emitida após a segunda etapa. Administradores seguem para o
+  painel administrativo depois da confirmação [decisão complementar].
 
 - Recuperação de senha por link enviado ao e-mail [validado].
 
-- Confirmação de 5 dígitos aleatórios do CNPJ apenas no primeiro cadastro, junto com confirmação por e-mail [validado]. O CNPJ é público, então não serve como verificação a cada login. Comunicar o ajuste ao cliente, que havia pedido a verificação para garantir a identidade.
+- CNPJ é dado cadastral, não fator de autenticação. O cadastro aparece
+  imediatamente na fila de aprovação e, após aprovado, é confirmado ao
+  associado por e-mail. Logins confirmam por OTP após validar a senha
+  [decisão complementar].
 
 - Contadores não têm conta própria [validado]. O contador acessa com o e-mail e a senha da conta do associado; se o dono da farmácia não quiser consultar pessoalmente, ele compartilha o próprio acesso. O compartilhamento é responsabilidade exclusiva do titular da conta, e toda ação feita com esse login é considerada ação do associado (RN29). A forma de deixar isso explícito para o associado depende da pendência P11.
 
