@@ -21,17 +21,32 @@
     "import/no-unassigned-import": [
       "warn",
       {
-        "allow": ["dotenv/config", "**/*.css", "**/*.scss"]
+        "allow": [
+          "dotenv/config",
+          "@testing-library/jest-dom/vitest",
+          "**/*.css",
+          "**/*.scss"
+        ]
       }
-    ]
+    ],
+    // O JSX do React 17+ não precisa de `import React`.
+    "react/react-in-jsx-scope": "off",
+    // Sugere <output> no lugar de role="status", mas <output> é para resultado
+    // de cálculo em formulário. Para avisos, role="status" é o padrão de região
+    // ao vivo (WAI-ARIA).
+    "jsx-a11y/prefer-tag-over-role": "off"
   },
   "overrides": [
     {
-      "files": ["**/*.spec.ts", "**/*.e2e-spec.ts", "**/test/**"],
+      "files": ["apps/api/**/*.spec.ts", "apps/api/test/**"],
       "plugins": ["jest"],
       "env": {
         "jest": true
       }
+    },
+    {
+      "files": ["apps/web/**/*.test.ts", "apps/web/**/*.test.tsx"],
+      "plugins": ["vitest"]
     }
   ],
   "ignorePatterns": ["**/dist/**", "**/coverage/**", "**/src/generated/**"]

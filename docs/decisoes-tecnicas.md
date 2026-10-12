@@ -2,7 +2,7 @@
 
 Última atualização: 11/10/2026.
 
-Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end) e o backlog no GitHub Projects da organização.
+Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
 ## Nome
 
@@ -93,7 +93,7 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 - Organização: monorepo com apps/web, apps/api, packages/shared (tipos, validações e cliente da API) e, depois, apps/mobile.
 
-- Biblioteca de componentes: acessível (React Bootstrap ou Mantine), a definir.
+- Biblioteca de componentes: **React Bootstrap**, com tema próprio em Sass para o público idoso (fonte base de 18px, cores com contraste acima do AA, foco bem visível). Decidida no [ADR-002](adr/0002-biblioteca-componentes.md).
 
 - Hospedagem: free tier. Volume estimado: até ~2.000 associados, ~150 com contribuição ativa, menos de 400 acessos mensais. Verificar os termos dos planos gratuitos, pois alguns proíbem uso comercial.
 
