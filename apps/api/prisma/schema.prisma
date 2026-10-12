@@ -1,6 +1,3 @@
-// Schema do banco do Elo Connect.
-// Os modelos entram a partir do DER (issue MODELAGEM).
-
 generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
@@ -9,4 +6,362 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  ASSOCIATE
+
+  @@map("PerfilUsuario")
+}
+
+enum RegistrationStatus {
+  PENDING_EMAIL
+  PENDING_APPROVAL
+  APPROVED
+
+  @@map("StatusCadastro")
+}
+
+enum EmailOtpPurpose {
+  LOGIN
+  REGISTRATION
+
+  @@map("FinalidadeCodigoEmail")
+}
+
+enum AssociateStatus {
+  ADIMPLENTE
+  INADIMPLENTE
+  CANCELAMENTO_SOLICITADO
+  CANCELADO
+
+  @@map("StatusAssociado")
+}
+
+enum BillStatus {
+  RASCUNHO
+  EM_ABERTO
+  PAGO
+  VENCIDO
+  CANCELADO
+
+  @@map("StatusBoleto")
+}
+
+enum PaymentMethod {
+  BOLETO
+  PIX
+
+  @@map("FormaPagamento")
+}
+
+enum TransactionStatus {
+  EM_ABERTO
+  PAGO
+  VENCIDO
+  CANCELADO
+  ESTORNADO
+
+  @@map("StatusTransacao")
+}
+
+enum CancellationStatus {
+  PENDENTE
+  APROVADO
+  RECUSADO
+  EFETIVADO
+
+  @@map("StatusSolicitacaoCancelamento")
+}
+
+enum ContributionProposalStatus {
+  PENDING_HOMOLOGATION
+  APPROVED
+  REJECTED
+
+  @@map("StatusPropostaContribuicao")
+}
+
+model User {
+  id                           String                 @id @default(cuid())
+  email                        String                 @unique
+  passwordHash                 String
+  role                         UserRole
+  isActive                     Boolean                @default(true)
+  registrationStatus           RegistrationStatus     @default(APPROVED)
+  registrationRequestedAt      DateTime?
+  registrationApprovedAt       DateTime?
+  registrationApprovedByUserId String?
+  welcomeEmailSentAt           DateTime?
+  createdAt                    DateTime               @default(now())
+  updatedAt                    DateTime               @updatedAt
+  sessions                     AuthSession[]
+  resetTokens                  PasswordResetToken[]
+  associate                    Associate?
+  contributionValuesCreated    ContributionValue[]    @relation("ContributionValueAuthor")
+  contributionProposals        ContributionProposal[] @relation("ContributionProposalAuthor")
+  contributionReviews          ContributionProposal[] @relation("ContributionProposalReviewer")
+  auditEntries                 AuditLog[]             @relation("AuditActor")
+  cancellationReviews          CancellationRequest[]  @relation("CancellationReviewer")
+  transactions                 Transaction[]          @relation("TransactionActor")
+  conventionsCreated           Convention[]           @relation("ConventionAuthor")
+  attachmentsUploaded          ConventionAttachment[] @relation("AttachmentUploader")
+  newsCreated                  News[]                 @relation("NewsAuthor")
+  benefitsCreated              Benefit[]              @relation("BenefitAuthor")
+  registrationApprovedBy       User?                  @relation("RegistrationApprover", fields: [registrationApprovedByUserId], references: [id], onDelete: Restrict)
+  registrationsApproved        User[]                 @relation("RegistrationApprover")
+  emailOtpChallenges           EmailOtpChallenge[]
+
+  @@index([registrationStatus, registrationRequestedAt])
+  @@map("Usuario")
+}
+
+model EmailOtpChallenge {
+  id         String          @id @default(cuid())
+  userId     String
+  tokenHash  String          @unique
+  codeHash   String
+  purpose    EmailOtpPurpose
+  expiresAt  DateTime
+  attempts   Int             @default(0)
+  resends    Int             @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime        @default(now())
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose, consumedAt])
+  @@index([expiresAt])
+  @@map("DesafioCodigoEmail")
+}
+
+model AuthSession {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("SessaoAutenticacao")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("TokenRedefinicaoSenha")
+}
+
+model Associate {
+  id                   String                @id @default(cuid())
+  userId               String                @unique
+  cnpj                 String                @unique
+  legalName            String
+  tradeName            String?
+  cnae                 String?
+  status               AssociateStatus
+  recurringBilling     Boolean               @default(false)
+  manuallyBlocked      Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  bills                Bill[]
+  transactions         Transaction[]
+  cancellationRequests CancellationRequest[]
+  auditEntries         AuditLog[]
+
+  @@index([status])
+  @@index([recurringBilling])
+  @@map("Associado")
+}
+
+model Bill {
+  id           String        @id @default(cuid())
+  associateId  String
+  identifier   String        @unique
+  amount       Decimal       @db.Decimal(10, 2)
+  dueDate      DateTime      @db.Date
+  status       BillStatus    @default(RASCUNHO)
+  pixPayload   String?
+  pdfUrl       String?
+  sentAt       DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  associate    Associate     @relation(fields: [associateId], references: [id], onDelete: Restrict)
+  transactions Transaction[]
+
+  @@index([associateId, dueDate])
+  @@index([status, dueDate])
+  @@map("Boleto")
+}
+
+model Transaction {
+  id                 String            @id @default(cuid())
+  billId             String
+  associateId        String
+  identifierSnapshot String
+  amount             Decimal           @db.Decimal(10, 2)
+  status             TransactionStatus
+  paymentMethod      PaymentMethod?
+  occurredAt         DateTime          @default(now())
+  responsibleUserId  String?
+  details            Json?
+  bill               Bill              @relation(fields: [billId], references: [id], onDelete: Restrict)
+  associate          Associate         @relation(fields: [associateId], references: [id], onDelete: Restrict)
+  responsibleUser    User?             @relation("TransactionActor", fields: [responsibleUserId], references: [id], onDelete: Restrict)
+
+  @@index([associateId, occurredAt])
+  @@index([billId, occurredAt])
+  @@map("Transacao")
+}
+
+model ContributionValue {
+  id              String   @id @default(cuid())
+  monthlyAmount   Decimal  @db.Decimal(10, 2)
+  annualAmount    Decimal  @db.Decimal(10, 2)
+  effectiveFrom   DateTime @db.Date
+  createdAt       DateTime @default(now())
+  createdByUserId String
+  createdBy       User     @relation("ContributionValueAuthor", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([effectiveFrom])
+  @@map("ValorContribuicao")
+}
+
+model ContributionProposal {
+  id                    String                     @id @default(cuid())
+  monthlyAmount         Decimal                    @db.Decimal(10, 2)
+  annualAmount          Decimal                    @db.Decimal(10, 2)
+  annualDiscountPercent Int                        @default(20)
+  effectiveFrom         DateTime                   @db.Date
+  status                ContributionProposalStatus @default(PENDING_HOMOLOGATION)
+  note                  String?
+  decisionNote          String?
+  submittedAt           DateTime                   @default(now())
+  submittedByUserId     String
+  reviewedAt            DateTime?
+  reviewedByUserId      String?
+  createdBy             User                       @relation("ContributionProposalAuthor", fields: [submittedByUserId], references: [id], onDelete: Restrict)
+  reviewedBy            User?                      @relation("ContributionProposalReviewer", fields: [reviewedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([status, submittedAt])
+  @@index([effectiveFrom])
+  @@map("PropostaValorContribuicao")
+}
+
+model Convention {
+  id              String                  @id @default(cuid())
+  title           String
+  summary         String
+  effectiveFrom   DateTime?               @db.Date
+  effectiveUntil  DateTime?               @db.Date
+  publishedAt     DateTime?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  createdByUserId String
+  createdBy       User                    @relation("ConventionAuthor", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  attachments     ConventionAttachment[]
+  salaryScales    ConventionSalaryScale[]
+
+  @@index([publishedAt])
+  @@map("Convencao")
+}
+
+model ConventionSalaryScale {
+  id           String     @id @default(cuid())
+  conventionId String
+  jobTitle     String
+  floorAmount  Decimal    @db.Decimal(10, 2)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  convention   Convention @relation(fields: [conventionId], references: [id], onDelete: Restrict)
+
+  @@index([conventionId, jobTitle])
+  @@map("PisoSalarialConvencao")
+}
+
+model ConventionAttachment {
+  id               String     @id @default(cuid())
+  conventionId     String
+  fileName         String
+  url              String
+  createdAt        DateTime   @default(now())
+  uploadedByUserId String
+  convention       Convention @relation(fields: [conventionId], references: [id], onDelete: Restrict)
+  uploadedBy       User       @relation("AttachmentUploader", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([conventionId])
+  @@map("AnexoConvencao")
+}
+
+model News {
+  id              String    @id @default(cuid())
+  title           String
+  content         String
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdByUserId String
+  createdBy       User      @relation("NewsAuthor", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([publishedAt])
+  @@map("Noticia")
+}
+
+model Benefit {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdByUserId String
+  createdBy       User     @relation("BenefitAuthor", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([isActive])
+  @@map("Beneficio")
+}
+
+model CancellationRequest {
+  id               String             @id @default(cuid())
+  associateId      String
+  status           CancellationStatus @default(PENDENTE)
+  requestedAt      DateTime           @default(now())
+  reviewedAt       DateTime?
+  reviewedByUserId String?
+  decisionNote     String?
+  associate        Associate          @relation(fields: [associateId], references: [id], onDelete: Restrict)
+  reviewedBy       User?              @relation("CancellationReviewer", fields: [reviewedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([associateId, requestedAt])
+  @@index([status, requestedAt])
+  @@map("SolicitacaoCancelamento")
+}
+
+model AuditLog {
+  id             String     @id @default(cuid())
+  actorUserId    String
+  associateId    String?
+  action         String
+  entity         String
+  entityId       String
+  occurredAt     DateTime   @default(now())
+  previousValues Json?
+  newValues      Json?
+  actor          User       @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: Restrict)
+  associate      Associate? @relation(fields: [associateId], references: [id], onDelete: Restrict)
+
+  @@index([actorUserId, occurredAt])
+  @@index([associateId, occurredAt])
+  @@index([action, occurredAt])
+  @@map("LogAuditoria")
 }
