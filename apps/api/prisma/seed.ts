@@ -45,6 +45,61 @@ function gerarCnpj(indice: number): string {
 
 const doisDigitos = (n: number) => String(n).padStart(2, '0');
 
+const NOMES = [
+  'Drogaria Vida',
+  'Farmácia Popular',
+  'Drogaria Central',
+  'Farmácia Saúde Total',
+  'Drogaria Bom Preço',
+  'Farmácia do Povo',
+  'Drogaria Esperança',
+  'Farmácia São João',
+  'Drogaria Pantanal',
+  'Farmácia Nova Era',
+];
+
+/**
+ * Associados extras (21 a 80) para testar listagem, busca e paginação.
+ * Roda também em banco já populado: o CNPJ único evita duplicar.
+ */
+async function semearAssociadosExtras(prisma: PrismaClient) {
+  const dados = [];
+  for (let i = 21; i <= 80; i++) {
+    const tipo = i % 5; // 0,1,2 em dia; 3 inadimplente; 4 pendente
+    const nome = `${NOMES[i % NOMES.length]} ${doisDigitos(i)}`;
+    dados.push({
+      cnpj: gerarCnpj(i),
+      razaoSocial: `${nome} Ltda`,
+      nomeFantasia: nome,
+      email: `farmacia${doisDigitos(i)}@example.com`,
+      telefone: `(65) 90000-00${doisDigitos(i)}`,
+      municipio: MUNICIPIOS[i % MUNICIPIOS.length],
+      contribuicaoAtiva: tipo !== 4,
+      situacao: tipo <= 2 ? ('ADIMPLENTE' as const) : ('INADIMPLENTE' as const),
+    });
+  }
+  const { count } = await prisma.associado.createMany({
+    data: dados,
+    skipDuplicates: true,
+  });
+  console.log(`Associados extras criados: ${count}.`);
+
+  const pendentes = await prisma.solicitacaoCancelamento.count({
+    where: { status: 'PENDENTE' },
+  });
+  if (pendentes < 4) {
+    const candidatos = await prisma.associado.findMany({
+      where: { cnpj: { in: [gerarCnpj(23), gerarCnpj(24), gerarCnpj(28)] } },
+    });
+    await prisma.solicitacaoCancelamento.createMany({
+      data: candidatos.map((a) => ({
+        associadoId: a.id,
+        motivo: 'Motivo fictício para teste.',
+      })),
+    });
+  }
+}
+
 async function main() {
   if (process.env.NODE_ENV === 'production') {
     throw new Error('O seed é só para desenvolvimento.');
@@ -56,8 +111,9 @@ async function main() {
 
   try {
     if ((await prisma.usuario.count()) > 0) {
+      await semearAssociadosExtras(prisma);
       console.log(
-        'O banco já tem dados. Para recriar do zero: pnpm --filter api db:reset',
+        'O banco já tinha dados. Para recriar do zero: pnpm --filter api db:reset',
       );
       return;
     }
@@ -303,6 +359,8 @@ async function main() {
         },
       ],
     });
+
+    await semearAssociadosExtras(prisma);
 
     console.log(`Seed concluído. Senha de todos os usuários: ${SENHA_DEV}`);
     console.log('  admin@example.com        (admin)');
