@@ -25,6 +25,10 @@ erDiagram
     Associado |o--o{ LogAuditoria : "afetado em"
     Usuario ||--o{ Convencao : "publica"
     Convencao ||--o{ ConvencaoAnexo : "tem"
+    Associado ||--o{ InscricaoConvencao : "inscreve-se"
+    Convencao ||--o{ InscricaoConvencao : "recebe"
+    Associado ||--o{ SolicitacaoSuporte : "solicita"
+    Usuario ||--o{ SolicitacaoSuporte : "abre"
     Usuario ||--o{ Noticia : "publica"
 
     Usuario {
@@ -122,7 +126,7 @@ erDiagram
         string titulo
         int ano
         text resumo
-        json tabelaReajuste
+        json tabelaReajuste "legado, não utilizado"
         datetime publicadaEm "nulo: rascunho"
         uuid autorId FK
     }
@@ -132,6 +136,21 @@ erDiagram
         string nomeArquivo
         string arquivoUrl
         int tamanhoBytes
+    }
+    InscricaoConvencao {
+        uuid id PK
+        uuid associadoId FK
+        uuid convencaoId FK
+        datetime inscritaEm
+    }
+    SolicitacaoSuporte {
+        uuid id PK
+        uuid associadoId FK
+        uuid usuarioId FK
+        text mensagem
+        StatusSolicitacaoSuporte status "RECEBIDA, EM_ANALISE, CONCLUIDA"
+        datetime criadaEm
+        datetime atualizadaEm
     }
     Noticia {
         uuid id PK
@@ -195,7 +214,8 @@ A imutabilidade é garantida **pelo próprio banco**: triggers recusam UPDATE, D
 | Estados do boleto depois dos 30 dias de validade | P01 | Pode exigir um status a mais (ex.: EXPIRADO). |
 | Boleto ANUAL: fora do lote? renovação? | P04 | Tipo existe; regras de geração ainda não. |
 | Boleto AVULSO: geração, vencimento, período de acesso | P10 | Tipo existe; regras de geração ainda não. |
-| Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
+| Inscrição em convenção | RF23 | `InscricaoConvencao` registra uma inscrição única por associado e convenção, com data automática. |
+| Solicitação de suporte | RF25 | `SolicitacaoSuporte` registra a mensagem do afiliado adimplente e o status de acompanhamento pela sede. |
 | Lista de benefícios | P06 | Tabela genérica (título, descrição, ordem). |
 | Aceite do compartilhamento com o contador | P11 | **Fora do modelo**. Se for preciso registrar data e hora do aceite, entra um campo em `Usuario`. |
 | Retenção e exclusão de dados (LGPD) | P07 | Inativação em vez de exclusão. Revisar quando houver orientação. |

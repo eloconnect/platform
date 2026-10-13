@@ -188,7 +188,6 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - P04: o plano anual fica fora do lote mensal? Como é a renovação?
 
-- P05: o que significa "se registrar em uma convenção" na prática.
 
 - P06: lista de benefícios (reunião futura do cliente).
 

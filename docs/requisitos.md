@@ -16,28 +16,29 @@ Documentos relacionados: [Decisões Técnicas](decisoes-tecnicas.md), [Registro 
 
 | **Termo** | **Significado no projeto** |
 | --- | --- |
-| Associado | Qualquer farmácia/drogaria do universo do sindicato em MT (~2.000), identificada pelo CNAE. Não paga obrigatoriamente. Único tipo de usuário do lado do cliente. |
-| Adimplente | Associado com a contribuição em dia. Acessa benefícios, suporte e inscrição em convenções. |
-| Inadimplente | Associado que não está em dia: boleto vencido e não pago, ou que não contribui. Vê apenas as informações gerais das convenções. |
+| Associado | Farmácia/drogaria do universo do sindicato em MT (~2.000), identificada pelo CNAE. Pode ter login mesmo sem ser afiliada. |
+| Afiliado | Dono ou representante de farmácia pagante do sindicato. |
+| Adimplente | Afiliado com a contribuição em dia. Acessa boletos, histórico, benefícios, suporte jurídico particular e inscrição em convenções. |
+| Inadimplente | Associado com login que não está em dia: boleto vencido e não pago, ou que não contribui. Vê as informações gerais das convenções, sem acesso a benefícios, suporte ou inscrição. |
 | Contribuição ativa | Atributo interno do cadastro (nome técnico livre) que marca os associados com cobrança recorrente (~150). É ativado pelo próprio associado ao pedir a cobrança recorrente no app e desativado por cancelamento aprovado pela sede ou por interrupção feita pela sede. Define quem recebe boleto e lembretes. Não é tipo de usuário e não aparece para o associado; no painel da sede, aparece como "Recebe boleto mensal: sim/não". |
 | Contador | Contador da farmácia. Não é tipo de usuário e não tem conta própria: acessa com a conta do associado, que é responsável pelo compartilhamento (RN29). |
 | Boleto avulso | Boleto de um único mês, pedido pelo associado sem aderir à cobrança recorrente. |
 | Log de auditoria | Registro imutável de todas as ações feitas pelos usuários da sede (quem, o quê, quando, valor anterior e novo). |
 | Feed de notícias | Área do app com notícias e atualizações do setor, publicadas pela sede. Visível a qualquer associado logado, adimplente ou inadimplente; visitantes não acessam. |
-| Benefício | Serviços exclusivos para associados adimplentes (ex: suporte jurídico particular). Lista a definir em reunião futura com o cliente. |
-| Convenção coletiva | Negociação anual (meio do ano) que define regras e reajustes salariais do setor. Módulo distinto de Benefícios. |
+| Benefício | Serviço exclusivo para afiliados adimplentes. O sindicato oferece suporte jurídico particular. |
+| Convenção coletiva | Instrumento com informações e regras coletivas do setor, publicado pela sede em resumo e anexos PDF. Módulo distinto de Benefícios; o sindicato não oferece reajuste salarial. |
 | Cobrança formal | Comunicado institucional obrigatório enviado a todos os associados, **sem boleto**. |
 | CNAE | Classificação Nacional de Atividades Econômicas — identifica as empresas vinculadas ao sindicato. |
 | JUCEMAT | Junta Comercial do Estado de Mato Grosso — fornece dados das empresas em XML. |
-
-> Atenção: por decisão do cliente, o termo "afiliado" não é mais usado; a separação é feita por adimplente/inadimplente. Versões antigas dos documentos usavam associado/afiliado.
 
 ## 2. Perfis de usuário
 
 | **Perfil** | **Descrição** | **Status** |
 | --- | --- | --- |
 | Administrador (sede) | 3 funcionários. Gerencia associados, cobrança, valores, conteúdo e cancelamentos. | [Validado] |
-| Associado | Dono/representante de farmácia. Perfil único; o acesso depende do status. Adimplente: boletos, histórico, notícias, benefícios, suporte e convenções. Inadimplente: seus boletos e histórico, as notícias e as informações gerais das convenções, sem benefícios, suporte ou inscrição. O contador da farmácia usa esta mesma conta, com o mesmo acesso (RN29). | [Validado] |
+| Afiliado adimplente | Dono/representante de farmácia pagante e em dia. Acessa boletos, histórico, benefícios, suporte jurídico particular e convenções. | [Validado] |
+| Associado com login não afiliado/inadimplente | Vê informações gerais das convenções, sem acesso a benefícios, suporte ou inscrição. | [Validado] |
+| Associado | O contador da farmácia usa a conta do associado, com o mesmo acesso (RN29). | [Validado] |
 | Visitante | Acessa a landing page pública com o que o sindicato oferece, login e cadastro. Não acessa o feed de notícias. | [Validado] |
 
 Público majoritariamente de terceira idade: simplicidade de interface é requisito obrigatório, não opcional.
@@ -125,16 +126,16 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF21 | Funcionário da sede publica e edita o resumo da convenção coletiva (texto, anexos em PDF, tabela de reajuste salarial). | Must | [Validado] |
+| RF21 | Funcionário da sede publica e edita o resumo da convenção coletiva (texto e anexos em PDF). O sindicato não oferece reajuste salarial. | Must | [Validado] |
 | RF22 | Qualquer usuário logado (inclusive inadimplente) vê as informações gerais das convenções. O contador acessa pela conta do associado (RN29). | Must | [Validado] |
-| RF23 | Associado adimplente pode se inscrever/registrar participação em uma convenção. | Should | [A confirmar] — ver P05 |
+| RF23 | Afiliado adimplente pode se inscrever em uma convenção; o sistema registra a conta do associado e a data da inscrição, sem solicitar dados adicionais. | Should | [Validado] |
 
 ### 4.6 Benefícios e suporte
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
 | RF24 | Admin cadastra/edita os benefícios exibidos no app e na landing page. | Must | [Validado] — conteúdo a definir (P06) |
-| RF25 | Associado adimplente acessa os benefícios e solicita suporte. | Should | [A confirmar] — depende da lista de benefícios |
+| RF25 | Afiliado adimplente acessa os benefícios e solicita suporte jurídico particular. Associados inadimplentes não têm acesso. | Should | [Validado] |
 
 ### 4.7 Cancelamento
 
@@ -218,7 +219,6 @@ As user stories (US01 a US39) são mantidas como issues no GitHub Projects da or
 | P02 | O XML da JUCEMAT traz o e-mail das farmácias? Com que frequência e de que forma o sindicato recebe esse arquivo? | Cliente | RF28, RF29 (sem e-mail não há como enviar a cobrança formal) |
 | P03 | Qualquer associado pode criar conta pelo app? Ao pedir a cobrança recorrente, o primeiro boleto é gerado na hora ou só no próximo lote mensal? | Cliente | RF05, RF36, fluxo de entrada |
 | P04 | O associado do plano anual fica fora do lote mensal? Como é a renovação no fim do ano? | Cliente | RF17, RF10 |
-| P05 | O que significa "se registrar em uma convenção" na prática (inscrição em assembleia, evento, outro)? | Cliente | RF23 |
 | P06 | Lista de benefícios (aguardando reunião futura do cliente). | Cliente | RF24, RF25, landing page |
 | P07 | LGPD e tratamento de dados cadastrais e financeiros. | Prof. Poli | RNF05 |
 | P08 | Comunicar ao cliente o ajuste na verificação por CNPJ (só no primeiro cadastro, com confirmação por e-mail). | Cliente | RF04, RN21 |
