@@ -45,15 +45,6 @@ export function LayoutBase({
         Pular para o conteúdo
       </a>
       <header className="site-header">
-        <div className="site-utility">
-          <Container className="site-utility-content">
-            <span>Elo Connect · Acesso Institucional</span>
-            <a href="tel:08007244500">
-              <span aria-hidden="true">☎</span> Central telefônica:{' '}
-              <strong>0800 724 4500</strong>
-            </a>
-          </Container>
-        </div>
         <Navbar expand={expand} bg="white" className="primary-nav">
           <Container>
             <Navbar.Brand as={Link} to={inicio} className="marca-elo">

@@ -51,10 +51,10 @@ export function PaginaEntrar() {
       </nav>
 
       <div className="aviso-acesso">
-        <strong>Ambiente seguro e exclusivo</strong>
+        <strong>Acesso da farmácia associada</strong>
         <span>
-          Acesso restrito a proprietários, sócios-administradores e
-          farmacêuticos titulares credenciados.
+          O contador usa a conta do associado. O compartilhamento do acesso é
+          responsabilidade do titular da conta.
         </span>
       </div>
 

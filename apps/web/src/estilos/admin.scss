@@ -285,6 +285,24 @@ $suave: #4f5b68;
   }
 }
 
+.adm-botao-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid $borda;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: $texto;
+  font-weight: 700;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
 .adm-cartao {
   background: #fff;
   border: 1px solid $borda;
@@ -867,7 +885,8 @@ $suave: #4f5b68;
     color: $suave;
   }
 
-  input {
+  input,
+  textarea {
     width: 100%;
     min-height: 2.75rem;
     padding: 0.5rem 0.9rem;
@@ -877,12 +896,30 @@ $suave: #4f5b68;
     color: $texto;
     font-size: 0.9rem;
   }
+
+  textarea {
+    resize: vertical;
+  }
+
+  input[type='file'] {
+    width: auto;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
 }
 
 .adm-campos-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: 1rem;
+}
+
+.adm-mensagem {
+  margin: 0;
+  color: $azul-escuro;
+  font-weight: 700;
 }
 
 .adm-formulario-acoes {

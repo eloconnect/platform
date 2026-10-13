@@ -34,22 +34,24 @@ export function useDadosAdmin<T>(
         erro: 'Entre com sua conta para ver estes dados.',
         carregando: false,
       });
-      return;
+    } else {
+      setEstado((atual) => ({ ...atual, carregando: true, erro: null }));
+      carregar(token).then(
+        (dados) => ativo && setEstado({ dados, erro: null, carregando: false }),
+        (erro: unknown) =>
+          ativo &&
+          setEstado({
+            dados: null,
+            carregando: false,
+            erro:
+              erro instanceof ApiError && erro.status === 401
+                ? 'Sua sessão expirou. Entre novamente.'
+                : erro instanceof ApiError && erro.status === 403
+                  ? 'Sua conta não tem acesso a este conteúdo.'
+                  : 'Não foi possível carregar os dados agora.',
+          }),
+      );
     }
-    setEstado((atual) => ({ ...atual, carregando: true, erro: null }));
-    carregar(token).then(
-      (dados) => ativo && setEstado({ dados, erro: null, carregando: false }),
-      (erro: unknown) =>
-        ativo &&
-        setEstado({
-          dados: null,
-          carregando: false,
-          erro:
-            erro instanceof ApiError && erro.status === 401
-              ? 'Sua sessão expirou. Entre novamente.'
-              : 'Não foi possível carregar os dados agora.',
-        }),
-    );
     return () => {
       ativo = false;
     };
@@ -78,11 +80,13 @@ export async function executarAdmin<T>(
       erro:
         status === 401
           ? 'Sua sessão expirou. Entre novamente.'
-          : status === 409
-            ? 'Esta solicitação já foi decidida.'
-            : status === 400
-              ? 'Confira os dados informados.'
-              : 'Não foi possível concluir a ação agora.',
+          : status === 403
+            ? 'Sua conta não tem permissão para concluir esta ação.'
+            : status === 409
+              ? 'Esta solicitação já foi decidida.'
+              : status === 400
+                ? 'Confira os dados informados.'
+                : 'Não foi possível concluir a ação agora.',
     };
   }
 }

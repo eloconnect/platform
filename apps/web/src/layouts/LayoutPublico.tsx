@@ -8,10 +8,9 @@ export function LayoutPublico() {
       expand="xl"
       itensMenu={[
         { para: '/', texto: 'Início' },
+        { para: '#beneficios', texto: 'Benefícios', ancora: true },
         { para: '#convencoes', texto: 'Convenções coletivas', ancora: true },
-        { para: '#atuacao', texto: 'Jurídico sindical', ancora: true },
-        { para: '#atuacao', texto: 'Associados', ancora: true },
-        { para: '/entrar', texto: 'Contribuições' },
+        { para: '#suporte', texto: 'Suporte', ancora: true },
         { para: '/entrar', texto: 'Entrar' },
       ]}
       acaoPrimaria={{ para: '/cadastro', texto: 'Cadastrar farmácia' }}

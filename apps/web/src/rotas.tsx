@@ -1,17 +1,18 @@
-import { Navigate, type RouteObject } from 'react-router';
+import { type RouteObject } from 'react-router';
 import { LayoutAdmin } from './layouts/LayoutAdmin';
 import { LayoutAutenticacao } from './layouts/LayoutAutenticacao';
 import { LayoutAssociado } from './layouts/LayoutAssociado';
 import { LayoutPublico } from './layouts/LayoutPublico';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaConvencoes } from './paginas/admin/PaginaConvencoes';
-import { PaginaFichaAfiliado } from './paginas/admin/PaginaFichaAfiliado';
+import { PaginaFichaAssociado } from './paginas/admin/PaginaFichaAssociado';
 import { PaginaJucemat } from './paginas/admin/PaginaJucemat';
 import { PaginaValores } from './paginas/admin/PaginaValores';
+import { PaginaSuporte } from './paginas/admin/PaginaSuporte';
 import { PaginaBeneficios } from './paginas/associado/PaginaBeneficios';
 import { PaginaBoletos } from './paginas/associado/PaginaBoletos';
 import { PaginaConvencoesAssociado } from './paginas/associado/PaginaConvencoesAssociado';
-import { PaginaFiliacao } from './paginas/associado/PaginaFiliacao';
+import { PaginaCancelamento } from './paginas/associado/PaginaCancelamento';
 import { PaginaHistorico } from './paginas/associado/PaginaHistorico';
 import { PaginaNoticias } from './paginas/associado/PaginaNoticias';
 import { PaginaCadastroFarmacia } from './paginas/publico/PaginaCadastroFarmacia';
@@ -68,7 +69,7 @@ export const rotas: RouteObject[] = [
       { path: 'historico', element: <PaginaHistorico /> },
       { path: 'beneficios', element: <PaginaBeneficios /> },
       { path: 'convencoes', element: <PaginaConvencoesAssociado /> },
-      { path: 'filiacao', element: <PaginaFiliacao /> },
+      { path: 'cancelamento', element: <PaginaCancelamento /> },
       { path: 'noticias', element: <PaginaNoticias /> },
     ],
   },
@@ -78,9 +79,9 @@ export const rotas: RouteObject[] = [
     children: [
       { index: true, element: <PaginaInicioAdmin /> },
       { path: 'valores', element: <PaginaValores /> },
-      { path: 'afiliados', element: <Navigate to="/admin" replace /> },
-      { path: 'afiliados/:id', element: <PaginaFichaAfiliado /> },
+      { path: 'associados/:id', element: <PaginaFichaAssociado /> },
       { path: 'convencoes', element: <PaginaConvencoes /> },
+      { path: 'suporte', element: <PaginaSuporte /> },
       { path: 'jucemat', element: <PaginaJucemat /> },
     ],
   },

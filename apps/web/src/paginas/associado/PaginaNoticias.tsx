@@ -18,9 +18,9 @@ export function PaginaNoticias() {
   return (
     <>
       <Cabecalho
-        selo="INFORMATIVO OFICIAL SINDICAL"
-        titulo="Notícias e Avisos do Setor Farmacêutico"
-        descricao="Informações oficiais da Anvisa, Ministério da Saúde e Sindicato."
+        selo="FEED DO ASSOCIADO"
+        titulo="Notícias"
+        descricao="Notícias publicadas pela sede do sindicato."
       />
       <AvisoCarga carregando={carregando} erro={erro} />
       {lista?.length === 0 && (

@@ -31,7 +31,7 @@ export function PaginaHistorico() {
       </nav>
       <Cabecalho
         titulo="Histórico de Boletos e Pagamentos"
-        descricao="Consulte todas as mensalidades quitadas e emita comprovantes com facilidade."
+        descricao="Consulte os pagamentos registrados para a sua farmácia."
       />
       <AvisoCarga carregando={carregando} erro={erro} />
 
@@ -39,48 +39,28 @@ export function PaginaHistorico() {
         <>
           <section
             className="as-cartao as-situacao"
-            aria-label="Situação cadastral"
+            aria-label="Situação da contribuição"
           >
             <div>
-              <p className="as-etiqueta">STATUS GERAL DE CONTRIBUIÇÃO</p>
               <p className="as-situacao-titulo">
-                Situação Cadastral:{' '}
+                Situação da contribuição:{' '}
                 <em className={h.emDia ? 'as-ok' : 'as-alerta'}>
-                  {h.emDia ? 'TOTALMENTE EM DIA' : 'COM PENDÊNCIA'}
+                  {h.emDia ? 'Adimplente' : 'Inadimplente'}
                 </em>
               </p>
               <p className="as-descricao">
                 {h.emDia
-                  ? 'Nenhuma pendência financeira ou documental em aberto.'
-                  : 'Há mensalidade em aberto. Regularize para manter seus benefícios.'}
+                  ? 'A contribuição está em dia.'
+                  : 'A contribuição não está em dia.'}
               </p>
             </div>
-            <button
-              type="button"
-              className="as-botao"
-              disabled
-              title="A certidão será emitida com a integração bancária"
-            >
-              Emitir Certidão de Quitação (CND)
-            </button>
           </section>
 
           <section className="as-cartao" aria-labelledby="t-quitadas">
             <div className="as-linha-titulo">
               <div>
-                <h2 id="t-quitadas">Mensalidades Sindicais Quitadas</h2>
-                <p className="as-descricao">
-                  Comprovantes válidos para fins fiscais, contábeis e auditorias
-                  sindicais.
-                </p>
+                <h2 id="t-quitadas">Pagamentos registrados</h2>
               </div>
-              <button
-                type="button"
-                className="as-botao as-botao-claro as-botao-pequeno"
-                onClick={() => window.print()}
-              >
-                Imprimir Relatório
-              </button>
             </div>
             <div className="as-tabela-rolagem">
               <table className="as-tabela">
@@ -111,32 +91,11 @@ export function PaginaHistorico() {
                 </tbody>
               </table>
             </div>
-            <p className="as-total">
-              <span>
-                Exibindo os últimos {h.itens.length} pagamentos processados.
-              </span>
-              <span>
-                Total liquidado no período:{' '}
-                <strong>{moeda(h.totalPeriodo)}</strong>
-              </span>
-            </p>
           </section>
 
-          <div className="as-grade-2">
-            <Link to="/associado" className="as-botao as-botao-claro">
-              ← Voltar para meus boletos
-            </Link>
-            <p className="as-cartao as-autenticidade">
-              <strong>Autenticidade Garantida</strong>
-              <span>
-                Comprovantes assinados digitalmente pela autoridade sindical.
-              </span>
-            </p>
-          </div>
-          <p className="as-cartao as-ajuda">
-            Precisa de auxílio com pagamentos ou comprovantes? Ligue para a
-            Central Sindical Gratuita: <strong>0800 724 3000</strong>
-          </p>
+          <Link to="/associado" className="as-botao as-botao-claro">
+            Voltar para boletos
+          </Link>
         </>
       )}
     </>

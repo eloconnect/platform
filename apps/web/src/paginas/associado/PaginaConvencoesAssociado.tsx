@@ -1,28 +1,144 @@
-import { Link } from 'react-router';
+import { useState } from 'react';
 import { api } from '../../api';
 import { useTituloPagina } from '../../componentes';
 import { AvisoCarga } from '../admin/ComponentesAdmin';
-import { data, moeda, useDadosAdmin } from '../admin/useDadosAdmin';
+import { data, executarAdmin, useDadosAdmin } from '../admin/useDadosAdmin';
 import { Cabecalho } from './componentes';
 
-/** Pisos salariais da convenção vigente e acesso à gestão de filiação. */
+/** Resumos e anexos publicados pela sede. */
 export function PaginaConvencoesAssociado() {
   useTituloPagina('Convenções Coletivas');
   const {
     dados: lista,
+    definir: definirLista,
     erro,
     carregando,
   } = useDadosAdmin((token) => api.associado.convencoes(token), []);
   const vigente = lista?.[0];
+  const [baixando, setBaixando] = useState<string | null>(null);
+  const [erroDownload, setErroDownload] = useState<string | null>(null);
+  const [inscrevendo, setInscrevendo] = useState<string | null>(null);
+  const [mensagemInscricao, setMensagemInscricao] = useState<string | null>(
+    null,
+  );
+
+  async function inscrever(convencaoId: string) {
+    setInscrevendo(convencaoId);
+    setMensagemInscricao(null);
+    const resultado = await executarAdmin((token) =>
+      api.associado.inscreverConvencao(token, convencaoId),
+    );
+    if (!resultado.dados) {
+      setMensagemInscricao(
+        resultado.erro ?? 'Não foi possível registrar a inscrição.',
+      );
+      setInscrevendo(null);
+      return;
+    }
+    const recarga = await executarAdmin((token) =>
+      api.associado.convencoes(token),
+    );
+    if (recarga.dados) definirLista(recarga.dados);
+    setMensagemInscricao(
+      recarga.erro
+        ? 'Inscrição registrada, mas não foi possível atualizar a página.'
+        : 'Inscrição registrada.',
+    );
+    setInscrevendo(null);
+  }
+
+  async function baixarAnexo(
+    convencaoId: string,
+    anexoId: string,
+    nomeArquivo: string,
+  ) {
+    const chave = `${convencaoId}:${anexoId}`;
+    setBaixando(chave);
+    setErroDownload(null);
+    const resultado = await executarAdmin((token) =>
+      api.associado.baixarAnexoConvencao(token, convencaoId, anexoId),
+    );
+    if (!resultado.dados) {
+      setErroDownload(resultado.erro ?? 'Não foi possível baixar o arquivo.');
+      setBaixando(null);
+      return;
+    }
+    const url = URL.createObjectURL(resultado.dados);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeArquivo;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setBaixando(null);
+  }
+
+  const arquivos = (convencao: NonNullable<typeof lista>[number]) =>
+    convencao.arquivos.length > 0 ? (
+      <ul className="as-lista-arquivos">
+        {convencao.arquivos.map((arquivo) => {
+          const chave = `${convencao.id}:${arquivo.id}`;
+          return (
+            <li key={arquivo.id}>
+              <span>{arquivo.nomeArquivo}</span>
+              <button
+                className="as-botao as-botao-pequeno"
+                type="button"
+                disabled={baixando === chave}
+                onClick={() =>
+                  baixarAnexo(convencao.id, arquivo.id, arquivo.nomeArquivo)
+                }
+              >
+                {baixando === chave ? 'Baixando…' : 'Baixar PDF'}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    ) : (
+      <p className="as-total">Sem arquivo anexado até o momento.</p>
+    );
+
+  const acaoInscricao = (convencao: NonNullable<typeof lista>[number]) => {
+    if (convencao.inscrito) {
+      return <p className="as-aviso">Inscrição registrada.</p>;
+    }
+    if (!convencao.podeInscrever) {
+      return (
+        <p className="as-descricao">
+          A inscrição é exclusiva para afiliados em dia.
+        </p>
+      );
+    }
+    return (
+      <button
+        className="as-botao as-botao-largo"
+        type="button"
+        disabled={inscrevendo === convencao.id}
+        onClick={() => void inscrever(convencao.id)}
+      >
+        {inscrevendo === convencao.id ? 'Registrando…' : 'Inscrever-se'}
+      </button>
+    );
+  };
 
   return (
     <>
       <Cabecalho
-        selo="DOCUMENTOS TRABALHISTAS E EVENTOS OFICIAIS"
-        titulo="Convenções Coletivas de Trabalho"
-        descricao="Consulte os pisos salariais vigentes da categoria."
+        selo="INFORMAÇÕES PARA ASSOCIADOS"
+        titulo="Convenções Coletivas"
+        descricao="Consulte os resumos e anexos das convenções coletivas publicados pela sede."
       />
       <AvisoCarga carregando={carregando} erro={erro} />
+      {erroDownload && (
+        <p className="as-aviso" role="alert">
+          {erroDownload}
+        </p>
+      )}
+      {mensagemInscricao && (
+        <p className="as-aviso" role="status">
+          {mensagemInscricao}
+        </p>
+      )}
       {lista?.length === 0 && (
         <p className="as-aviso" role="status">
           Nenhuma convenção foi publicada pela sede ainda.
@@ -30,45 +146,18 @@ export function PaginaConvencoesAssociado() {
       )}
 
       {vigente && (
-        <section className="as-cartao" aria-labelledby="t-pisos">
+        <section className="as-cartao" aria-labelledby="t-convencao">
           <div className="as-linha-titulo">
             <div>
-              <h2 id="t-pisos">{vigente.titulo}</h2>
+              <h2 id="t-convencao">{vigente.titulo}</h2>
               <p className="as-descricao">{vigente.resumo}</p>
             </div>
             <span className="as-etiqueta as-etiqueta-ok">
-              Vigente desde {data(vigente.publicadaEm)}
+              Publicada em {data(vigente.publicadaEm)}
             </span>
           </div>
-          {vigente.pisos.length > 0 && (
-            <div className="as-tabela-rolagem">
-              <table className="as-tabela">
-                <thead>
-                  <tr>
-                    <th scope="col">Cargo / Função Regulamentada</th>
-                    <th scope="col">Piso Anterior</th>
-                    <th scope="col">Piso Mínimo Garantido</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vigente.pisos.map((p) => (
-                    <tr key={p.funcao}>
-                      <th scope="row">{p.funcao}</th>
-                      <td>{p.pisoAnterior ? moeda(p.pisoAnterior) : '—'}</td>
-                      <td className="as-destaque">{moeda(p.pisoNovo)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <p className="as-total">
-            <span>
-              {vigente.anexos > 0
-                ? `${vigente.anexos} arquivo(s) anexado(s) pela sede.`
-                : 'Sem arquivo anexado até o momento.'}
-            </span>
-          </p>
+          {arquivos(vigente)}
+          {acaoInscricao(vigente)}
         </section>
       )}
 
@@ -79,25 +168,13 @@ export function PaginaConvencoesAssociado() {
             {lista.slice(1).map((c) => (
               <li key={c.id}>
                 <strong>{c.titulo}</strong> <small>({c.ano})</small>
+                {arquivos(c)}
+                {acaoInscricao(c)}
               </li>
             ))}
           </ul>
         </section>
       )}
-
-      <section className="as-cartao as-filiacao">
-        <div>
-          <p className="as-etiqueta">PRINCIPAL SERVIÇO</p>
-          <h2>Gestão de Filiação</h2>
-          <p className="as-descricao">
-            Gerencie sua condição de associado, consulte termos de filiação ou
-            solicite alterações cadastrais da farmácia sem burocracia.
-          </p>
-        </div>
-        <Link to="/associado/filiacao" className="as-botao">
-          Acessar Gestão de Filiação →
-        </Link>
-      </section>
     </>
   );
 }

@@ -44,14 +44,13 @@ export function PaginaBoletos() {
       r.erro ??
         (ativo
           ? 'Envio automático mensal ativado.'
-          : 'Envio automático desativado. Você receberá apenas o boleto avulso.'),
+          : 'Envio automático mensal desativado.'),
     );
   }
 
   const [agora] = useState(() => new Date().setHours(0, 0, 0, 0));
   const boleto = p?.boleto;
   const vencido = !!boleto && new Date(boleto.vencimento).getTime() < agora;
-  const cheio = p ? p.valorMensal * 12 : 0;
 
   return (
     <>
@@ -72,7 +71,9 @@ export function PaginaBoletos() {
                     p.farmacia.situacao === 'EM_DIA' ? 'as-ok' : 'as-alerta'
                   }
                 >
-                  {p.farmacia.situacao === 'EM_DIA' ? 'Regular' : 'Em atraso'}
+                  {p.farmacia.situacao === 'EM_DIA'
+                    ? 'Adimplente'
+                    : 'Inadimplente'}
                 </em>
               </span>
             </p>
@@ -133,10 +134,11 @@ export function PaginaBoletos() {
               </>
             ) : (
               <div>
-                <p className="as-etiqueta">Mensalidade em dia</p>
+                <p className="as-etiqueta">Nenhum boleto em aberto</p>
                 <p className="as-vencimento">
-                  Não há mensalidade em aberto. O próximo boleto chega no e-mail
-                  cadastrado.
+                  {p.recorrente
+                    ? 'Quando houver um boleto, ele ficará disponível nesta área e será enviado por e-mail.'
+                    : 'Você pode pedir a cobrança recorrente ou solicitar um boleto para um único mês.'}
                 </p>
               </div>
             )}
@@ -146,8 +148,8 @@ export function PaginaBoletos() {
             <section className="as-cartao as-opcao">
               <h2>Envio Automático Todo Mês (Recorrente)</h2>
               <p>
-                Receba o boleto todo mês no WhatsApp e e-mail sem se preocupar
-                com atrasos ou esquecimentos.
+                Peça o envio mensal de boletos. A cobrança recorrente é ativada
+                automaticamente.
               </p>
               <button
                 type="button"
@@ -161,10 +163,10 @@ export function PaginaBoletos() {
               </button>
             </section>
             <section className="as-cartao as-opcao">
-              <h2>Boleto Avulso</h2>
+              <h2>Boleto de um único mês</h2>
               <p>
-                Pague apenas o mês atual sem cadastrar envio automático. Você
-                baixa o boleto manualmente quando desejar fazer a quitação.
+                Solicite um boleto para pagar um único mês, sem aderir à
+                cobrança recorrente.
               </p>
               <button
                 type="button"
@@ -179,22 +181,16 @@ export function PaginaBoletos() {
 
           <section className="as-cartao as-anual" aria-labelledby="t-anual">
             <div>
-              <p className="as-etiqueta as-etiqueta-escura">
-                OPORTUNIDADE ANUAL COM DESCONTO
-              </p>
-              <h2 id="t-anual">Economize 20% pagando o ano todo de uma vez</h2>
-              <p>
-                <s>De {moeda(cheio)}</s> por apenas{' '}
-                <strong>{moeda(p.valorAnual)}</strong> à vista
-              </p>
+              <p className="as-etiqueta as-etiqueta-escura">PLANO ANUAL</p>
+              <h2 id="t-anual">Plano anual pago à vista tem 20% de desconto</h2>
             </div>
             <button
               type="button"
               className="as-botao"
               disabled
-              title="O boleto anual será liberado com a integração bancária"
+              title="A opção de pagamento anual ainda não está disponível."
             >
-              Quero pagar com 20% de desconto
+              Pagamento anual indisponível
             </button>
           </section>
 

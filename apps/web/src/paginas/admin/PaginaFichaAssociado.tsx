@@ -18,8 +18,8 @@ import {
 } from './useDadosAdmin';
 
 const SITUACAO = {
-  EM_DIA: 'Filiação Ativa (Em Dia)',
-  PENDENTE: 'Filiação Pendente',
+  EM_DIA: 'Adimplente',
+  PENDENTE: 'Inadimplente',
   INADIMPLENTE: 'Inadimplente',
 } as const;
 
@@ -41,8 +41,8 @@ function mesAno(iso: string) {
 }
 
 /** Ficha cadastral e financeira de um associado. */
-export function PaginaFichaAfiliado() {
-  useTituloPagina('Ficha do Associado');
+export function PaginaFichaAssociado() {
+  useTituloPagina('Ficha do associado');
   const { id = '' } = useParams();
   const [mensagem, setMensagem] = useState<string | null>(null);
   const {
@@ -58,7 +58,7 @@ export function PaginaFichaAfiliado() {
       <nav className="adm-migalhas" aria-label="Você está em">
         <Link to="/admin">Sede Central</Link>
         <span aria-hidden="true">›</span>
-        <span>Gestão de Afiliados</span>
+        <span>Associados</span>
         {f && (
           <>
             <span aria-hidden="true">›</span>
@@ -93,7 +93,7 @@ export function PaginaFichaAfiliado() {
               </span>
               <p>
                 <strong>CNPJ:</strong> {cnpjMascarado(f.cnpj)}
-                {f.municipio && <> • {f.municipio}/MT</>} • Filiação:{' '}
+                {f.municipio && <> • {f.municipio}/MT</>} • Cadastro:{' '}
                 {data(f.filiadoDesde)}
               </p>
             </div>
@@ -114,7 +114,9 @@ export function PaginaFichaAfiliado() {
               }}
             >
               <IconeProibido />
-              {f.bloqueado ? 'Liberar Acesso' : 'Bloquear / Suspender Acesso'}
+              {f.bloqueado
+                ? 'Liberar acesso a benefícios'
+                : 'Bloquear acesso a benefícios'}
             </button>
           </section>
 
@@ -151,11 +153,8 @@ export function PaginaFichaAfiliado() {
           <section className="adm-cartao adm-bloco" aria-labelledby="t-fin">
             <h2 id="t-fin" className="adm-bloco-titulo">
               <IconeCarteira />
-              Resumo Financeiro &amp; Mensalidades
+              Boletos e pagamentos
             </h2>
-            <p className="adm-bloco-sub">
-              Últimos lançamentos da conta Sicredi
-            </p>
             <div className="adm-tabela-rolagem">
               <table className="adm-tabela adm-tabela-simples">
                 <thead>
@@ -164,7 +163,7 @@ export function PaginaFichaAfiliado() {
                     <th scope="col">Vencimento</th>
                     <th scope="col">Valor</th>
                     <th scope="col" className="adm-coluna-acao">
-                      Status Sicredi
+                      Situação
                     </th>
                   </tr>
                 </thead>

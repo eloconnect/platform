@@ -8,6 +8,7 @@ const ABAS = [
   { para: '/associado/beneficios', texto: 'Benefícios & Suporte' },
   { para: '/associado/convencoes', texto: 'Convenções Coletivas' },
   { para: '/associado/noticias', texto: 'Notícias' },
+  { para: '/associado/cancelamento', texto: 'Solicitar cancelamento' },
 ];
 
 /** Portal da farmácia associada, com abas no topo. */
@@ -67,18 +68,8 @@ export function LayoutAssociado() {
       >
         <Outlet />
       </main>
-
       <footer className="as-rodape">
-        <span>
-          © 2025 Elo Connect • Sistema Integrado de Gestão e Relacionamento
-          Sindical Farmacêutico
-        </span>
-        <span>
-          Central Nacional: <strong>0800 724 3000</strong>
-        </span>
-        <span>
-          Atendimento presencial e online de segunda a sexta, das 8h às 18h
-        </span>
+        <span>Elo Connect</span>
       </footer>
     </div>
   );

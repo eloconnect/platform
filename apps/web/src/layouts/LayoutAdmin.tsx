@@ -4,15 +4,15 @@ import {
   IconeConvencoes,
   IconeJucemat,
   IconePainel,
-  IconePerfil,
   IconeValores,
+  IconeDocumento,
 } from '../paginas/admin/icones';
 import { limparSessao } from '../sessao';
 
 const ITENS = [
   {
     para: '/admin',
-    texto: 'Painel Executivo',
+    texto: 'Associados',
     icone: <IconePainel />,
     fim: true,
   },
@@ -22,16 +22,20 @@ const ITENS = [
     icone: <IconeValores />,
   },
   {
-    para: '/admin/afiliados',
-    texto: 'Perfil do Afiliado',
-    icone: <IconePerfil />,
-  },
-  {
     para: '/admin/convencoes',
-    texto: 'Convenções & Benefícios',
+    texto: 'Convenções coletivas',
     icone: <IconeConvencoes />,
   },
-  { para: '/admin/jucemat', texto: 'Gestão JUCEMAT', icone: <IconeJucemat /> },
+  {
+    para: '/admin/suporte',
+    texto: 'Solicitações de suporte',
+    icone: <IconeDocumento />,
+  },
+  {
+    para: '/admin/jucemat',
+    texto: 'Cancelamentos e cobrança',
+    icone: <IconeJucemat />,
+  },
 ];
 
 /** Painel da sede, com menu lateral. */
@@ -49,14 +53,13 @@ export function LayoutAdmin() {
           </span>
           <div>
             <strong>Elo Connect</strong>
-            <small>Gestão Patronal</small>
+            <small>Painel da sede</small>
           </div>
         </div>
 
         <div className="adm-sede">
-          <small>SEDE CENTRAL</small>
-          <strong>SINDIFARMA Patronal</strong>
-          <span>Gestão Executiva • SP</span>
+          <small>ADMINISTRAÇÃO</small>
+          <strong>Associados e conteúdo</strong>
         </div>
 
         <nav aria-label="Menu do painel">

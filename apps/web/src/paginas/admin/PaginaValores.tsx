@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useTituloPagina } from '../../componentes';
 import { api } from '../../api';
 import { AvisoCarga, CabecalhoAdmin, TopoAdmin } from './ComponentesAdmin';
-import { IconeCarteira, IconeEscudo, IconeRaio } from './icones';
+import { IconeCarteira, IconeRaio } from './icones';
 import { data, executarAdmin, moeda, useDadosAdmin } from './useDadosAdmin';
 
-/** Valor vigente da mensalidade e proposta de reajuste. */
+/** Consulta e alteração do valor da contribuição. */
 export function PaginaValores() {
   useTituloPagina('Valores & Reajustes');
   const [novo, setNovo] = useState('');
@@ -19,43 +19,38 @@ export function PaginaValores() {
 
   return (
     <>
-      <TopoAdmin plantao />
+      <TopoAdmin />
       <CabecalhoAdmin
-        titulo="Valores & Reajustes de Mensalidade"
-        descricao="Consulte o valor atual vigente e configure uma nova proposição de reajuste com vigência para homologação da diretoria."
+        titulo="Valores da contribuição"
+        descricao="O valor é igual para todos os associados. Alterações passam a valer no próximo boleto."
       />
       <AvisoCarga carregando={carregando} erro={erro} />
 
       <section className="adm-cartao adm-vigente" aria-label="Valor vigente">
         <div>
           <p className="adm-vigente-rotulo">
-            <span>MENSALIDADE PADRÃO VIGENTE</span>
-            <span className="adm-etiqueta adm-etiqueta-azul">Em Vigor</span>
+            <span>VALOR VIGENTE</span>
+            <span className="adm-etiqueta adm-etiqueta-azul">Contribuição</span>
           </p>
           <p className="adm-vigente-valor">
             {v ? moeda(v.valorMensal) : '—'} <small>/ mês por farmácia</small>
           </p>
           <p className="adm-indicador-nota">
-            Vigência ativa desde {data(v?.vigenteDesde ?? null)} • Plano anual à
-            vista: {v ? moeda(v.valorAnual) : '—'} • Cobrança automática Sicredi
+            Desde {data(v?.vigenteDesde ?? null)} • Valor anual à vista:{' '}
+            {v ? moeda(v.valorAnual) : '—'}
           </p>
-        </div>
-        <div className="adm-vigente-lateral">
-          <small>Estabelecimentos Filiados</small>
-          <strong>{v?.estabelecimentos ?? '—'} unidades</strong>
-          <span>Integradas à cobrança</span>
-          <IconeEscudo />
         </div>
       </section>
 
       <section className="adm-cartao adm-bloco" aria-labelledby="t-reajuste">
         <h2 id="t-reajuste" className="adm-bloco-titulo">
           <IconeCarteira />
-          Propor Novo Reajuste
+          Alterar contribuição mensal
         </h2>
         <p className="adm-bloco-sub">
-          Defina o novo valor e o início da vigência para submeter à aprovação
-          do conselho.
+          Associados com contribuição ativa serão avisados por e-mail sobre a
+          alteração. O plano anual à vista tem o desconto previsto nos
+          requisitos.
         </p>
         <form
           className="adm-formulario"
@@ -74,31 +69,17 @@ export function PaginaValores() {
             setMensagem(r.erro ?? 'Novo valor registrado.');
           }}
         >
-          <div className="adm-campos-2">
-            <label>
-              <span>Novo Valor da Mensalidade (R$)</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="195,00"
-                value={novo}
-                onChange={(e) => setNovo(e.target.value)}
-              />
-              <small>Valor mensal aplicado a cada estabelecimento ativo</small>
-            </label>
-            <label>
-              <span>Vigência Inicial</span>
-              <input type="date" />
-              <small>Data de início do novo valor para emissão bancária</small>
-            </label>
-          </div>
           <label>
-            <span>Número da Resolução de Diretoria / Ata de Aprovação</span>
+            <span>Novo valor mensal (R$)</span>
             <input
-              type="text"
-              placeholder="Ata da Assembleia Geral Extraordinária nº"
+              type="number"
+              min="0.01"
+              step="0.01"
+              inputMode="decimal"
+              value={novo}
+              onChange={(e) => setNovo(e.target.value)}
             />
-            <small>Documento legal que fundamenta o reajuste</small>
+            <small>O valor anual é calculado com o desconto de 20%.</small>
           </label>
           {mensagem && (
             <p className="adm-aviso" role="status">
@@ -108,7 +89,7 @@ export function PaginaValores() {
           <div className="adm-formulario-acoes">
             <button type="submit" className="adm-botao-primario">
               <IconeRaio />
-              Salvar e Enviar para Homologação
+              Salvar novo valor
             </button>
           </div>
         </form>

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTituloPagina } from '../../componentes';
 import { api } from '../../api';
 import { AvisoCarga, CabecalhoAdmin, TopoAdmin } from './ComponentesAdmin';
-import { IconeUpload } from './icones';
 import {
   cnpjMascarado,
   data,
@@ -10,9 +9,9 @@ import {
   useDadosAdmin,
 } from './useDadosAdmin';
 
-/** Fila de cancelamentos e notificação formal JUCEMAT. */
+/** Fila de cancelamentos e informações sobre a cobrança formal. */
 export function PaginaJucemat() {
-  useTituloPagina('Gestão JUCEMAT');
+  useTituloPagina('Cancelamentos e cobrança formal');
   const [mensagem, setMensagem] = useState<string | null>(null);
   const {
     dados: fila,
@@ -25,14 +24,13 @@ export function PaginaJucemat() {
     <>
       <TopoAdmin />
       <CabecalhoAdmin
-        selo="SEDE ADMINISTRATIVA • MÓDULO JURÍDICO E CADASTRAL"
-        titulo="Gestão de Cancelamentos e Cobrança Formal"
-        descricao="Validação de desfiliações pendentes e emissão de notificações JUCEMAT."
+        titulo="Cancelamentos e cobrança formal"
+        descricao="Analise solicitações de cancelamento e consulte o envio de comunicados aos associados."
       />
 
       <section className="adm-cartao adm-lista" aria-labelledby="t-fila">
         <h2 id="t-fila" className="adm-bloco-titulo adm-fila-titulo">
-          Fila de Cancelamentos
+          Solicitações de cancelamento
           <span className="adm-etiqueta adm-etiqueta-azul">
             {fila?.length ?? 0} pendentes
           </span>
@@ -74,11 +72,12 @@ export function PaginaJucemat() {
                         );
                         if (r.dados) definir(r.dados);
                         setMensagem(
-                          r.erro ?? `Desfiliação de ${s.razaoSocial} aprovada.`,
+                          r.erro ??
+                            `Cancelamento de ${s.razaoSocial} aprovado.`,
                         );
                       }}
                     >
-                      Aprovar Desfiliação
+                      Aprovar cancelamento
                     </button>
                   </td>
                 </tr>
@@ -97,25 +96,25 @@ export function PaginaJucemat() {
 
       <section className="adm-cartao adm-bloco" aria-labelledby="t-jucemat">
         <h2 id="t-jucemat" className="adm-bloco-titulo">
-          Notificação Formal JUCEMAT
+          Cobrança formal
         </h2>
-        <div
-          className="adm-envio"
-          role="group"
-          aria-label="Arquivo XML da JUCEMAT"
-        >
-          <IconeUpload />
-          <strong>Carregar arquivo XML da JUCEMAT</strong>
-          <span>Arraste o arquivo ou clique para selecionar</span>
-        </div>
+        <p className="adm-bloco-sub">
+          O comunicado informa a existência do sindicato, o valor da
+          contribuição e os benefícios. É enviado por e-mail à base de
+          associados, sem boleto.
+        </p>
+        <p className="adm-bloco-sub">
+          A base deve ser importada de arquivo XML da JUCEMAT, filtrado pelo
+          CNAE. A importação ainda não está disponível nesta tela.
+        </p>
         <div className="adm-formulario-acoes">
           <button
             type="button"
             className="adm-botao-primario"
             disabled
-            title="O disparo depende da integração com a JUCEMAT"
+            title="O envio ainda não está disponível nesta tela."
           >
-            Disparar Notificação Formal
+            Envio indisponível
           </button>
         </div>
       </section>

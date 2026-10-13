@@ -22,6 +22,12 @@ vi.mock('./api', () => ({
       aprovarCancelamento: vi.fn<ApiClient['admin']['aprovarCancelamento']>(),
       definirAcesso: vi.fn<ApiClient['admin']['definirAcesso']>(),
       convencoes: vi.fn<ApiClient['admin']['convencoes']>(),
+      beneficios: vi.fn<ApiClient['admin']['beneficios']>(),
+      criarBeneficio: vi.fn<ApiClient['admin']['criarBeneficio']>(),
+      atualizarBeneficio: vi.fn<ApiClient['admin']['atualizarBeneficio']>(),
+      solicitacoesSuporte: vi.fn<ApiClient['admin']['solicitacoesSuporte']>(),
+      atualizarStatusSuporte:
+        vi.fn<ApiClient['admin']['atualizarStatusSuporte']>(),
     },
     associado: {
       painel: vi.fn<ApiClient['associado']['painel']>(),
@@ -29,9 +35,14 @@ vi.mock('./api', () => ({
       convencoes: vi.fn<ApiClient['associado']['convencoes']>(),
       noticias: vi.fn<ApiClient['associado']['noticias']>(),
       beneficios: vi.fn<ApiClient['associado']['beneficios']>(),
+      inscreverConvencao: vi.fn<ApiClient['associado']['inscreverConvencao']>(),
+      solicitarSuporte: vi.fn<ApiClient['associado']['solicitarSuporte']>(),
       definirRecorrencia: vi.fn<ApiClient['associado']['definirRecorrencia']>(),
       solicitarCancelamento:
         vi.fn<ApiClient['associado']['solicitarCancelamento']>(),
+    },
+    publico: {
+      beneficios: vi.fn<ApiClient['publico']['beneficios']>(),
     },
   },
 }));
@@ -50,6 +61,7 @@ describe('Rotas', () => {
     vi.mocked(api.login).mockReset();
     vi.mocked(api.solicitarRecuperacaoSenha).mockReset();
     vi.mocked(api.redefinirSenha).mockReset();
+    vi.mocked(api.publico.beneficios).mockReset().mockResolvedValue([]);
     vi.mocked(api.admin.resumo).mockReset().mockResolvedValue({
       totalAssociados: 0,
       emDia: 0,
@@ -73,7 +85,7 @@ describe('Rotas', () => {
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: 'A força que impulsiona e protege o setor farmacêutico.',
+        name: 'Informações do sindicato para farmácias associadas',
       }),
     ).toBeInTheDocument();
     expect(
@@ -88,9 +100,6 @@ describe('Rotas', () => {
         .every((link) => link.getAttribute('href') === '/entrar'),
     ).toBe(true);
     expect(
-      screen.getByRole('link', { name: 'Filie sua Farmácia Agora' }),
-    ).toHaveAttribute('href', '/cadastro');
-    expect(
       screen
         .getAllByRole('link', { name: 'Cadastrar farmácia' })
         .every((link) => link.getAttribute('href') === '/cadastro'),
@@ -98,59 +107,46 @@ describe('Rotas', () => {
     expect(
       screen.getByRole('link', { name: 'Convenções coletivas' }),
     ).toHaveAttribute('href', '/#convencoes');
-    expect(screen.getByRole('link', { name: 'Contribuições' })).toHaveAttribute(
-      'href',
-      '/entrar',
-    );
     expect(
-      screen.getByRole('heading', {
-        name: 'Convenções Coletivas e Pisos Vigentes',
-      }),
+      screen.getByRole('heading', { name: 'O que você encontra' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', {
-        name: 'Fortaleça o seu negócio. Seja parte do sindicato que luta pela sua farmácia.',
-      }),
+      screen.getByRole('heading', { name: 'Convenções coletivas' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('img', {
-        name: 'Equipe de profissionais em atendimento em uma farmácia.',
-      }),
+      screen.getByRole('heading', { name: 'Benefícios' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: 'Filie sua Farmácia Agora' }),
-    ).toHaveAttribute('href', '/cadastro');
+      screen.getByRole('heading', { name: 'Suporte' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: 'Espaço reservado para uma foto' }),
+    ).toBeInTheDocument();
+    expect(document.querySelector('img')).toBeNull();
+    expect(screen.queryByText(/R\$\s*\d/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/\b\d{1,3}(?:[.,]\d+)?%|\+\s?\d+|\b\d+\s+anos?\b/i),
+    ).not.toBeInTheDocument();
   });
 
-  it('links de convenção e filiação levam às páginas de acesso correspondentes', () => {
+  it('o acesso às informações do associado leva ao login', () => {
     abrir('/');
     fireEvent.click(
-      screen.getByRole('link', {
-        name: 'Entrar para consultar: CCT Geral — Varejo Farmacêutico Estadual',
-      }),
+      screen.getAllByRole('link', { name: 'Acessar área do associado' })[0],
     );
     expect(
       screen.getByRole('heading', { level: 1, name: 'Acesse sua área' }),
     ).toBeInTheDocument();
   });
 
-  it('botão de filiação abre o cadastro da farmácia', () => {
+  it('botão de cadastro abre o cadastro da farmácia', () => {
     abrir('/');
     fireEvent.click(
-      screen.getByRole('link', { name: 'Enviar solicitação de filiação' }),
+      screen.getAllByRole('link', { name: 'Cadastrar farmácia' })[0],
     );
     expect(
       screen.getByRole('heading', { level: 1, name: 'Cadastrar farmácia' }),
     ).toBeInTheDocument();
-  });
-
-  it('atalho do plantão inicia uma ligação para a central', () => {
-    abrir('/');
-    expect(
-      screen.getByRole('link', {
-        name: 'Ligar para o Plantão Trabalhista no 0800 724 4500',
-      }),
-    ).toHaveAttribute('href', 'tel:08007244500');
   });
 
   it.each([
@@ -158,7 +154,7 @@ describe('Rotas', () => {
     ['/esqueci-senha', 'Esqueci minha senha'],
     ['/cadastro', 'Cadastrar farmácia'],
     ['/cadastro/confirmar', 'Confirme os dados da farmácia'],
-    ['/admin', 'Painel Executivo de Arrecadação Patronal'],
+    ['/admin', 'Associados'],
     ['/nao-existe', 'Página não encontrada'],
   ])('%s mostra "%s"', (caminho, titulo) => {
     abrir(caminho);
@@ -210,7 +206,7 @@ describe('Rotas', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: 'Painel Executivo de Arrecadação Patronal',
+        name: 'Associados',
       }),
     ).toBeInTheDocument();
     expect(api.login).toHaveBeenCalledWith({
@@ -382,10 +378,13 @@ describe('Rotas', () => {
     abrir('/admin');
     expect(await screen.findByText('Drogaria Teste')).toBeInTheDocument();
     expect(screen.getByText('Inadimplente')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Benefícios' }),
+    ).not.toBeInTheDocument();
     expect(api.admin.associados).toHaveBeenCalledWith('jwt', '', 1);
     expect(
       screen.getByRole('link', { name: 'Ver perfil de Drogaria Teste' }),
-    ).toHaveAttribute('href', '/admin/afiliados/a1');
+    ).toHaveAttribute('href', '/admin/associados/a1');
   });
 
   it('/associado mostra a mensalidade em aberto da farmácia', async () => {
@@ -440,7 +439,7 @@ describe('Rotas', () => {
     ).toHaveAttribute('href', '/associado/historico');
   });
 
-  it('/associado/filiacao só habilita o cancelamento após a ciência', async () => {
+  it('/associado/cancelamento só habilita o pedido após a ciência', async () => {
     sessionStorage.setItem(
       'eloconnect.sessao',
       JSON.stringify({
@@ -467,9 +466,10 @@ describe('Rotas', () => {
       cancelamentoPendente: false,
       boleto: null,
     });
-    abrir('/associado/filiacao');
+    vi.mocked(api.associado.beneficios).mockResolvedValue([]);
+    abrir('/associado/cancelamento');
     const confirmar = await screen.findByRole('button', {
-      name: 'Confirmar Pedido de Cancelamento',
+      name: 'Enviar solicitação de cancelamento',
     });
     await waitFor(() => expect(confirmar).toBeDisabled());
     fireEvent.click(screen.getByRole('checkbox'));

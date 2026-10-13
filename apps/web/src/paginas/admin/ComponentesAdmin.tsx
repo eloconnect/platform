@@ -1,26 +1,19 @@
 import type { ReactNode } from 'react';
 import { lerSessao } from '../../sessao';
-import { IconeRaio } from './icones';
 
 /** Barra superior comum a todas as telas do painel da sede. */
-export function TopoAdmin({ plantao = false }: { plantao?: boolean }) {
+export function TopoAdmin() {
   const usuario = lerSessao()?.usuario;
   return (
     <div className="adm-topo">
       <span className="adm-conectado">
         <span className="adm-ponto" aria-hidden="true" />
-        Sindicato Conectado: SINDIFARMA-SP
+        Painel da sede
       </span>
       <div className="adm-topo-direita">
-        {plantao && (
-          <button type="button" className="adm-botao-plantao">
-            <IconeRaio />
-            Plantão Urgente
-          </button>
-        )}
         <div className="adm-usuario">
           <strong>{usuario?.nome ?? 'Sede'}</strong>
-          <span>Diretor Responsável</span>
+          <span>Administrador</span>
         </div>
       </div>
     </div>
