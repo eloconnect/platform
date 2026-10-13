@@ -1,0 +1,31 @@
+# Atualização de dependências: uma vez por mês, num PR só por ecossistema.
+# Versões major ficam de fora: TypeScript 6, Prisma 7 e Node 24 são fixados de
+# propósito (ver docs/decisoes-tecnicas.md), e uma major pede revisão manual.
+# Os alertas de vulnerabilidade não esperam o mês: chegam na aba Security.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      dependencias:
+        patterns: ['*']
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
+      include: scope

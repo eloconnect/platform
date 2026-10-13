@@ -127,6 +127,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Lint e formatação: **oxlint** (com regras de React e jsx-a11y) e **Prettier** no monorepo inteiro, com hooks de commit (husky, lint-staged e commitlint). Arquivos Markdown ficam fora do Prettier. Detalhes no CONTRIBUTING.
 
+- Segurança do repositório: secret scanning com push protection (o push com credencial é bloqueado) e Dependabot. Os alertas e as correções de vulnerabilidade chegam na hora. As atualizações comuns (`.github/dependabot.yml`) chegam uma vez por mês, num PR por ecossistema, sem versões major, porque TypeScript 6, Prisma 7 e Node 24 são fixados de propósito.
+
 - Ambiente de desenvolvimento: o projeto fica no sistema de arquivos do WSL (ex.: `~/projetos`), não em `/mnt/c`, por desempenho.
 
 - Pastas de instruções para ferramentas de IA geradas automaticamente por pacotes (ex.: `.claude/`, `.agents/`, `.windsurf/`) não entram no repositório.
