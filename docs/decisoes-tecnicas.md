@@ -97,7 +97,7 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 - Hospedagem: free tier. Volume estimado: até ~2.000 associados, ~150 com contribuição ativa, menos de 400 acessos mensais. Verificar os termos dos planos gratuitos, pois alguns proíbem uso comercial.
 
-- E-mail transacional: verificar limites diários do serviço gratuito escolhido (cobrança formal para ~2.000 destinatários pode exigir envio escalonado).
+- E-mail transacional: a API usa SMTP configurável, sem dependência de um fornecedor específico. Antes da produção, escolher o provedor e verificar os limites diários: a cobrança formal para ~2.000 destinatários pode exigir envio escalonado.
 
 ## Ambiente e ferramentas
 
@@ -120,6 +120,9 @@ Decididas no setup inicial do repositório (09/10/2026):
 - Migrations e seed: migrations versionadas em `apps/api/prisma/migrations` (a primeira é a `init`). O seed (`apps/api/prisma/seed.ts`, executado com `tsx`) cria só dados fictícios. No Prisma 7, o `migrate reset` não roda o seed sozinho, por isso o script `db:reset` chama os dois.
 
 - Hash de senha: **argon2id**, com o pacote `@node-rs/argon2` (binários prontos, sem compilação na instalação), conforme o RNF04. O seed já usa esse pacote, e o login (US03) deve usar o mesmo.
+- Login: `POST /api/auth/login` autentica somente contas ativas e com e-mail confirmado, valida a senha com Argon2id e retorna JWT de acesso com validade de 1 hora. A chave `JWT_SECRET` deve ter pelo menos 32 caracteres.
+- Serviço de e-mail: `EmailService` envia mensagens por SMTP usando `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_FROM` e, se exigidos pelo provedor, `SMTP_USER` e `SMTP_PASSWORD`. Recuperação de senha e outros fluxos devem usar este serviço.
+- Recuperação de senha: `POST /api/auth/esqueci-senha` responde sempre igual (não revela se o e-mail existe) e envia, por e-mail, um link `WEB_URL/redefinir-senha?token=...` com token aleatório de uso único e validade de 1 hora; só o hash SHA-256 do token fica no banco (`TokenUsuario`). `POST /api/auth/redefinir-senha` valida o token, grava a nova senha com Argon2id e consome o token. Pendência: limitar tentativas (rate limit) nesses endpoints antes da produção.
 
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
 

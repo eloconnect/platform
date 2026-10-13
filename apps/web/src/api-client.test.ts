@@ -22,6 +22,28 @@ describe('createApiClient', () => {
     );
   });
 
+  it('chama POST /auth/login com o corpo em JSON', async () => {
+    const resposta = {
+      accessToken: 'jwt',
+      usuario: { id: '1', email: 'a@b.c', nome: 'A', perfil: 'ASSOCIADO' },
+    };
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(new Response(JSON.stringify(resposta)));
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await expect(
+      cliente.login({ email: 'a@b.c', senha: 'x' }),
+    ).resolves.toEqual(resposta);
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/auth/login',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ email: 'a@b.c', senha: 'x' }),
+      }),
+    );
+  });
+
   it('lança ApiError com o status quando a API responde erro', async () => {
     const fetchFalso = vi
       .fn<Fetch>()
