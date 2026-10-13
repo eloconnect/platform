@@ -39,20 +39,20 @@ export interface HistoricoAssociado {
   totalPeriodo: number;
 }
 
-export interface PisoSalarial {
-  funcao: string;
-  pisoAnterior?: number;
-  pisoNovo: number;
-}
-
 export interface ConvencaoAssociado {
   id: string;
   titulo: string;
   ano: number;
   resumo: string;
   publicadaEm: string | null;
-  pisos: PisoSalarial[];
+  inscrito: boolean;
+  podeInscrever: boolean;
   anexos: number;
+  arquivos: {
+    id: string;
+    nomeArquivo: string;
+    tamanhoBytes: number;
+  }[];
 }
 
 export interface NoticiaAssociado {
@@ -66,4 +66,14 @@ export interface BeneficioAssociado {
   id: string;
   titulo: string;
   descricao: string;
+}
+
+export interface InscricaoConvencaoResponse {
+  inscritaEm: string;
+}
+
+export interface SolicitacaoSuporteResponse {
+  id: string;
+  status: 'RECEBIDA';
+  criadaEm: string;
 }

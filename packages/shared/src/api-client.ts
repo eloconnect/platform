@@ -4,13 +4,21 @@ import type {
   HistoricoAssociado,
   NoticiaAssociado,
   PainelAssociado,
+  InscricaoConvencaoResponse,
+  SolicitacaoSuporteResponse,
 } from './associado.js';
 import type {
+  AnexoConvencaoAdmin,
+  BeneficioAdmin,
   CancelamentoPendente,
+  DadosBeneficio,
+  DadosConvencao,
   ConvencaoPublicada,
   FichaAssociado,
   ListaAssociados,
   ResumoAdmin,
+  SolicitacaoSuporteAdmin,
+  StatusSolicitacaoSuporte,
   ValoresAdmin,
 } from './admin.js';
 import type {
@@ -73,6 +81,50 @@ export function createApiClient(
     return (await resposta.json()) as T;
   }
 
+  async function enviarPdf<T>(
+    caminho: string,
+    token: string,
+    arquivo: File,
+  ): Promise<T> {
+    const dados = new FormData();
+    dados.append('arquivo', arquivo);
+    const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: dados,
+      credentials: 'include',
+    });
+    if (!resposta.ok) {
+      throw new ApiError(
+        resposta.status,
+        `A API respondeu ${resposta.status} em POST ${caminho}`,
+      );
+    }
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    return (await resposta.json()) as T;
+  }
+
+  async function baixarPdf(caminho: string, token: string): Promise<Blob> {
+    const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/pdf',
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: 'include',
+    });
+    if (!resposta.ok) {
+      throw new ApiError(
+        resposta.status,
+        `A API respondeu ${resposta.status} em GET ${caminho}`,
+      );
+    }
+    return resposta.blob();
+  }
+
   return {
     getHealth: () => requisitar<HealthResponse>('GET', '/health'),
     login: (dados: LoginRequest) =>
@@ -89,6 +141,44 @@ export function createApiClient(
           'GET',
           `/admin/associados?busca=${encodeURIComponent(busca)}&pagina=${pagina}`,
           undefined,
+          token,
+        ),
+      beneficios: (token: string) =>
+        requisitar<BeneficioAdmin[]>(
+          'GET',
+          '/admin/beneficios',
+          undefined,
+          token,
+        ),
+      criarBeneficio: (token: string, dados: Omit<DadosBeneficio, 'ativo'>) =>
+        requisitar<BeneficioAdmin>('POST', '/admin/beneficios', dados, token),
+      atualizarBeneficio: (
+        token: string,
+        id: string,
+        dados: Partial<DadosBeneficio>,
+      ) =>
+        requisitar<BeneficioAdmin>(
+          'PATCH',
+          `/admin/beneficios/${encodeURIComponent(id)}`,
+          dados,
+          token,
+        ),
+      solicitacoesSuporte: (token: string) =>
+        requisitar<SolicitacaoSuporteAdmin[]>(
+          'GET',
+          '/admin/suporte',
+          undefined,
+          token,
+        ),
+      atualizarStatusSuporte: (
+        token: string,
+        id: string,
+        status: StatusSolicitacaoSuporte,
+      ) =>
+        requisitar<{ id: string; status: StatusSolicitacaoSuporte }>(
+          'PATCH',
+          `/admin/suporte/${encodeURIComponent(id)}`,
+          { status },
           token,
         ),
       ficha: (token: string, id: string) =>
@@ -135,6 +225,26 @@ export function createApiClient(
           undefined,
           token,
         ),
+      criarConvencao: (token: string, dados: DadosConvencao) =>
+        requisitar<Pick<ConvencaoPublicada, 'id'>>(
+          'POST',
+          '/admin/convencoes',
+          dados,
+          token,
+        ),
+      atualizarConvencao: (token: string, id: string, dados: DadosConvencao) =>
+        requisitar<Pick<ConvencaoPublicada, 'id'>>(
+          'PATCH',
+          `/admin/convencoes/${encodeURIComponent(id)}`,
+          dados,
+          token,
+        ),
+      anexarConvencaoPdf: (token: string, id: string, arquivo: File) =>
+        enviarPdf<AnexoConvencaoAdmin>(
+          `/admin/convencoes/${encodeURIComponent(id)}/anexos`,
+          token,
+          arquivo,
+        ),
     },
     associado: {
       painel: (token: string) =>
@@ -158,6 +268,22 @@ export function createApiClient(
           undefined,
           token,
         ),
+      inscreverConvencao: (token: string, id: string) =>
+        requisitar<InscricaoConvencaoResponse>(
+          'POST',
+          `/associado/convencoes/${encodeURIComponent(id)}/inscricao`,
+          {},
+          token,
+        ),
+      baixarAnexoConvencao: (
+        token: string,
+        convencaoId: string,
+        anexoId: string,
+      ) =>
+        baixarPdf(
+          `/associado/convencoes/${encodeURIComponent(convencaoId)}/anexos/${encodeURIComponent(anexoId)}`,
+          token,
+        ),
       noticias: (token: string) =>
         requisitar<NoticiaAssociado[]>(
           'GET',
@@ -170,6 +296,13 @@ export function createApiClient(
           'GET',
           '/associado/beneficios',
           undefined,
+          token,
+        ),
+      solicitarSuporte: (token: string, mensagem: string) =>
+        requisitar<SolicitacaoSuporteResponse>(
+          'POST',
+          '/associado/suporte',
+          { mensagem },
           token,
         ),
       definirRecorrencia: (token: string, ativo: boolean) =>
@@ -186,6 +319,10 @@ export function createApiClient(
           { motivo },
           token,
         ),
+    },
+    publico: {
+      beneficios: () =>
+        requisitar<BeneficioAssociado[]>('GET', '/publico/beneficios'),
     },
   };
 }

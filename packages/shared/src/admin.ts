@@ -71,4 +71,54 @@ export interface ConvencaoPublicada {
   resumo: string;
   publicadaEm: string | null;
   anexos: number;
+  arquivos: AnexoConvencaoAdmin[];
+}
+
+export interface AnexoConvencaoAdmin {
+  id: string;
+  nomeArquivo: string;
+  tamanhoBytes: number;
+}
+
+export interface ConvencaoAdmin {
+  id: string;
+  titulo: string;
+  ano: number;
+  resumo: string;
+  publicadaEm: string | null;
+  anexos: number;
+}
+
+export interface DadosConvencao {
+  titulo: string;
+  ano: number;
+  resumo: string;
+  publicar: boolean;
+}
+
+export interface BeneficioAdmin {
+  id: string;
+  titulo: string;
+  descricao: string;
+  ativo: boolean;
+  ordem: number;
+}
+
+export interface DadosBeneficio {
+  titulo: string;
+  descricao: string;
+  ativo?: boolean;
+  ordem: number;
+}
+
+export type StatusSolicitacaoSuporte = 'RECEBIDA' | 'EM_ANALISE' | 'CONCLUIDA';
+
+export interface SolicitacaoSuporteAdmin {
+  id: string;
+  associado: string;
+  cnpj: string;
+  mensagem: string;
+  status: StatusSolicitacaoSuporte;
+  criadaEm: string;
+  atualizadaEm: string;
 }
