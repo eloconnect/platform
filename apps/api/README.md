@@ -4,6 +4,7 @@ Back-end do Elo Connect em NestJS. Para preparar o ambiente, siga o [README da r
 
 - Prefixo global `/api`. O `GET /api/health` confere a API e a conexão com o banco.
 - Variáveis de ambiente no `.env`, criado pelo `pnpm bootstrap` a partir do `.env.example`.
+- Anexos PDF de convenções são gravados em `uploads/convencoes` por padrão; defina `UPLOADS_DIR` para outro diretório persistente. Em produção, configure armazenamento persistente e compartilhado entre as instâncias da API.
 - Schema do banco em `prisma/schema.prisma`, documentado em [Modelo de dados](../../docs/modelo-dados.md).
 - O client do Prisma é gerado no `postinstall`, em `src/generated/prisma`, e fica fora do Git.
 - Seed com dados fictícios em `prisma/seed.ts`.

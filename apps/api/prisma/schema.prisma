@@ -45,6 +45,7 @@ model Usuario {
   convencoes             Convencao[]
   noticias               Noticia[]
   cancelamentosDecididos SolicitacaoCancelamento[]
+  solicitacoesSuporte    SolicitacaoSuporte[]
 }
 
 enum TipoToken {
@@ -107,11 +108,13 @@ model Associado {
   criadoEm          DateTime          @default(now())
   atualizadoEm      DateTime          @updatedAt
 
-  usuario       Usuario?
-  boletos       Boleto[]
-  transacoes    Transacao[]
-  logs          LogAuditoria[]
-  cancelamentos SolicitacaoCancelamento[]
+  usuario              Usuario?
+  boletos              Boleto[]
+  transacoes           Transacao[]
+  logs                 LogAuditoria[]
+  cancelamentos        SolicitacaoCancelamento[]
+  inscricoesConvencoes InscricaoConvencao[]
+  solicitacoesSuporte  SolicitacaoSuporte[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -298,13 +301,13 @@ model LogAuditoria {
 // Conteúdo
 // ---------------------------------------------------------------------------
 
-/// Convenção coletiva (RF21, RF22). Inscrição em convenção fica fora até P05.
+/// Convenção coletiva (RF21, RF22). Inscrição para afiliados em dia (RF23).
 model Convencao {
   id             String    @id @default(uuid(7)) @db.Uuid
   titulo         String
   ano            Int
   resumo         String    @db.Text
-  /// Tabela de reajuste salarial. Formato livre até a primeira convenção real.
+  /// Coluna legada; não é lida nem escrita. Mantida sem migration destrutiva.
   tabelaReajuste Json?
   /// Nulo = rascunho, não aparece para os associados.
   publicadaEm    DateTime?
@@ -312,8 +315,9 @@ model Convencao {
   criadoEm       DateTime  @default(now())
   atualizadoEm   DateTime  @updatedAt
 
-  autor  Usuario          @relation(fields: [autorId], references: [id], onDelete: Restrict)
-  anexos ConvencaoAnexo[]
+  autor      Usuario              @relation(fields: [autorId], references: [id], onDelete: Restrict)
+  anexos     ConvencaoAnexo[]
+  inscricoes InscricaoConvencao[]
 
   @@index([ano])
 }
@@ -331,6 +335,43 @@ model ConvencaoAnexo {
   convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Cascade)
 
   @@index([convencaoId])
+}
+
+/// Inscrição de afiliado adimplente em convenção (RF23).
+model InscricaoConvencao {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  associadoId String   @db.Uuid
+  convencaoId String   @db.Uuid
+  inscritaEm  DateTime @default(now())
+
+  associado Associado @relation(fields: [associadoId], references: [id], onDelete: Cascade)
+  convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Cascade)
+
+  @@unique([associadoId, convencaoId])
+  @@index([convencaoId, inscritaEm])
+}
+
+enum StatusSolicitacaoSuporte {
+  RECEBIDA
+  EM_ANALISE
+  CONCLUIDA
+}
+
+/// Pedido de suporte jurídico feito por afiliado adimplente.
+model SolicitacaoSuporte {
+  id           String                   @id @default(uuid(7)) @db.Uuid
+  associadoId  String                   @db.Uuid
+  usuarioId    String                   @db.Uuid
+  mensagem     String                   @db.Text
+  status       StatusSolicitacaoSuporte @default(RECEBIDA)
+  criadaEm     DateTime                 @default(now())
+  atualizadaEm DateTime                 @updatedAt
+
+  associado Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([status, criadaEm])
+  @@index([associadoId, criadaEm])
 }
 
 /// Feed de notícias, visível a qualquer associado logado (RN28, RF35, RF41).

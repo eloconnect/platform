@@ -2,8 +2,17 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import type {
+  AtualizarBeneficioDto,
+  AtualizarConvencaoDto,
+  NovaConvencaoDto,
+  NovoBeneficioDto,
+} from './admin.dto';
+import { StatusSolicitacaoSuporte } from '../generated/prisma/enums';
+import { removerPdf, salvarPdf } from './convencao-arquivos';
 
 export type SituacaoSindical = 'EM_DIA' | 'PENDENTE' | 'INADIMPLENTE';
 
@@ -239,9 +248,133 @@ export class AdminService {
     return this.ficha(id);
   }
 
+  async beneficios() {
+    return this.prisma.beneficio.findMany({
+      orderBy: [{ ordem: 'asc' }, { criadoEm: 'asc' }],
+    });
+  }
+
+  async criarBeneficio(adminId: string, dados: NovoBeneficioDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const criado = await tx.beneficio.create({
+        data: {
+          titulo: dados.titulo.trim(),
+          descricao: dados.descricao.trim(),
+          ordem: dados.ordem,
+        },
+      });
+      await tx.logAuditoria.create({
+        data: {
+          usuarioId: adminId,
+          acao: 'BENEFICIO_CRIADO',
+          entidade: 'Beneficio',
+          entidadeId: criado.id,
+          valorNovo: {
+            titulo: criado.titulo,
+            descricao: criado.descricao,
+            ordem: criado.ordem,
+            ativo: criado.ativo,
+          },
+        },
+      });
+      return criado;
+    });
+  }
+
+  async atualizarBeneficio(
+    adminId: string,
+    id: string,
+    dados: AtualizarBeneficioDto,
+  ) {
+    const anterior = await this.prisma.beneficio.findUnique({ where: { id } });
+    if (!anterior) throw new NotFoundException('Benefício não encontrado.');
+    return this.prisma.$transaction(async (tx) => {
+      const atualizado = await tx.beneficio.update({
+        where: { id },
+        data: {
+          ...(dados.titulo === undefined
+            ? {}
+            : { titulo: dados.titulo.trim() }),
+          ...(dados.descricao === undefined
+            ? {}
+            : { descricao: dados.descricao.trim() }),
+          ...(dados.ativo === undefined ? {} : { ativo: dados.ativo }),
+          ...(dados.ordem === undefined ? {} : { ordem: dados.ordem }),
+        },
+      });
+      await tx.logAuditoria.create({
+        data: {
+          usuarioId: adminId,
+          acao: 'BENEFICIO_EDITADO',
+          entidade: 'Beneficio',
+          entidadeId: id,
+          valorAnterior: {
+            titulo: anterior.titulo,
+            descricao: anterior.descricao,
+            ordem: anterior.ordem,
+            ativo: anterior.ativo,
+          },
+          valorNovo: {
+            titulo: atualizado.titulo,
+            descricao: atualizado.descricao,
+            ordem: atualizado.ordem,
+            ativo: atualizado.ativo,
+          },
+        },
+      });
+      return atualizado;
+    });
+  }
+
+  async solicitacoesSuporte() {
+    const lista = await this.prisma.solicitacaoSuporte.findMany({
+      orderBy: [{ status: 'asc' }, { criadaEm: 'desc' }],
+      include: {
+        associado: { select: { razaoSocial: true, cnpj: true } },
+      },
+    });
+    return lista.map((solicitacao) => ({
+      id: solicitacao.id,
+      associado: solicitacao.associado.razaoSocial,
+      cnpj: solicitacao.associado.cnpj,
+      mensagem: solicitacao.mensagem,
+      status: solicitacao.status,
+      criadaEm: solicitacao.criadaEm,
+      atualizadaEm: solicitacao.atualizadaEm,
+    }));
+  }
+
+  async atualizarStatusSuporte(
+    adminId: string,
+    id: string,
+    status: StatusSolicitacaoSuporte,
+  ) {
+    const anterior = await this.prisma.solicitacaoSuporte.findUnique({
+      where: { id },
+      select: { id: true, status: true, associadoId: true },
+    });
+    if (!anterior) {
+      throw new NotFoundException('Solicitação de suporte não encontrada.');
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.solicitacaoSuporte.update({ where: { id }, data: { status } });
+      await tx.logAuditoria.create({
+        data: {
+          usuarioId: adminId,
+          acao: 'SUPORTE_STATUS_ATUALIZADO',
+          entidade: 'SolicitacaoSuporte',
+          entidadeId: id,
+          associadoId: anterior.associadoId,
+          valorAnterior: { status: anterior.status },
+          valorNovo: { status },
+        },
+      });
+    });
+    return { id, status };
+  }
+
   async convencoes() {
     const lista = await this.prisma.convencao.findMany({
-      where: { publicadaEm: { not: null } },
       orderBy: [{ ano: 'desc' }, { criadoEm: 'desc' }],
       include: { anexos: true },
     });
@@ -252,6 +385,164 @@ export class AdminService {
       resumo: c.resumo,
       publicadaEm: c.publicadaEm,
       anexos: c.anexos.length,
+      arquivos: c.anexos.map((anexo) => ({
+        id: anexo.id,
+        nomeArquivo: anexo.nomeArquivo,
+        tamanhoBytes: anexo.tamanhoBytes,
+      })),
     }));
+  }
+
+  async criarConvencao(adminId: string, dados: NovaConvencaoDto) {
+    const publicadaEm = dados.publicar ? new Date() : null;
+    const convencao = await this.prisma.$transaction(async (tx) => {
+      const criada = await tx.convencao.create({
+        data: {
+          titulo: dados.titulo.trim(),
+          ano: dados.ano,
+          resumo: dados.resumo.trim(),
+          publicadaEm,
+          autorId: adminId,
+        },
+      });
+      await tx.logAuditoria.create({
+        data: {
+          usuarioId: adminId,
+          acao: publicadaEm ? 'CONVENCAO_PUBLICADA' : 'CONVENCAO_CRIADA',
+          entidade: 'Convencao',
+          entidadeId: criada.id,
+          valorNovo: {
+            titulo: criada.titulo,
+            ano: criada.ano,
+            resumo: criada.resumo,
+            publicadaEm: publicadaEm?.toISOString() ?? null,
+          },
+        },
+      });
+      return criada;
+    });
+    return {
+      id: convencao.id,
+      titulo: convencao.titulo,
+      ano: convencao.ano,
+      resumo: convencao.resumo,
+      publicadaEm: convencao.publicadaEm,
+    };
+  }
+
+  async atualizarConvencao(
+    adminId: string,
+    id: string,
+    dados: AtualizarConvencaoDto,
+  ) {
+    const anterior = await this.prisma.convencao.findUnique({
+      where: { id },
+    });
+    if (!anterior) throw new NotFoundException('Convenção não encontrada.');
+
+    const publicadaEm =
+      dados.publicar === undefined
+        ? anterior.publicadaEm
+        : dados.publicar
+          ? (anterior.publicadaEm ?? new Date())
+          : null;
+    const atualizada = await this.prisma.$transaction(async (tx) => {
+      const salva = await tx.convencao.update({
+        where: { id },
+        data: {
+          ...(dados.titulo === undefined
+            ? {}
+            : { titulo: dados.titulo.trim() }),
+          ...(dados.ano === undefined ? {} : { ano: dados.ano }),
+          ...(dados.resumo === undefined
+            ? {}
+            : { resumo: dados.resumo.trim() }),
+          ...(dados.publicar === undefined ? {} : { publicadaEm }),
+        },
+      });
+      await tx.logAuditoria.create({
+        data: {
+          usuarioId: adminId,
+          acao:
+            !anterior.publicadaEm && publicadaEm
+              ? 'CONVENCAO_PUBLICADA'
+              : 'CONVENCAO_EDITADA',
+          entidade: 'Convencao',
+          entidadeId: id,
+          valorAnterior: {
+            titulo: anterior.titulo,
+            ano: anterior.ano,
+            resumo: anterior.resumo,
+            publicadaEm: anterior.publicadaEm?.toISOString() ?? null,
+          },
+          valorNovo: {
+            titulo: salva.titulo,
+            ano: salva.ano,
+            resumo: salva.resumo,
+            publicadaEm: salva.publicadaEm?.toISOString() ?? null,
+          },
+        },
+      });
+      return salva;
+    });
+    return {
+      id: atualizada.id,
+      titulo: atualizada.titulo,
+      ano: atualizada.ano,
+      resumo: atualizada.resumo,
+      publicadaEm: atualizada.publicadaEm,
+    };
+  }
+
+  async anexarPdf(
+    adminId: string,
+    id: string,
+    arquivo: { buffer: Buffer; originalname: string; size: number },
+  ) {
+    if (!arquivo.originalname.toLowerCase().endsWith('.pdf')) {
+      throw new UnsupportedMediaTypeException(
+        'O arquivo enviado deve ter extensão PDF.',
+      );
+    }
+    const convencao = await this.prisma.convencao.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+    if (!convencao) throw new NotFoundException('Convenção não encontrada.');
+
+    const arquivoUrl = await salvarPdf(arquivo.buffer);
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const anexo = await tx.convencaoAnexo.create({
+          data: {
+            convencaoId: id,
+            nomeArquivo: arquivo.originalname.slice(0, 255),
+            arquivoUrl,
+            tamanhoBytes: arquivo.size,
+          },
+        });
+        await tx.logAuditoria.create({
+          data: {
+            usuarioId: adminId,
+            acao: 'CONVENCAO_ANEXO_ADICIONADO',
+            entidade: 'ConvencaoAnexo',
+            entidadeId: anexo.id,
+            valorNovo: {
+              convencaoId: id,
+              nomeArquivo: anexo.nomeArquivo,
+              tamanhoBytes: anexo.tamanhoBytes,
+            },
+          },
+        });
+        return {
+          id: anexo.id,
+          nomeArquivo: anexo.nomeArquivo,
+          tamanhoBytes: anexo.tamanhoBytes,
+        };
+      });
+    } catch (erro) {
+      await removerPdf(arquivoUrl);
+      throw erro;
+    }
   }
 }

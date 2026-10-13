@@ -1,38 +1,29 @@
 ﻿import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { ContaAssociado } from './portal.guard';
-
-export interface Piso {
-  funcao: string;
-  pisoAnterior?: number;
-  pisoNovo: number;
-}
-
-function pisos(json: unknown): Piso[] {
-  if (!Array.isArray(json)) return [];
-  const lista: Piso[] = [];
-  for (const item of json as unknown[]) {
-    if (typeof item !== 'object' || item === null) continue;
-    const { funcao, pisoAnterior, pisoNovo } = item as Record<string, unknown>;
-    if (typeof funcao === 'string' && typeof pisoNovo === 'number') {
-      lista.push({
-        funcao,
-        pisoAnterior:
-          typeof pisoAnterior === 'number' ? pisoAnterior : undefined,
-        pisoNovo,
-      });
-    }
-  }
-  return lista;
-}
+import { lerPdf } from '../admin/convencao-arquivos';
+import { StatusSolicitacaoSuporte } from '../generated/prisma/enums';
 
 @Injectable()
 export class PortalService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private podeAcessarBeneficios(associado: {
+    situacao: string;
+    acessoManual: string | null;
+  }) {
+    return (
+      associado.acessoManual === 'LIBERADO' ||
+      (associado.acessoManual !== 'BLOQUEADO' &&
+        associado.situacao === 'ADIMPLENTE')
+    );
+  }
 
   private async farmacia(associadoId: string) {
     const associado = await this.prisma.associado.findUnique({
@@ -65,9 +56,10 @@ export class PortalService {
         cnpj: associado.cnpj,
         situacao:
           associado.acessoManual === 'BLOQUEADO' ||
-          associado.situacao === 'INADIMPLENTE'
-            ? ('INADIMPLENTE' as const)
-            : ('EM_DIA' as const),
+          (associado.acessoManual !== 'LIBERADO' &&
+            associado.situacao === 'INADIMPLENTE')
+            ? 'INADIMPLENTE'
+            : 'EM_DIA',
       },
       valorMensal: Number(valor?.valorMensal ?? 0),
       valorAnual: Number(valor?.valorAnual ?? 0),
@@ -116,11 +108,18 @@ export class PortalService {
     };
   }
 
-  async convencoes() {
+  async convencoes({ associadoId }: ContaAssociado) {
+    const associado = await this.farmacia(associadoId);
     const lista = await this.prisma.convencao.findMany({
       where: { publicadaEm: { not: null } },
       orderBy: { publicadaEm: 'desc' },
-      include: { anexos: true },
+      include: {
+        anexos: true,
+        inscricoes: {
+          where: { associadoId },
+          select: { id: true },
+        },
+      },
     });
     return lista.map((c) => ({
       id: c.id,
@@ -128,9 +127,56 @@ export class PortalService {
       ano: c.ano,
       resumo: c.resumo,
       publicadaEm: c.publicadaEm,
-      pisos: pisos(c.tabelaReajuste),
+      inscrito: c.inscricoes.length > 0,
+      podeInscrever: this.podeAcessarBeneficios(associado),
       anexos: c.anexos.length,
+      arquivos: c.anexos.map((anexo) => ({
+        id: anexo.id,
+        nomeArquivo: anexo.nomeArquivo,
+        tamanhoBytes: anexo.tamanhoBytes,
+      })),
     }));
+  }
+
+  async inscreverConvencao(conta: ContaAssociado, convencaoId: string) {
+    const associado = await this.farmacia(conta.associadoId);
+    if (!this.podeAcessarBeneficios(associado)) {
+      throw new ForbiddenException(
+        'A inscrição em convenção é exclusiva para associados adimplentes.',
+      );
+    }
+    const convencao = await this.prisma.convencao.findFirst({
+      where: { id: convencaoId, publicadaEm: { not: null } },
+      select: { id: true },
+    });
+    if (!convencao) throw new NotFoundException('Convenção não encontrada.');
+
+    const inscricao = await this.prisma.inscricaoConvencao.upsert({
+      where: {
+        associadoId_convencaoId: {
+          associadoId: conta.associadoId,
+          convencaoId,
+        },
+      },
+      update: {},
+      create: { associadoId: conta.associadoId, convencaoId },
+      select: { inscritaEm: true },
+    });
+    return inscricao;
+  }
+
+  async anexoConvencao(convencaoId: string, anexoId: string) {
+    const anexo = await this.prisma.convencaoAnexo.findFirst({
+      where: { id: anexoId, convencaoId },
+      include: { convencao: { select: { publicadaEm: true } } },
+    });
+    if (!anexo || !anexo.convencao.publicadaEm) {
+      throw new NotFoundException('Anexo não encontrado.');
+    }
+    return {
+      nomeArquivo: anexo.nomeArquivo,
+      conteudo: await lerPdf(anexo.arquivoUrl),
+    };
   }
 
   async noticias() {
@@ -146,7 +192,21 @@ export class PortalService {
     }));
   }
 
-  async beneficios() {
+  async beneficios({ associadoId }: ContaAssociado) {
+    const associado = await this.farmacia(associadoId);
+    if (!this.podeAcessarBeneficios(associado)) {
+      throw new ForbiddenException(
+        'Benefícios e suporte são exclusivos para associados adimplentes.',
+      );
+    }
+    return this.listaBeneficios();
+  }
+
+  async beneficiosPublicos() {
+    return this.listaBeneficios();
+  }
+
+  private async listaBeneficios() {
     const lista = await this.prisma.beneficio.findMany({
       where: { ativo: true },
       orderBy: { ordem: 'asc' },
@@ -156,6 +216,27 @@ export class PortalService {
       titulo: b.titulo,
       descricao: b.descricao,
     }));
+  }
+
+  async solicitarSuporte(conta: ContaAssociado, mensagem: string) {
+    const associado = await this.farmacia(conta.associadoId);
+    if (!this.podeAcessarBeneficios(associado)) {
+      throw new ForbiddenException(
+        'O suporte jurídico é exclusivo para associados adimplentes.',
+      );
+    }
+    const texto = mensagem.trim();
+    if (!texto) throw new BadRequestException('Descreva sua solicitação.');
+    const solicitacao = await this.prisma.solicitacaoSuporte.create({
+      data: {
+        associadoId: conta.associadoId,
+        usuarioId: conta.usuarioId,
+        mensagem: texto,
+        status: StatusSolicitacaoSuporte.RECEBIDA,
+      },
+      select: { id: true, status: true, criadaEm: true },
+    });
+    return solicitacao;
   }
 
   async definirRecorrencia(conta: ContaAssociado, ativo: boolean) {

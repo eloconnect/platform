@@ -302,64 +302,6 @@ async function main() {
       },
     });
 
-    // Conteúdo
-    await prisma.convencao.create({
-      data: {
-        titulo: 'Convenção Coletiva de Exemplo',
-        ano: hoje.getUTCFullYear(),
-        resumo:
-          'Resumo fictício da convenção coletiva, só para desenvolvimento. ' +
-          'O conteúdo real é publicado pela sede.',
-        tabelaReajuste: [
-          { funcao: 'Função de exemplo A', pisoAnterior: 1000, pisoNovo: 1050 },
-          { funcao: 'Função de exemplo B', pisoAnterior: 1500, pisoNovo: 1575 },
-        ],
-        publicadaEm: new Date(),
-        autorId: admin.id,
-      },
-    });
-    await prisma.noticia.createMany({
-      data: [
-        {
-          titulo: 'Notícia de exemplo publicada',
-          conteudo: 'Texto fictício de uma notícia publicada pela sede.',
-          publicadaEm: new Date(),
-          autorId: admin.id,
-        },
-        {
-          titulo: 'Outra notícia de exemplo',
-          conteudo: 'Mais um texto fictício para testar o feed.',
-          publicadaEm: new Date(Date.now() - 3 * 86_400_000),
-          autorId: admin.id,
-        },
-        {
-          titulo: 'Rascunho de notícia',
-          conteudo: 'Não deve aparecer no feed dos associados.',
-          autorId: admin.id,
-        },
-      ],
-    });
-    // TODO(P06): lista real de benefícios depende do cliente.
-    await prisma.beneficio.createMany({
-      data: [
-        {
-          titulo: 'Benefício de exemplo 1',
-          descricao: 'Descrição fictícia.',
-          ordem: 1,
-        },
-        {
-          titulo: 'Benefício de exemplo 2',
-          descricao: 'Descrição fictícia.',
-          ordem: 2,
-        },
-        {
-          titulo: 'Benefício de exemplo 3',
-          descricao: 'Descrição fictícia.',
-          ordem: 3,
-        },
-      ],
-    });
-
     await semearAssociadosExtras(prisma);
 
     console.log(`Seed concluído. Senha de todos os usuários: ${SENHA_DEV}`);

@@ -11,3 +11,9 @@ export class CancelamentoDto {
   @MaxLength(500)
   motivo?: string;
 }
+
+export class SolicitarSuporteDto {
+  @IsString()
+  @MaxLength(5000)
+  mensagem!: string;
+}
