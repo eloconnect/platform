@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 11/10/2026.
+Última atualização: 12/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -122,6 +122,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 - Hash de senha: **argon2id**, com o pacote `@node-rs/argon2` (binários prontos, sem compilação na instalação), conforme o RNF04. O seed já usa esse pacote, e o login (US03) deve usar o mesmo.
 
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
+
+- CI: **GitHub Actions** (`.github/workflows/ci.yml`), em todo PR para o `main` e em todo push no `main`. Instala com o lockfile travado e roda lint, formatação, build, testes e os testes e2e da API num Postgres 17 descartável. O check é obrigatório no ruleset do `main`. Não há filtro para PRs só de documentação, porque um check obrigatório que não roda deixa o PR travado.
 
 - Lint e formatação: **oxlint** (com regras de React e jsx-a11y) e **Prettier** no monorepo inteiro, com hooks de commit (husky, lint-staged e commitlint). Arquivos Markdown ficam fora do Prettier. Detalhes no CONTRIBUTING.
 
