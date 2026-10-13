@@ -174,7 +174,7 @@ describe('AuthService', () => {
       await expect(
         service.solicitarRecuperacaoSenha({ email: usuario.email }),
       ).resolves.toHaveProperty('mensagem');
-      await new Promise(process.nextTick);
+      await new Promise((resolve) => setImmediate(resolve));
       expect(erro).toHaveBeenCalled();
       erro.mockRestore();
     });
