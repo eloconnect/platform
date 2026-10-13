@@ -25,8 +25,12 @@ export function PaginaStatus() {
   }, []);
 
   return (
-    <>
+    <section className="cartao-pagina">
+      <span className="pagina-selo">Elo Connect · Diagnóstico</span>
       <h1>Status do sistema</h1>
+      <p className="pagina-descricao">
+        Confira a conexão com a API e o banco de dados.
+      </p>
       {estado.tipo === 'carregando' && (
         <p role="status">Verificando a API...</p>
       )}
@@ -47,6 +51,6 @@ export function PaginaStatus() {
           está ligado (<code>docker compose up -d</code>).
         </MensagemErro>
       )}
-    </>
+    </section>
   );
 }

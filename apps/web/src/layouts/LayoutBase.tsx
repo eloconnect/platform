@@ -7,6 +7,7 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router';
 export interface ItemMenu {
   para: string;
   texto: string;
+  ancora?: boolean;
 }
 
 /**
@@ -16,10 +17,14 @@ export interface ItemMenu {
 export function LayoutBase({
   inicio,
   itensMenu,
+  acaoPrimaria,
+  expand = 'md',
 }: {
   /** Para onde o nome "Elo Connect" no cabeçalho leva. */
   inicio: string;
   itensMenu: ItemMenu[];
+  acaoPrimaria?: ItemMenu;
+  expand?: 'md' | 'lg' | 'xl';
 }) {
   const { pathname } = useLocation();
   const principal = useRef<HTMLElement>(null);
@@ -35,45 +40,82 @@ export function LayoutBase({
   }, [pathname]);
 
   return (
-    <>
+    <div className="aplicativo">
       <a href="#conteudo" className="visually-hidden-focusable link-pular">
         Pular para o conteúdo
       </a>
-      <header>
-        <Navbar expand="md" bg="white" className="border-bottom">
+      <header className="site-header">
+        <div className="site-utility">
+          <Container className="site-utility-content">
+            <span>Elo Connect · Acesso Institucional</span>
+            <a href="tel:08007244500">
+              <span aria-hidden="true">☎</span> Central telefônica:{' '}
+              <strong>0800 724 4500</strong>
+            </a>
+          </Container>
+        </div>
+        <Navbar expand={expand} bg="white" className="primary-nav">
           <Container>
-            <Navbar.Brand
-              as={Link}
-              to={inicio}
-              className="fw-bold text-primary"
-            >
+            <Navbar.Brand as={Link} to={inicio} className="marca-elo">
+              <span className="marca-site-icone" aria-hidden="true">
+                E
+              </span>
               Elo Connect
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="menu-principal">Menu</Navbar.Toggle>
             <Navbar.Collapse id="menu-principal">
-              <Nav as="nav" aria-label="Menu principal" className="ms-auto">
-                {itensMenu.map((item) => (
-                  <Nav.Link key={item.para} as={NavLink} to={item.para} end>
-                    {item.texto}
-                  </Nav.Link>
-                ))}
+              <Nav
+                as="nav"
+                aria-label="Menu principal"
+                className="menu-principal ms-auto"
+              >
+                {itensMenu.map((item) =>
+                  item.ancora ? (
+                    <Nav.Link key={item.texto} href={`${inicio}${item.para}`}>
+                      {item.texto}
+                    </Nav.Link>
+                  ) : (
+                    <Nav.Link key={item.texto} as={NavLink} to={item.para} end>
+                      {item.texto}
+                    </Nav.Link>
+                  ),
+                )}
               </Nav>
+              {acaoPrimaria && (
+                <Link
+                  className="btn btn-primary btn-lg acao-cabecalho"
+                  to={acaoPrimaria.para}
+                >
+                  {acaoPrimaria.texto}
+                </Link>
+              )}
             </Navbar.Collapse>
           </Container>
         </Navbar>
       </header>
-      <main id="conteudo" ref={principal} tabIndex={-1} className="py-4">
-        <Container>
+      <main
+        id="conteudo"
+        ref={principal}
+        tabIndex={-1}
+        className={`pagina-principal py-4 py-lg-5 ${
+          pathname === '/' ? 'pagina-principal-vitrine' : ''
+        }`}
+      >
+        <Container
+          className={pathname === '/' ? 'container-vitrine' : undefined}
+        >
           <Outlet />
         </Container>
       </main>
-      <footer className="border-top py-3 bg-body-tertiary">
-        <Container>
-          <small>
-            Elo Connect · Sindicato das farmácias e drogarias de Mato Grosso
-          </small>
-        </Container>
-      </footer>
-    </>
+      {pathname !== '/' && (
+        <footer className="site-footer py-3">
+          <Container>
+            <small>
+              Elo Connect · Sindicato das farmácias e drogarias de Mato Grosso
+            </small>
+          </Container>
+        </footer>
+      )}
+    </div>
   );
 }
