@@ -1,0 +1,70 @@
+# Lint, formatação, build e testes em todo PR para o main e em todo push no main.
+# Os testes e2e da API rodam num Postgres 17 descartável, criado só para o job.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Um push novo no mesmo PR cancela a execução anterior. No main, todas rodam até o fim.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      db:
+        image: postgres:17
+        env:
+          POSTGRES_USER: eloconnect
+          POSTGRES_PASSWORD: eloconnect
+          POSTGRES_DB: eloconnect
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eloconnect"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://eloconnect:eloconnect@localhost:5432/eloconnect?schema=public
+    steps:
+      - uses: actions/checkout@v7
+
+      # Versão do pnpm lida do campo packageManager do package.json.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Formatação
+        run: pnpm format:check
+
+      - name: Build
+        run: pnpm build
+
+      - name: Testes
+        run: pnpm test
+
+      - name: Migrations no banco de teste
+        run: pnpm --filter api db:deploy
+
+      - name: Testes e2e da API
+        run: pnpm --filter api test:e2e
