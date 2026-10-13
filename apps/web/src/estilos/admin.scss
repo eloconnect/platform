@@ -88,7 +88,7 @@ $suave: #4f5b68;
 
   small {
     color: $suave;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -109,14 +109,14 @@ $suave: #4f5b68;
   border: 1px solid $borda;
   border-radius: 0.9rem;
   background: $fundo;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 
   small {
     display: block;
     color: $azul;
     font-weight: 700;
     letter-spacing: 0.06em;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
   }
 
   strong,
@@ -126,7 +126,7 @@ $suave: #4f5b68;
 
   span {
     color: $suave;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -173,7 +173,7 @@ $suave: #4f5b68;
   border: 1px solid $borda;
   border-radius: 999px;
   background: #fff;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: $suave;
 
@@ -200,7 +200,7 @@ $suave: #4f5b68;
   border-radius: 999px;
   background: #fdecee;
   color: #b02a37;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -219,7 +219,7 @@ $suave: #4f5b68;
 
   span {
     color: $suave;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -243,7 +243,7 @@ $suave: #4f5b68;
   align-items: center;
   gap: 0.6rem;
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
 
   span {
     padding: 0.15rem 0.65rem;
@@ -257,7 +257,7 @@ $suave: #4f5b68;
   small {
     color: $suave;
     font-weight: 600;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -303,7 +303,7 @@ $suave: #4f5b68;
 
   h2 {
     margin: 0;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -341,7 +341,7 @@ $suave: #4f5b68;
 
   small {
     margin-left: 0.5rem;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: $suave;
   }
@@ -353,7 +353,7 @@ $suave: #4f5b68;
 
 .adm-indicador-nota {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $suave;
 }
 
@@ -396,7 +396,7 @@ $suave: #4f5b68;
   gap: 0.4rem;
   padding: 0.25rem 0.8rem;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -450,13 +450,13 @@ $suave: #4f5b68;
 .adm-tabela {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 
   th {
     padding: 0.8rem 1.4rem;
     background: #f6f8fb;
     color: $suave;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -486,7 +486,7 @@ $suave: #4f5b68;
 
   small {
     color: $suave;
-    font-size: 0.78rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -513,7 +513,7 @@ $suave: #4f5b68;
   gap: 0.45rem;
   padding: 0.25rem 0.8rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -543,7 +543,7 @@ $suave: #4f5b68;
   background: transparent;
   color: $azul;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 
   &:hover {
     background: #e3edf8;
@@ -567,7 +567,7 @@ $suave: #4f5b68;
   gap: 0.75rem;
   padding: 0.9rem 1.4rem;
   border-top: 1px solid $borda;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $suave;
 
   p {
@@ -636,7 +636,7 @@ $suave: #4f5b68;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: $suave;
   margin-bottom: -0.75rem;
 
@@ -686,7 +686,7 @@ $suave: #4f5b68;
 
   p {
     margin: 0.5rem 0 0;
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     color: $suave;
   }
 }
@@ -733,7 +733,7 @@ $suave: #4f5b68;
 
 .adm-bloco-sub {
   margin: 0.2rem 0 1rem;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   color: $suave;
 }
 
@@ -752,7 +752,7 @@ $suave: #4f5b68;
   small {
     display: block;
     color: $suave;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.06em;
   }
@@ -763,7 +763,7 @@ $suave: #4f5b68;
   }
 
   span {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: $suave;
   }
 }
@@ -793,7 +793,7 @@ $suave: #4f5b68;
   align-items: center;
   gap: 0.6rem;
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   color: $suave;
@@ -827,7 +827,7 @@ $suave: #4f5b68;
 
   small,
   span {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     color: $suave;
   }
 
@@ -856,14 +856,14 @@ $suave: #4f5b68;
   label > span {
     display: block;
     margin-bottom: 0.3rem;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
   }
 
   label > small {
     display: block;
     margin-top: 0.3rem;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     color: $suave;
   }
 
@@ -900,7 +900,7 @@ $suave: #4f5b68;
 .adm-botao-pequeno {
   min-height: 2.4rem;
   padding: 0.3rem 1rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   border-radius: 0.6rem;
   box-shadow: none;
 }
@@ -916,7 +916,7 @@ $suave: #4f5b68;
   border-radius: 1rem;
   background: #f3f6fb;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: $suave;
 
   svg {
@@ -961,7 +961,7 @@ $suave: #4f5b68;
   }
 
   small {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
     color: $suave;
   }
 }
