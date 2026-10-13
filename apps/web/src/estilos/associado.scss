@@ -47,7 +47,7 @@ $alerta: #b02a37;
   }
 
   small {
-    font-size: 0.65rem;
+    font-size: 0.9rem;
     letter-spacing: 0.03em;
     color: $suave;
   }
@@ -68,7 +68,7 @@ $alerta: #b02a37;
   display: flex;
   align-items: center;
   gap: 1rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-align: right;
 
   strong,
@@ -101,7 +101,7 @@ $alerta: #b02a37;
     border-radius: 0.5rem;
     background: $lilas;
     color: $azul;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 700;
     text-decoration: none;
 
@@ -144,7 +144,7 @@ $alerta: #b02a37;
 .as-selo {
   margin: 0 0 0.35rem;
   color: $azul;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -152,7 +152,7 @@ $alerta: #b02a37;
 .as-descricao {
   margin: 0.35rem 0 0;
   color: $suave;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .as-cadastro {
@@ -161,12 +161,12 @@ $alerta: #b02a37;
   border-radius: 0.7rem;
   background: #fff;
   box-shadow: 0 1px 6px rgb(11 79 140 / 10%);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 
   small {
     display: block;
     color: $suave;
-    font-size: 0.65rem;
+    font-size: 0.9rem;
     letter-spacing: 0.04em;
   }
 }
@@ -211,7 +211,7 @@ $alerta: #b02a37;
   border-radius: 2rem;
   background: $lilas;
   color: $azul;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -264,7 +264,7 @@ $alerta: #b02a37;
   border-radius: 0.6rem;
   background: $azul-vivo;
   color: #fff;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-align: center;
   text-decoration: none;
@@ -293,7 +293,7 @@ $alerta: #b02a37;
 
 .as-botao-pequeno {
   min-height: 2.4rem;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
 }
 
 .as-botao-largo {
@@ -317,7 +317,7 @@ $alerta: #b02a37;
     flex: 1;
     margin: 0;
     color: $suave;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -345,7 +345,7 @@ $alerta: #b02a37;
   border-radius: 0.7rem;
   background: #fff;
   border: 1px solid $borda;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .as-migalhas {
@@ -354,7 +354,7 @@ $alerta: #b02a37;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: $suave;
 
   a {
@@ -383,7 +383,7 @@ $alerta: #b02a37;
     background: none;
     padding: 0;
     color: $suave;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
   }
 }
 
@@ -409,7 +409,7 @@ $alerta: #b02a37;
 .as-tabela {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 
   th,
   td {
@@ -421,7 +421,7 @@ $alerta: #b02a37;
   thead th {
     background: $lilas;
     color: $suave;
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     letter-spacing: 0.03em;
   }
 
@@ -444,7 +444,7 @@ $alerta: #b02a37;
   padding: 0.7rem 1rem;
   border-radius: 0.6rem;
   background: $lilas;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 
   strong {
     color: $azul;
@@ -456,7 +456,7 @@ $alerta: #b02a37;
   display: flex;
   flex-direction: column;
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   background: $lilas;
   box-shadow: none;
 }
@@ -502,7 +502,7 @@ $alerta: #b02a37;
     padding: 0.9rem 1.1rem;
     border-radius: 0.7rem;
     background: $lilas;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 
     span {
       color: $suave;
@@ -517,7 +517,7 @@ $alerta: #b02a37;
   align-self: center;
   width: 100%;
   max-width: 34rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 
   p {
     margin: 0;
@@ -562,7 +562,7 @@ $alerta: #b02a37;
   border-top: 1px solid $borda;
   background: #fff;
   color: $suave;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
 
   span {
     flex: 1 1 14rem;
