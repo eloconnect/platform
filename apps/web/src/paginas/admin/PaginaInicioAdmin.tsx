@@ -28,6 +28,21 @@ export function PaginaInicioAdmin() {
   const [baixandoPdf, setBaixandoPdf] = useState(false);
   const [mensagem, setMensagem] = useState<string | null>(null);
   const campoArquivo = useRef<HTMLInputElement>(null);
+  const [periodoRelatorio, setPeriodoRelatorio] = useState<'mes' | 'ano'>(
+    'mes',
+  );
+  const [mesRelatorio, setMesRelatorio] = useState(() => {
+    const hoje = new Date();
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [anoRelatorio, setAnoRelatorio] = useState(() =>
+    String(new Date().getFullYear()),
+  );
+  const [somenteInadimplentes, setSomenteInadimplentes] = useState(false);
+  const [baixandoRelatorio, setBaixandoRelatorio] = useState(false);
+  const [mensagemRelatorio, setMensagemRelatorio] = useState<string | null>(
+    null,
+  );
   const lista = useDadosAdmin(
     (token) => api.admin.associados(token, busca.trim(), pagina),
     [busca, pagina, atualizacao],
@@ -134,6 +149,123 @@ export function PaginaInicioAdmin() {
         </form>
         {mensagem && (
           <output className="adm-importacao-mensagem">{mensagem}</output>
+        )}
+      </section>
+
+      <section
+        className="adm-cartao adm-relatorio"
+        aria-labelledby="t-relatorio-recebimentos"
+      >
+        <div className="adm-relatorio-intro">
+          <h2 id="t-relatorio-recebimentos">
+            Relatório de pagamentos recebidos
+          </h2>
+          <p>
+            Consulte o total recebido e os pagamentos por farmácia, usando a
+            data em que cada pagamento foi registrado.
+          </p>
+        </div>
+        <div className="adm-relatorio-controles">
+          <label>
+            <span>Período</span>
+            <select
+              aria-label="Período do relatório"
+              value={periodoRelatorio}
+              onChange={(event) => {
+                setPeriodoRelatorio(
+                  event.target.value === 'ano' ? 'ano' : 'mes',
+                );
+                setMensagemRelatorio(null);
+              }}
+            >
+              <option value="mes">Mês</option>
+              <option value="ano">Ano</option>
+            </select>
+          </label>
+          {periodoRelatorio === 'mes' ? (
+            <label>
+              <span>Mês de recebimento</span>
+              <input
+                aria-label="Mês de recebimento"
+                type="month"
+                value={mesRelatorio}
+                onChange={(event) => {
+                  setMesRelatorio(event.target.value);
+                  setMensagemRelatorio(null);
+                }}
+              />
+            </label>
+          ) : (
+            <label>
+              <span>Ano de recebimento</span>
+              <input
+                aria-label="Ano de recebimento"
+                type="number"
+                min="2000"
+                max="9999"
+                value={anoRelatorio}
+                onChange={(event) => {
+                  setAnoRelatorio(event.target.value);
+                  setMensagemRelatorio(null);
+                }}
+              />
+            </label>
+          )}
+          <label>
+            <span>Situação das farmácias</span>
+            <select
+              aria-label="Situação das farmácias no relatório"
+              value={somenteInadimplentes ? 'inadimplentes' : 'todas'}
+              onChange={(event) => {
+                setSomenteInadimplentes(event.target.value === 'inadimplentes');
+                setMensagemRelatorio(null);
+              }}
+            >
+              <option value="todas">Todas com pagamento</option>
+              <option value="inadimplentes">Somente inadimplentes</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            className="adm-botao-primario"
+            disabled={
+              baixandoRelatorio ||
+              (periodoRelatorio === 'mes'
+                ? !/^\d{4}-(0[1-9]|1[0-2])$/.test(mesRelatorio)
+                : !/^\d{4}$/.test(anoRelatorio) || Number(anoRelatorio) < 2000)
+            }
+            onClick={async () => {
+              const referencia =
+                periodoRelatorio === 'mes' ? mesRelatorio : anoRelatorio;
+              setBaixandoRelatorio(true);
+              setMensagemRelatorio(null);
+              const resultado = await executarAdmin((token) =>
+                api.admin.exportarRecebimentosPdf(
+                  token,
+                  periodoRelatorio,
+                  referencia,
+                  somenteInadimplentes,
+                ),
+              );
+              setBaixandoRelatorio(false);
+              if (resultado.erro) {
+                setMensagemRelatorio(resultado.erro);
+              } else if (resultado.dados) {
+                salvarArquivo(
+                  resultado.dados,
+                  `recebimentos-${referencia}${somenteInadimplentes ? '-inadimplentes' : ''}.pdf`,
+                );
+                setMensagemRelatorio('Relatório baixado em PDF.');
+              }
+            }}
+          >
+            {baixandoRelatorio ? 'Gerando PDF…' : 'Baixar relatório em PDF'}
+          </button>
+        </div>
+        {mensagemRelatorio && (
+          <output className="adm-relatorio-mensagem">
+            {mensagemRelatorio}
+          </output>
         )}
       </section>
 

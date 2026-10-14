@@ -27,6 +27,29 @@ interface AssociadoLista {
   situacao: string;
 }
 
+interface BoletoRecebidoRelatorio {
+  competencia: Date;
+  pagoEm: Date | null;
+  valor: { toString(): string } | number;
+}
+
+interface AssociadoRecebimento {
+  razaoSocial: string;
+  nomeFantasia: string | null;
+  cnpj: string;
+  municipio: string | null;
+  email: string | null;
+  telefone: string | null;
+  situacao: string;
+  boletos: BoletoRecebidoRelatorio[];
+}
+
+interface FiltroRecebimento {
+  periodo: 'MES' | 'ANO';
+  referencia: string;
+  inadimplentes: boolean;
+}
+
 type DocumentoPdf = InstanceType<typeof PDFKit>;
 
 function gerarPdf(montar: (doc: DocumentoPdf) => void): Promise<Buffer> {
@@ -162,6 +185,103 @@ export function pdfListaAssociados(associados: AssociadoLista[]) {
           `Razão social: ${associado.razaoSocial} | CNPJ: ${cnpjFormatado(associado.cnpj)} | Município: ${associado.municipio ?? '—'} / MT | Situação: ${rotuloSituacao(associado.situacao)}`,
         );
       doc.moveDown(0.4);
+    }
+  });
+}
+
+export function pdfRecebimentos(
+  associados: AssociadoRecebimento[],
+  filtro: FiltroRecebimento,
+) {
+  return gerarPdf((doc) => {
+    const tituloPeriodo =
+      filtro.periodo === 'MES'
+        ? new Date(`${filtro.referencia}-01T00:00:00Z`).toLocaleDateString(
+            'pt-BR',
+            { month: 'long', year: 'numeric', timeZone: 'UTC' },
+          )
+        : filtro.referencia;
+    const totalRecebido = associados.reduce(
+      (total, associado) =>
+        total +
+        associado.boletos.reduce(
+          (subtotal, boleto) => subtotal + Number(boleto.valor),
+          0,
+        ),
+      0,
+    );
+    const quantidadePagantes = associados.filter(
+      (associado) => associado.boletos.length > 0,
+    ).length;
+    const descricaoFiltro = filtro.inadimplentes
+      ? 'Farmácias inadimplentes atualmente'
+      : 'Farmácias com pagamento no período';
+    const cabecalho = () => {
+      doc.fontSize(17).font('Helvetica-Bold').text('Elo Connect');
+      doc.fontSize(13).text('Relatório de recebimentos');
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Período: ${tituloPeriodo}`)
+        .text(`Filtro: ${descricaoFiltro}`)
+        .text(`Emitido em: ${dataPtBr(new Date())}`);
+      doc.moveDown(0.5);
+      doc
+        .font('Helvetica-Bold')
+        .text(`Total recebido: ${moedaPtBr(totalRecebido)}`);
+      doc
+        .font('Helvetica')
+        .text(`Farmácias com pagamento: ${quantidadePagantes}`);
+      doc.text(`Farmácias listadas: ${associados.length}`);
+      doc.moveDown(0.6);
+    };
+    cabecalho();
+
+    if (associados.length === 0) {
+      doc.text(
+        'Nenhuma farmácia encontrada para o período e filtro selecionados.',
+      );
+      return;
+    }
+
+    for (const associado of associados) {
+      if (doc.y > doc.page.height - doc.page.margins.bottom - 90) {
+        doc.addPage();
+        doc
+          .fontSize(9)
+          .font('Helvetica-Bold')
+          .text(`Relatório de recebimentos (continuação) — ${tituloPeriodo}`);
+        doc.moveDown(0.5);
+      }
+      const recebido = associado.boletos.reduce(
+        (total, boleto) => total + Number(boleto.valor),
+        0,
+      );
+      doc
+        .fontSize(9)
+        .font('Helvetica-Bold')
+        .text(associado.nomeFantasia ?? associado.razaoSocial);
+      doc
+        .font('Helvetica')
+        .text(
+          `Razão social: ${associado.razaoSocial} | CNPJ: ${cnpjFormatado(associado.cnpj)}`,
+        )
+        .text(
+          `Município: ${associado.municipio ?? '—'} / MT | E-mail: ${associado.email ?? '—'} | Telefone: ${associado.telefone ?? '—'}`,
+        )
+        .text(
+          `Situação atual: ${rotuloSituacao(associado.situacao)} | Total recebido no período: ${moedaPtBr(recebido)}`,
+        );
+      if (associado.boletos.length === 0) {
+        doc.text('Nenhum pagamento no período selecionado.');
+      } else {
+        for (const boleto of associado.boletos) {
+          doc.text(
+            `  Competência ${dataPtBr(boleto.competencia)} | Pago em ${dataPtBr(boleto.pagoEm)} | ${moedaPtBr(boleto.valor)}`,
+          );
+        }
+      }
+      doc.moveDown(0.55);
     }
   });
 }

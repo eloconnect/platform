@@ -366,6 +366,61 @@ $suave: #4f5b68;
   font-weight: 700;
 }
 
+.adm-relatorio {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding: 1.4rem;
+}
+
+.adm-relatorio-intro {
+  h2 {
+    margin: 0 0 0.4rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+    color: $suave;
+  }
+}
+
+.adm-relatorio-controles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  align-items: end;
+  gap: 1rem;
+
+  label > span {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid $borda;
+    border-radius: 0.7rem;
+    background: #f3f6fb;
+    color: $texto;
+  }
+
+  button {
+    justify-content: center;
+    white-space: nowrap;
+  }
+}
+
+.adm-relatorio-mensagem {
+  color: $azul-escuro;
+  font-weight: 700;
+}
+
 .adm-indicadores {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));

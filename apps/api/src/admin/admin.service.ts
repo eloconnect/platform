@@ -14,7 +14,11 @@ import type {
 import { StatusSolicitacaoSuporte } from '../generated/prisma/enums';
 import { removerPdf, salvarPdf } from './convencao-arquivos';
 import type { AssociadoCsv } from './associados-csv';
-import { pdfHistoricoAssociado, pdfListaAssociados } from './relatorios-admin';
+import {
+  pdfHistoricoAssociado,
+  pdfListaAssociados,
+  pdfRecebimentos,
+} from './relatorios-admin';
 
 export type SituacaoSindical = 'EM_DIA' | 'PENDENTE' | 'INADIMPLENTE';
 
@@ -160,6 +164,53 @@ export class AdminService {
         ...associado,
         situacao: situacaoSindical(associado),
       })),
+    );
+  }
+
+  async exportarRecebimentosPdf(
+    periodo: 'MES' | 'ANO',
+    referencia: string,
+    inadimplentes: boolean,
+  ) {
+    const inicio =
+      periodo === 'MES'
+        ? new Date(`${referencia}-01T00:00:00.000Z`)
+        : new Date(`${referencia}-01-01T00:00:00.000Z`);
+    const fim = new Date(inicio);
+    if (periodo === 'MES') fim.setUTCMonth(fim.getUTCMonth() + 1);
+    else fim.setUTCFullYear(fim.getUTCFullYear() + 1);
+
+    const where = inadimplentes
+      ? { situacao: { not: 'ADIMPLENTE' as const }, contribuicaoAtiva: true }
+      : {
+          boletos: {
+            some: {
+              status: 'PAGO' as const,
+              pagoEm: { gte: inicio, lt: fim },
+            },
+          },
+        };
+    const associados = await this.prisma.associado.findMany({
+      where,
+      orderBy: { razaoSocial: 'asc' },
+      include: {
+        boletos: {
+          where: {
+            status: 'PAGO',
+            pagoEm: { gte: inicio, lt: fim },
+          },
+          orderBy: [{ pagoEm: 'asc' }, { competencia: 'asc' }],
+          select: { competencia: true, pagoEm: true, valor: true },
+        },
+      },
+    });
+
+    return pdfRecebimentos(
+      associados.map((associado) => ({
+        ...associado,
+        situacao: situacaoSindical(associado),
+      })),
+      { periodo, referencia, inadimplentes },
     );
   }
 

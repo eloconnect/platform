@@ -105,4 +105,18 @@ describe('createApiClient', () => {
       expect.objectContaining({ method: 'GET' }),
     );
   });
+
+  it('solicita PDF dos recebimentos pelo período e filtro selecionados', async () => {
+    const pdf = new Blob(['%PDF-1.7'], { type: 'application/pdf' });
+    const fetchFalso = vi.fn<Fetch>().mockResolvedValue(new Response(pdf));
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await expect(
+      cliente.admin.exportarRecebimentosPdf('jwt', 'mes', '2026-10', true),
+    ).resolves.toBeInstanceOf(Blob);
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/admin/relatorios/recebimentos.pdf?periodo=mes&referencia=2026-10&inadimplentes=true',
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
 });

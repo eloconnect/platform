@@ -157,7 +157,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | --- | --- | --- | --- |
 | RF30 | Registrar de forma imutável cada transação: data/hora, identificador do boleto, valor, forma de pagamento, status, usuário responsável. | Must | [Validado] |
 | RF31 | Associado consulta seu próprio histórico de boletos e pagamentos. | Must | [Validado] |
-| RF32 | Admin exporta o histórico de um associado (PDF/CSV) para comprovar contribuição ou não contribuição. | Should | [Validado] |
+| RF32 | Admin exporta em PDF o histórico completo de um associado ou um relatório consolidado de recebimentos por mês/ano, com opção de listar somente inadimplentes. | Should | [Validado] |
 | RF39 | Registrar de forma imutável todas as ações dos usuários da sede: usuário, ação, data/hora, associado ou registro afetado, valor anterior e novo. | Must | [Validado] |
 | RF40 | Admin consulta o log de auditoria com filtros por usuário, associado, tipo de ação e período. | Must | [Validado] |
 

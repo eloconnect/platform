@@ -71,6 +71,43 @@ export class AdminController {
     resposta.send(pdf);
   }
 
+  @Get('relatorios/recebimentos.pdf')
+  async exportarRecebimentosPdf(
+    @Query('periodo') periodo: string,
+    @Query('referencia') referencia: string,
+    @Query('inadimplentes') somenteInadimplentes: string,
+    @Res() resposta: Response,
+  ) {
+    if (periodo !== 'mes' && periodo !== 'ano') {
+      throw new BadRequestException('Selecione um período mensal ou anual.');
+    }
+    const referenciaValida =
+      periodo === 'mes'
+        ? /^(\d{4})-(0[1-9]|1[0-2])$/.exec(referencia)
+        : /^(\d{4})$/.exec(referencia);
+    const ano = Number(referenciaValida?.[1]);
+    if (!referenciaValida || ano < 2000 || ano > 9999) {
+      throw new BadRequestException('A referência de mês ou ano é inválida.');
+    }
+    if (somenteInadimplentes !== 'true' && somenteInadimplentes !== 'false') {
+      throw new BadRequestException('O filtro de inadimplência é inválido.');
+    }
+
+    const pdf = await this.admin.exportarRecebimentosPdf(
+      periodo === 'mes' ? 'MES' : 'ANO',
+      referencia,
+      somenteInadimplentes === 'true',
+    );
+    resposta.setHeader('Content-Type', 'application/pdf');
+    resposta.setHeader('X-Content-Type-Options', 'nosniff');
+    resposta.setHeader('Cache-Control', 'no-store');
+    resposta.setHeader(
+      'Content-Disposition',
+      'attachment; filename="relatorio-recebimentos.pdf"',
+    );
+    resposta.send(pdf);
+  }
+
   @Post('associados/importar')
   @UseInterceptors(
     FileInterceptor('arquivo', { limits: { fileSize: TAMANHO_MAXIMO_CSV } }),

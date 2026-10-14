@@ -20,6 +20,8 @@ vi.mock('./api', () => ({
         vi.fn<ApiClient['admin']['importarAssociadosCsv']>(),
       exportarListaAssociadosPdf:
         vi.fn<ApiClient['admin']['exportarListaAssociadosPdf']>(),
+      exportarRecebimentosPdf:
+        vi.fn<ApiClient['admin']['exportarRecebimentosPdf']>(),
       exportarHistoricoPdf: vi.fn<ApiClient['admin']['exportarHistoricoPdf']>(),
       valores: vi.fn<ApiClient['admin']['valores']>(),
       cancelamentos: vi.fn<ApiClient['admin']['cancelamentos']>(),
@@ -428,6 +430,52 @@ describe('Rotas', () => {
     ).toBeInTheDocument();
     expect(api.admin.importarAssociadosCsv).toHaveBeenCalledWith('jwt', csv);
     await waitFor(() => expect(api.admin.associados).toHaveBeenCalledTimes(2));
+  });
+
+  it('/admin gera relatório anual de recebimentos com filtro de inadimplentes', async () => {
+    sessionStorage.setItem(
+      'eloconnect.sessao',
+      JSON.stringify({
+        accessToken: 'jwt',
+        usuario: { id: '1', email: 'a@x.com', nome: 'Admin', perfil: 'ADMIN' },
+      }),
+    );
+    vi.mocked(api.admin.exportarRecebimentosPdf).mockResolvedValue(
+      new Blob(['%PDF-1.7'], { type: 'application/pdf' }),
+    );
+    abrir('/admin');
+
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'Período do relatório' }),
+      {
+        target: { value: 'ano' },
+      },
+    );
+    fireEvent.change(
+      screen.getByRole('combobox', {
+        name: 'Situação das farmácias no relatório',
+      }),
+      { target: { value: 'inadimplentes' } },
+    );
+    const cliqueLink = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Baixar relatório em PDF' }),
+    );
+
+    await waitFor(() =>
+      expect(api.admin.exportarRecebimentosPdf).toHaveBeenCalledWith(
+        'jwt',
+        'ano',
+        String(new Date().getFullYear()),
+        true,
+      ),
+    );
+    expect(
+      await screen.findByText('Relatório baixado em PDF.'),
+    ).toBeInTheDocument();
+    cliqueLink.mockRestore();
   });
   it('/associado mostra a mensalidade em aberto da farmácia', async () => {
     sessionStorage.setItem(

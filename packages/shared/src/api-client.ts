@@ -197,6 +197,16 @@ export function createApiClient(
         ),
       exportarListaAssociadosPdf: (token: string) =>
         baixarPdf('/admin/associados.pdf', token),
+      exportarRecebimentosPdf: (
+        token: string,
+        periodo: 'mes' | 'ano',
+        referencia: string,
+        inadimplentes: boolean,
+      ) =>
+        baixarPdf(
+          `/admin/relatorios/recebimentos.pdf?periodo=${periodo}&referencia=${encodeURIComponent(referencia)}&inadimplentes=${inadimplentes}`,
+          token,
+        ),
       exportarHistoricoPdf: (token: string, id: string) =>
         baixarPdf(
           `/admin/associados/${encodeURIComponent(id)}/historico.pdf`,
