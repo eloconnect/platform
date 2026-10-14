@@ -104,8 +104,8 @@ export function PaginaJucemat() {
           associados, sem boleto.
         </p>
         <p className="adm-bloco-sub">
-          A base deve ser importada de arquivo XML da JUCEMAT, filtrado pelo
-          CNAE. A importação ainda não está disponível nesta tela.
+          A base estadual pode ser importada por arquivo CSV na tela Associados.
+          Novos cadastros são criados e os existentes atualizados pelo CNPJ.
         </p>
         <div className="adm-formulario-acoes">
           <button

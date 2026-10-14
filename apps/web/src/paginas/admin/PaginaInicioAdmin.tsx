@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useTituloPagina } from '../../componentes';
 import { api } from '../../api';
 import { AvisoCarga, CabecalhoAdmin, TopoAdmin } from './ComponentesAdmin';
-import { cnpjMascarado, useDadosAdmin } from './useDadosAdmin';
+import {
+  cnpjMascarado,
+  executarAdmin,
+  salvarArquivo,
+  useDadosAdmin,
+} from './useDadosAdmin';
 import { IconeLupa, IconeOlho, IconePredio, IconeProibido } from './icones';
 
 export const ROTULO_SITUACAO = {
@@ -17,9 +22,15 @@ export function PaginaInicioAdmin() {
   useTituloPagina('Associados');
   const [busca, setBusca] = useState('');
   const [pagina, setPagina] = useState(1);
+  const [atualizacao, setAtualizacao] = useState(0);
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [importando, setImportando] = useState(false);
+  const [baixandoPdf, setBaixandoPdf] = useState(false);
+  const [mensagem, setMensagem] = useState<string | null>(null);
+  const campoArquivo = useRef<HTMLInputElement>(null);
   const lista = useDadosAdmin(
     (token) => api.admin.associados(token, busca.trim(), pagina),
-    [busca, pagina],
+    [busca, pagina, atualizacao],
   );
 
   const l = lista.dados;
@@ -34,6 +45,97 @@ export function PaginaInicioAdmin() {
         titulo="Associados"
         descricao="Busque associados e consulte os dados cadastrais e a situação da contribuição."
       />
+
+      <section
+        className="adm-cartao adm-importacao"
+        aria-labelledby="t-importar-associados"
+      >
+        <div>
+          <h2 id="t-importar-associados">Base estadual de farmácias</h2>
+          <p>
+            Importe um CSV para criar farmácias novas e atualizar cadastros
+            existentes pelo CNPJ. Campos vazios preservam os dados já
+            cadastrados.
+          </p>
+          <small>
+            Colunas obrigatórias: CNPJ e Razão Social. Opcionais: Nome Fantasia,
+            Município, E-mail e Telefone.
+          </small>
+        </div>
+        <form
+          className="adm-importacao-formulario"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (!arquivo) return;
+            if (!arquivo.name.toLowerCase().endsWith('.csv')) {
+              setMensagem('Selecione um arquivo com extensão .csv.');
+              return;
+            }
+            setImportando(true);
+            const resultado = await executarAdmin((token) =>
+              api.admin.importarAssociadosCsv(token, arquivo),
+            );
+            setImportando(false);
+            if (resultado.erro) {
+              setMensagem(resultado.erro);
+              return;
+            }
+            if (resultado.dados) {
+              setMensagem(
+                `Importação concluída: ${resultado.dados.criados} novos e ${resultado.dados.atualizados} atualizados.`,
+              );
+              setArquivo(null);
+              if (campoArquivo.current) campoArquivo.current.value = '';
+              setPagina(1);
+              setAtualizacao((versao) => versao + 1);
+            }
+          }}
+        >
+          <label htmlFor="csv-associados">Arquivo CSV</label>
+          <input
+            ref={campoArquivo}
+            id="csv-associados"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(event) => {
+              setArquivo(event.target.files?.[0] ?? null);
+              setMensagem(null);
+            }}
+          />
+          <div className="adm-importacao-acoes">
+            <button
+              type="button"
+              className="adm-botao-secundario"
+              disabled={baixandoPdf}
+              onClick={async () => {
+                setBaixandoPdf(true);
+                const resultado = await executarAdmin((token) =>
+                  api.admin.exportarListaAssociadosPdf(token),
+                );
+                setBaixandoPdf(false);
+                if (resultado.erro) {
+                  setMensagem(resultado.erro);
+                } else if (resultado.dados) {
+                  salvarArquivo(resultado.dados, 'farmacias-associadas.pdf');
+                  setMensagem('A lista de farmácias foi baixada em PDF.');
+                }
+              }}
+            >
+              {baixandoPdf ? 'Gerando PDF…' : 'Baixar lista em PDF'}
+            </button>
+            <button
+              type="submit"
+              className="adm-botao-primario"
+              disabled={!arquivo || importando}
+            >
+              {importando ? 'Importando…' : 'Importar CSV'}
+            </button>
+          </div>
+        </form>
+        {mensagem && (
+          <output className="adm-importacao-mensagem">{mensagem}</output>
+        )}
+      </section>
 
       <section className="adm-cartao adm-lista" aria-label="Associados">
         <label className="adm-busca">

@@ -16,6 +16,11 @@ vi.mock('./api', () => ({
       resumo: vi.fn<ApiClient['admin']['resumo']>(),
       associados: vi.fn<ApiClient['admin']['associados']>(),
       ficha: vi.fn<ApiClient['admin']['ficha']>(),
+      importarAssociadosCsv:
+        vi.fn<ApiClient['admin']['importarAssociadosCsv']>(),
+      exportarListaAssociadosPdf:
+        vi.fn<ApiClient['admin']['exportarListaAssociadosPdf']>(),
+      exportarHistoricoPdf: vi.fn<ApiClient['admin']['exportarHistoricoPdf']>(),
       valores: vi.fn<ApiClient['admin']['valores']>(),
       cancelamentos: vi.fn<ApiClient['admin']['cancelamentos']>(),
       propor: vi.fn<ApiClient['admin']['propor']>(),
@@ -379,6 +384,12 @@ describe('Rotas', () => {
     expect(await screen.findByText('Drogaria Teste')).toBeInTheDocument();
     expect(screen.getByText('Inadimplente')).toBeInTheDocument();
     expect(
+      screen.getByRole('heading', { name: 'Base estadual de farmácias' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Baixar lista em PDF' }),
+    ).toBeInTheDocument();
+    expect(
       screen.queryByRole('link', { name: 'Benefícios' }),
     ).not.toBeInTheDocument();
     expect(api.admin.associados).toHaveBeenCalledWith('jwt', '', 1);
@@ -387,6 +398,37 @@ describe('Rotas', () => {
     ).toHaveAttribute('href', '/admin/associados/a1');
   });
 
+  it('/admin importa CSV e atualiza a lista de associados', async () => {
+    sessionStorage.setItem(
+      'eloconnect.sessao',
+      JSON.stringify({
+        accessToken: 'jwt',
+        usuario: { id: '1', email: 'a@x.com', nome: 'Admin', perfil: 'ADMIN' },
+      }),
+    );
+    vi.mocked(api.admin.importarAssociadosCsv).mockResolvedValue({
+      total: 1,
+      criados: 1,
+      atualizados: 0,
+    });
+    abrir('/admin');
+
+    const csv = new File(
+      ['cnpj,razaoSocial\n12345678000190,Farmácia Teste'],
+      'farmacias.csv',
+      { type: 'text/csv' },
+    );
+    fireEvent.change(screen.getByLabelText('Arquivo CSV'), {
+      target: { files: [csv] },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Importar CSV' }));
+
+    expect(
+      await screen.findByText('Importação concluída: 1 novos e 0 atualizados.'),
+    ).toBeInTheDocument();
+    expect(api.admin.importarAssociadosCsv).toHaveBeenCalledWith('jwt', csv);
+    await waitFor(() => expect(api.admin.associados).toHaveBeenCalledTimes(2));
+  });
   it('/associado mostra a mensalidade em aberto da farmácia', async () => {
     sessionStorage.setItem(
       'eloconnect.sessao',

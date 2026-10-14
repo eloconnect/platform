@@ -26,6 +26,12 @@ export interface ListaAssociados {
   itens: AssociadoResumo[];
 }
 
+export interface ResultadoImportacaoAssociados {
+  total: number;
+  criados: number;
+  atualizados: number;
+}
+
 export interface BoletoResumo {
   id: string;
   competencia: string;

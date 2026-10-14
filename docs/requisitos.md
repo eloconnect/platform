@@ -148,7 +148,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF28 | Importar a base de associados a partir do XML da JUCEMAT (filtrado pelo CNAE). | Should | [A confirmar] — ver P02 |
+| RF28 | Importar a base estadual de farmácias a partir de CSV, criando novos associados e atualizando os existentes pelo CNPJ; exportar a base em PDF. | Should | [Validado] |
 | RF29 | Enviar a cobrança formal (comunicado, sem boleto) por e-mail a todos os associados da base. | Must | [Validado] — depende de P02 |
 
 ### 4.9 Histórico e auditoria
@@ -216,7 +216,7 @@ As user stories (US01 a US39) são mantidas como issues no GitHub Projects da or
 | **ID** | **Pergunta / ação** | **Com quem** | **Impacto** |
 | --- | --- | --- | --- |
 | P01 | A validade de 30 dias significa que o boleto pode ser pago até 30 dias após o vencimento? Depois disso, o boleto é cancelado e o valor vai para o mês seguinte, ou a dívida acumula? Os lembretes param nesse momento? | Cliente | RF14, RF15, histórico |
-| P02 | O XML da JUCEMAT traz o e-mail das farmácias? Com que frequência e de que forma o sindicato recebe esse arquivo? | Cliente | RF28, RF29 (sem e-mail não há como enviar a cobrança formal) |
+| P02 | A base estadual em CSV traz o e-mail das farmácias? Com que frequência e de que forma o sindicato recebe essa lista? | Cliente | RF29 (sem e-mail não há como enviar a cobrança formal) |
 | P03 | Qualquer associado pode criar conta pelo app? Ao pedir a cobrança recorrente, o primeiro boleto é gerado na hora ou só no próximo lote mensal? | Cliente | RF05, RF36, fluxo de entrada |
 | P04 | O associado do plano anual fica fora do lote mensal? Como é a renovação no fim do ano? | Cliente | RF17, RF10 |
 | P06 | Lista de benefícios (aguardando reunião futura do cliente). | Cliente | RF24, RF25, landing page |

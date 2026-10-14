@@ -14,6 +14,7 @@ import {
   data,
   executarAdmin,
   moeda,
+  salvarArquivo,
   useDadosAdmin,
 } from './useDadosAdmin';
 
@@ -45,6 +46,7 @@ export function PaginaFichaAssociado() {
   useTituloPagina('Ficha do associado');
   const { id = '' } = useParams();
   const [mensagem, setMensagem] = useState<string | null>(null);
+  const [baixandoPdf, setBaixandoPdf] = useState(false);
   const {
     dados: f,
     erro,
@@ -68,11 +70,7 @@ export function PaginaFichaAssociado() {
       </nav>
       <CabecalhoAdmin titulo="Ficha Cadastral e Financeira do Associado" />
       <AvisoCarga carregando={carregando} erro={erro} />
-      {mensagem && (
-        <p className="adm-aviso" role="status">
-          {mensagem}
-        </p>
-      )}
+      {mensagem && <output className="adm-aviso">{mensagem}</output>}
 
       {f && (
         <>
@@ -97,6 +95,25 @@ export function PaginaFichaAssociado() {
                 {data(f.filiadoDesde)}
               </p>
             </div>
+            <button
+              type="button"
+              className="adm-botao-secundario"
+              disabled={baixandoPdf}
+              onClick={async () => {
+                setBaixandoPdf(true);
+                const r = await executarAdmin((t) =>
+                  api.admin.exportarHistoricoPdf(t, f.id),
+                );
+                setBaixandoPdf(false);
+                if (r.erro) setMensagem(r.erro);
+                else if (r.dados) {
+                  salvarArquivo(r.dados, `historico-${f.id}.pdf`);
+                  setMensagem('O histórico financeiro foi baixado em PDF.');
+                }
+              }}
+            >
+              {baixandoPdf ? 'Gerando PDF…' : 'Baixar histórico em PDF'}
+            </button>
             <button
               type="button"
               className="adm-botao-perigo"

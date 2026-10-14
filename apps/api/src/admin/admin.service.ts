@@ -13,6 +13,8 @@ import type {
 } from './admin.dto';
 import { StatusSolicitacaoSuporte } from '../generated/prisma/enums';
 import { removerPdf, salvarPdf } from './convencao-arquivos';
+import type { AssociadoCsv } from './associados-csv';
+import { pdfHistoricoAssociado, pdfListaAssociados } from './relatorios-admin';
 
 export type SituacaoSindical = 'EM_DIA' | 'PENDENTE' | 'INADIMPLENTE';
 
@@ -125,6 +127,107 @@ export class AdminService {
         pagoEm: b.pagoEm,
       })),
     };
+  }
+
+  async exportarHistoricoPdf(id: string) {
+    const associado = await this.prisma.associado.findUnique({
+      where: { id },
+      include: {
+        boletos: { orderBy: [{ competencia: 'desc' }, { criadoEm: 'desc' }] },
+      },
+    });
+    if (!associado) throw new NotFoundException('Associado não encontrado.');
+    return pdfHistoricoAssociado({
+      ...associado,
+      situacao: situacaoSindical(associado),
+    });
+  }
+
+  async exportarListaAssociadosPdf() {
+    const associados = await this.prisma.associado.findMany({
+      orderBy: { razaoSocial: 'asc' },
+      select: {
+        razaoSocial: true,
+        nomeFantasia: true,
+        cnpj: true,
+        municipio: true,
+        situacao: true,
+        contribuicaoAtiva: true,
+      },
+    });
+    return pdfListaAssociados(
+      associados.map((associado) => ({
+        ...associado,
+        situacao: situacaoSindical(associado),
+      })),
+    );
+  }
+
+  async importarAssociados(adminId: string, registros: AssociadoCsv[]) {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const cnpjsExistentes = new Set(
+          (
+            await tx.associado.findMany({
+              where: {
+                cnpj: { in: registros.map((registro) => registro.cnpj) },
+              },
+              select: { cnpj: true },
+            })
+          ).map((associado) => associado.cnpj),
+        );
+        let criados = 0;
+        let atualizados = 0;
+
+        const processarLote = async (inicio: number): Promise<void> => {
+          const lote = registros.slice(inicio, inicio + 50);
+          await Promise.all(
+            lote.map(async (registro) => {
+              const dados = {
+                razaoSocial: registro.razaoSocial,
+                ...(registro.nomeFantasia
+                  ? { nomeFantasia: registro.nomeFantasia }
+                  : {}),
+                ...(registro.municipio
+                  ? { municipio: registro.municipio }
+                  : {}),
+                ...(registro.email ? { email: registro.email } : {}),
+                ...(registro.telefone ? { telefone: registro.telefone } : {}),
+              };
+              await tx.associado.upsert({
+                where: { cnpj: registro.cnpj },
+                create: {
+                  cnpj: registro.cnpj,
+                  razaoSocial: registro.razaoSocial,
+                  nomeFantasia: registro.nomeFantasia ?? null,
+                  municipio: registro.municipio ?? null,
+                  email: registro.email ?? null,
+                  telefone: registro.telefone ?? null,
+                },
+                update: dados,
+              });
+              if (cnpjsExistentes.has(registro.cnpj)) atualizados += 1;
+              else criados += 1;
+            }),
+          );
+          if (inicio + 50 < registros.length) {
+            await processarLote(inicio + 50);
+          }
+        };
+        await processarLote(0);
+
+        await tx.logAuditoria.create({
+          data: {
+            usuarioId: adminId,
+            acao: 'ASSOCIADOS_IMPORTADOS',
+            entidade: 'Associado',
+            valorNovo: { total: registros.length, criados, atualizados },
+          },
+        });
+        return { total: registros.length, criados, atualizados };
+      },
+      { maxWait: 10000, timeout: 60000 },
+    );
   }
 
   async valores() {

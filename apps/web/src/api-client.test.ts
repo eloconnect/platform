@@ -53,4 +53,56 @@ describe('createApiClient', () => {
     await expect(cliente.getHealth()).rejects.toMatchObject({ status: 503 });
     await expect(cliente.getHealth()).rejects.toBeInstanceOf(ApiError);
   });
+
+  it('envia CSV de associados e retorna o resultado da importação', async () => {
+    const resultado = { total: 2, criados: 1, atualizados: 1 };
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(new Response(JSON.stringify(resultado)));
+    const cliente = createApiClient('/api', fetchFalso);
+    const arquivo = new File(['csv'], 'farmacias.csv', { type: 'text/csv' });
+
+    await expect(
+      cliente.admin.importarAssociadosCsv('jwt', arquivo),
+    ).resolves.toEqual(resultado);
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/admin/associados/importar',
+      expect.objectContaining({
+        method: 'POST',
+        body: expect.any(FormData),
+      }),
+    );
+  });
+
+  it('baixa o PDF do histórico completo do associado', async () => {
+    const pdf = new Blob(['%PDF-1.7'], { type: 'application/pdf' });
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(
+        new Response(pdf, { headers: { 'Content-Type': 'application/pdf' } }),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await expect(
+      cliente.admin.exportarHistoricoPdf('jwt', 'id/associado'),
+    ).resolves.toBeInstanceOf(Blob);
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/admin/associados/id%2Fassociado/historico.pdf',
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
+
+  it('baixa o PDF com a lista estadual completa de farmácias', async () => {
+    const pdf = new Blob(['%PDF-1.7'], { type: 'application/pdf' });
+    const fetchFalso = vi.fn<Fetch>().mockResolvedValue(new Response(pdf));
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await expect(
+      cliente.admin.exportarListaAssociadosPdf('jwt'),
+    ).resolves.toBeInstanceOf(Blob);
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/admin/associados.pdf',
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
 });

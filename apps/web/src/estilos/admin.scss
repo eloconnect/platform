@@ -310,6 +310,62 @@ $suave: #4f5b68;
   box-shadow: 0 2px 8px rgb(20 40 70 / 5%);
 }
 
+.adm-importacao {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1fr) minmax(18rem, 1.2fr);
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1.4rem;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0 0 0.5rem;
+    color: $suave;
+  }
+
+  small {
+    color: $suave;
+  }
+
+  @media (max-width: 48rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adm-importacao-formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  label {
+    font-weight: 700;
+  }
+
+  input[type='file'] {
+    max-width: 100%;
+  }
+}
+
+.adm-importacao-acoes {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.adm-importacao-mensagem {
+  display: block;
+  grid-column: 1 / -1;
+  margin: 0;
+  color: $azul-escuro;
+  font-weight: 700;
+}
+
 .adm-indicadores {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
@@ -668,6 +724,7 @@ $suave: #4f5b68;
 }
 
 .adm-aviso {
+  display: block;
   margin: 0;
   padding: 0.75rem 1.4rem;
   color: $suave;

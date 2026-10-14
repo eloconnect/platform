@@ -9,11 +9,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { AdminId } from './admin-id.decorator';
 import {
   AcessoDto,
@@ -27,11 +29,17 @@ import {
 import { AdminGuard } from './admin.guard';
 import { AdminService } from './admin.service';
 import { TAMANHO_MAXIMO_PDF } from './convencao-arquivos';
+import { lerAssociadosCsv, TAMANHO_MAXIMO_CSV } from './associados-csv';
 
 interface ArquivoPdfRecebido {
   buffer: Buffer;
   originalname: string;
   size: number;
+}
+
+interface ArquivoCsvRecebido {
+  buffer: Buffer;
+  originalname: string;
 }
 
 @Controller('admin')
@@ -50,9 +58,60 @@ export class AdminController {
     return this.admin.listarAssociados(busca?.slice(0, 100), numero);
   }
 
+  @Get('associados.pdf')
+  async exportarListaAssociadosPdf(@Res() resposta: Response) {
+    const pdf = await this.admin.exportarListaAssociadosPdf();
+    resposta.setHeader('Content-Type', 'application/pdf');
+    resposta.setHeader('X-Content-Type-Options', 'nosniff');
+    resposta.setHeader('Cache-Control', 'no-store');
+    resposta.setHeader(
+      'Content-Disposition',
+      'attachment; filename="farmacias-associadas.pdf"',
+    );
+    resposta.send(pdf);
+  }
+
+  @Post('associados/importar')
+  @UseInterceptors(
+    FileInterceptor('arquivo', { limits: { fileSize: TAMANHO_MAXIMO_CSV } }),
+  )
+  importarAssociados(
+    @AdminId() adminId: string,
+    @UploadedFile() arquivo?: ArquivoCsvRecebido,
+  ) {
+    if (!arquivo) {
+      throw new BadRequestException('Selecione um arquivo CSV para importar.');
+    }
+    if (!arquivo.originalname.toLowerCase().endsWith('.csv')) {
+      throw new BadRequestException(
+        'O arquivo enviado deve ter extensão .csv.',
+      );
+    }
+    return this.admin.importarAssociados(
+      adminId,
+      lerAssociadosCsv(arquivo.buffer),
+    );
+  }
+
   @Get('associados/:id')
   ficha(@Param('id', ParseUUIDPipe) id: string) {
     return this.admin.ficha(id);
+  }
+
+  @Get('associados/:id/historico.pdf')
+  async exportarHistoricoPdf(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() resposta: Response,
+  ) {
+    const pdf = await this.admin.exportarHistoricoPdf(id);
+    resposta.setHeader('Content-Type', 'application/pdf');
+    resposta.setHeader('X-Content-Type-Options', 'nosniff');
+    resposta.setHeader('Cache-Control', 'no-store');
+    resposta.setHeader(
+      'Content-Disposition',
+      `attachment; filename="historico-${id}.pdf"`,
+    );
+    resposta.send(pdf);
   }
 
   @Get('valores')

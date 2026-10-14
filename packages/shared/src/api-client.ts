@@ -17,6 +17,7 @@ import type {
   FichaAssociado,
   ListaAssociados,
   ResumoAdmin,
+  ResultadoImportacaoAssociados,
   SolicitacaoSuporteAdmin,
   StatusSolicitacaoSuporte,
   ValoresAdmin,
@@ -81,7 +82,7 @@ export function createApiClient(
     return (await resposta.json()) as T;
   }
 
-  async function enviarPdf<T>(
+  async function enviarArquivo<T>(
     caminho: string,
     token: string,
     arquivo: File,
@@ -188,6 +189,19 @@ export function createApiClient(
           undefined,
           token,
         ),
+      importarAssociadosCsv: (token: string, arquivo: File) =>
+        enviarArquivo<ResultadoImportacaoAssociados>(
+          '/admin/associados/importar',
+          token,
+          arquivo,
+        ),
+      exportarListaAssociadosPdf: (token: string) =>
+        baixarPdf('/admin/associados.pdf', token),
+      exportarHistoricoPdf: (token: string, id: string) =>
+        baixarPdf(
+          `/admin/associados/${encodeURIComponent(id)}/historico.pdf`,
+          token,
+        ),
       valores: (token: string) =>
         requisitar<ValoresAdmin>('GET', '/admin/valores', undefined, token),
       cancelamentos: (token: string) =>
@@ -240,7 +254,7 @@ export function createApiClient(
           token,
         ),
       anexarConvencaoPdf: (token: string, id: string, arquivo: File) =>
-        enviarPdf<AnexoConvencaoAdmin>(
+        enviarArquivo<AnexoConvencaoAdmin>(
           `/admin/convencoes/${encodeURIComponent(id)}/anexos`,
           token,
           arquivo,
