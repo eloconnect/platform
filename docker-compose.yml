@@ -8,6 +8,12 @@ services:
       POSTGRES_DB: eloconnect
     ports:
       - '5432:5432'
+    # Usado pelo `docker compose up --wait` (pnpm bootstrap) para esperar o banco aceitar conexões.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U eloconnect -d eloconnect']
+      interval: 2s
+      timeout: 5s
+      retries: 15
     volumes:
       - pgdata:/var/lib/postgresql/data
 

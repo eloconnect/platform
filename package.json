@@ -6,6 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
+    "bootstrap": "node scripts/bootstrap.mjs",
     "dev": "pnpm -r --parallel --if-present run dev",
     "build": "pnpm -r --if-present run build",
     "test": "pnpm -r --if-present run test",
