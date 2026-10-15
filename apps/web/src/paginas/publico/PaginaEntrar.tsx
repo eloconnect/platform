@@ -87,7 +87,7 @@ export function PaginaEntrar() {
             </div>
             <h2 className="h5 fw-bold mb-0">Elo Connect</h2>
             <p className="text-muted small mb-0">Gestão sindical</p>
-            <h1 className="h3 fw-bold mt-4 mb-0">Acesse sua área</h1>
+            <h1 className="h3 fw-bold mt-4 mb-0">Entrar</h1>
           </div>
 
           {/* Abas de Navegação */}
