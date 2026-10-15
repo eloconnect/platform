@@ -61,3 +61,47 @@ main {
   color: $body-color;
   font-weight: 600;
 }
+// No final do arquivo tema.scss
+
+.logo-elo-connect {
+  width: 3.5rem; // ~63px
+  height: 3.5rem;
+  background-color: $primary;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  // ROTAÇÃO DE -50 GRAUS APLICADA AQUI
+  transform: rotate(48deg);
+  transition: transform 0.3s ease; // Suaviza se houver alguma interação
+
+  svg,
+  img {
+    width: 2rem; // ~36px
+    height: 2rem;
+  }
+}
+// Estilo para os botões de navegação no cabeçalho
+.navbar-nav {
+  .nav-link {
+    border-radius: 0.5rem; // ~8px de borda arredondada
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+
+    &:hover,
+    &:focus-visible {
+      background-color: rgba($primary, 0.08);
+      color: $primary;
+    }
+
+    // Se o botão for a página atual (ativa) ou o botão destacado "Entrar"
+    &.active,
+    &.btn-entrar {
+      border: 1px solid $primary;
+      color: $primary;
+      font-weight: 600;
+    }
+  }
+}
