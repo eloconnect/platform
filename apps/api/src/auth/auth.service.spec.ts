@@ -1,4 +1,3 @@
-import { hash, verify } from '@node-rs/argon2';
 import { createHash } from 'node:crypto';
 import {
   BadRequestException,
@@ -7,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { hash, verify } from '@node-rs/argon2';
 import { EmailService } from '../email/email.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
@@ -31,6 +31,7 @@ describe('AuthService', () => {
   const signAsync = jest.fn();
   const get = jest.fn();
   const send = jest.fn();
+
   const prisma = {
     usuario: { findUnique, update: usuarioUpdate },
     tokenUsuario: {
@@ -40,6 +41,7 @@ describe('AuthService', () => {
     },
     $transaction: transaction,
   };
+
   const service = new AuthService(
     prisma as unknown as PrismaService,
     { signAsync } as unknown as JwtService,
@@ -65,10 +67,11 @@ describe('AuthService', () => {
     );
     transaction.mockImplementation((operacao: unknown) =>
       typeof operacao === 'function'
-        ? operacao(prisma)
-        : Promise.all(operacao as Promise<unknown>[]),
+        ? (operacao as (p: typeof prisma) => unknown)(prisma)
+        : Promise.all(operacao as Array<Promise<unknown>>),
     );
   });
+
   it('valida a senha Argon2id e retorna JWT sem expor o hash', async () => {
     const result = await service.login({
       email: 'associado@example.com',
@@ -129,13 +132,20 @@ describe('AuthService', () => {
       });
 
       expect(resposta.mensagem).toContain('Se o e-mail estiver cadastrado');
-      const { data } = tokenCreate.mock.calls[0][0] as {
+
+      const firstCall = tokenCreate.mock.calls[0] as Array<{
         data: { tokenHash: string; expiraEm: Date; tipo: string };
-      };
+      }>;
+      const data = firstCall[0].data;
+
       expect(data.tipo).toBe('RECUPERACAO_SENHA');
       expect(data.expiraEm.getTime()).toBeGreaterThan(Date.now());
 
-      const mensagem = send.mock.calls[0][0] as { to: string; text: string };
+      const emailCall = send.mock.calls[0] as Array<{
+        to: string;
+        text: string;
+      }>;
+      const mensagem = emailCall[0];
       const token = /redefinir-senha\?token=(\S+)/.exec(mensagem.text)?.[1];
       expect(mensagem.to).toBe(usuario.email);
       expect(mensagem.text).toContain(
@@ -174,8 +184,12 @@ describe('AuthService', () => {
       await expect(
         service.solicitarRecuperacaoSenha({ email: usuario.email }),
       ).resolves.toHaveProperty('mensagem');
-      await new Promise(process.nextTick);
-      expect(erro).toHaveBeenCalled();
+
+      await new Promise((resolve) => {
+        process.nextTick(resolve);
+      });
+
+      expect(erro.mock.calls.length).toBeGreaterThan(0);
       erro.mockRestore();
     });
 
@@ -205,9 +219,12 @@ describe('AuthService', () => {
             },
           }),
         );
-        const { data } = usuarioUpdate.mock.calls[0][0] as {
+
+        const updateCall = usuarioUpdate.mock.calls[0] as Array<{
           data: { senhaHash: string };
-        };
+        }>;
+        const data = updateCall[0].data;
+
         expect(data.senhaHash).toMatch(/^\$argon2id\$/);
         expect(await verify(data.senhaHash, 'nova-senha-forte')).toBe(true);
         expect(tokenUpdateMany).toHaveBeenCalledTimes(1);
