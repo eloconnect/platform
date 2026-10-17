@@ -200,3 +200,5 @@ Decididas no setup inicial do repositório (09/10/2026):
 - P11: como registrar a responsabilidade do titular pelo compartilhamento do acesso com o contador (aviso com aceite no cadastro ou termo de uso formal).
 
 - Orientação sobre os aspectos jurídicos/trabalhistas do projeto se necessário
+
+- **Autenticação e Sessão (JWT):** Utilização de JSON Web Tokens (JWT) com validade de 1 hora, transmitidos no cabeçalho de requisição (`Authorization: Bearer <token>`). No frontend web, o token é armazenado de forma flexível via `localStorage` (quando "Lembrar neste dispositivo" for selecionado) ou `sessionStorage`. O padrão JWT também foi adotado para garantir total compatibilidade com o futuro aplicativo mobile do próximo semestre.
