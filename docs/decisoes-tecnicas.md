@@ -133,6 +133,9 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Pastas de instruções para ferramentas de IA geradas automaticamente por pacotes (ex.: `.claude/`, `.agents/`, `.windsurf/`) não entram no repositório.
 
+- **Autenticação e Sessão (JWT):** Utilização de JSON Web Tokens (JWT) com validade de 1 hora, transmitidos no cabeçalho de requisição (`Authorization: Bearer <token>`). No frontend web, o token é armazenado de forma flexível via `localStorage` (quando "Lembrar neste dispositivo" for selecionado) ou `sessionStorage`. O padrão JWT também foi adotado para garantir total compatibilidade com o futuro aplicativo mobile do próximo semestre.
+
+
 ## Repositório e dados do cliente
 
 - Código no GitHub em `eloconnect/platform`, **público**. Backlog no Project "Elo Connect - MVP" da organização.
@@ -201,4 +204,3 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Orientação sobre os aspectos jurídicos/trabalhistas do projeto se necessário
 
-- **Autenticação e Sessão (JWT):** Utilização de JSON Web Tokens (JWT) com validade de 1 hora, transmitidos no cabeçalho de requisição (`Authorization: Bearer <token>`). No frontend web, o token é armazenado de forma flexível via `localStorage` (quando "Lembrar neste dispositivo" for selecionado) ou `sessionStorage`. O padrão JWT também foi adotado para garantir total compatibilidade com o futuro aplicativo mobile do próximo semestre.
