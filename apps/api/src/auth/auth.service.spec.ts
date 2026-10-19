@@ -43,10 +43,10 @@ describe('AuthService', () => {
   };
 
   const service = new AuthService(
-    prisma as unknown as PrismaService,
-    { signAsync } as unknown as JwtService,
-    { get } as unknown as ConfigService,
-    { send } as unknown as EmailService,
+    prisma as unknown as PrismaService, // oxlint-disable-line typescript(no-unsafe-type-assertion)
+    { signAsync } as unknown as JwtService, // oxlint-disable-line typescript(no-unsafe-type-assertion)
+    { get } as unknown as ConfigService, // oxlint-disable-line typescript(no-unsafe-type-assertion)
+    { send } as unknown as EmailService, // oxlint-disable-line typescript(no-unsafe-type-assertion)
   );
 
   beforeAll(async () => {
@@ -67,8 +67,8 @@ describe('AuthService', () => {
     );
     transaction.mockImplementation((operacao: unknown) =>
       typeof operacao === 'function'
-        ? (operacao as (p: typeof prisma) => unknown)(prisma)
-        : Promise.all(operacao as Array<Promise<unknown>>),
+        ? (operacao as (p: typeof prisma) => unknown)(prisma) // oxlint-disable-line typescript(no-unsafe-type-assertion)
+        : Promise.all(operacao as Array<Promise<unknown>>), // oxlint-disable-line typescript(no-unsafe-type-assertion)
     );
   });
 
@@ -133,7 +133,7 @@ describe('AuthService', () => {
 
       expect(resposta.mensagem).toContain('Se o e-mail estiver cadastrado');
 
-      const firstCall = tokenCreate.mock.calls[0] as unknown as Array<{
+      const firstCall = tokenCreate.mock.calls[0] as Array<{ // oxlint-disable-line typescript(no-unsafe-type-assertion)
         data: { tokenHash: string; expiraEm: Date; tipo: string };
       }>;
       const data = firstCall[0].data;
@@ -141,7 +141,7 @@ describe('AuthService', () => {
       expect(data.tipo).toBe('RECUPERACAO_SENHA');
       expect(data.expiraEm.getTime()).toBeGreaterThan(Date.now());
 
-      const emailCall = send.mock.calls[0] as unknown as Array<{
+      const emailCall = send.mock.calls[0] as Array<{ // oxlint-disable-line typescript(no-unsafe-type-assertion)
         to: string;
         text: string;
       }>;
@@ -220,7 +220,7 @@ describe('AuthService', () => {
           }),
         );
 
-        const updateCall = usuarioUpdate.mock.calls[0] as unknown as Array<{
+        const updateCall = usuarioUpdate.mock.calls[0] as Array<{ // oxlint-disable-line typescript(no-unsafe-type-assertion)
           data: { senhaHash: string };
         }>;
         const data = updateCall[0].data;

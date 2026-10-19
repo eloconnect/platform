@@ -22,10 +22,10 @@ describe('EmailService', () => {
     createTransport.mockReturnValue({
       sendMail,
       close,
-    } as unknown as Transporter);
+    } as unknown as Transporter); // oxlint-disable-line typescript(no-unsafe-type-assertion)
     service = new EmailService({
       get: (key: string) => values[key],
-    } as unknown as ConfigService);
+    } as unknown as ConfigService); // oxlint-disable-line typescript(no-unsafe-type-assertion)
   });
 
   afterAll(() => {
