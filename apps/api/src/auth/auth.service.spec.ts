@@ -65,10 +65,11 @@ describe('AuthService', () => {
           ? 'https://app.example.com/'
           : undefined,
     );
-    transaction.mockImplementation((operacao: unknown) =>
-      typeof operacao === 'function'
-        ? (operacao as (p: typeof prisma) => unknown)(prisma) // oxlint-disable-line typescript(no-unsafe-type-assertion)
-        : Promise.all(operacao as Array<Promise<unknown>>), // oxlint-disable-line typescript(no-unsafe-type-assertion)
+    transaction.mockImplementation(
+      (operacao: unknown) =>
+        typeof operacao === 'function'
+          ? (operacao as (p: typeof prisma) => unknown)(prisma) // oxlint-disable-line typescript(no-unsafe-type-assertion)
+          : Promise.all(operacao as Array<Promise<unknown>>), // oxlint-disable-line typescript(no-unsafe-type-assertion)
     );
   });
 
@@ -133,7 +134,8 @@ describe('AuthService', () => {
 
       expect(resposta.mensagem).toContain('Se o e-mail estiver cadastrado');
 
-      const firstCall = tokenCreate.mock.calls[0] as Array<{ // oxlint-disable-line typescript(no-unsafe-type-assertion)
+      const firstCall = tokenCreate.mock.calls[0] as Array<{
+        // oxlint-disable-line typescript(no-unsafe-type-assertion)
         data: { tokenHash: string; expiraEm: Date; tipo: string };
       }>;
       const data = firstCall[0].data;
@@ -141,7 +143,8 @@ describe('AuthService', () => {
       expect(data.tipo).toBe('RECUPERACAO_SENHA');
       expect(data.expiraEm.getTime()).toBeGreaterThan(Date.now());
 
-      const emailCall = send.mock.calls[0] as Array<{ // oxlint-disable-line typescript(no-unsafe-type-assertion)
+      const emailCall = send.mock.calls[0] as Array<{
+        // oxlint-disable-line typescript(no-unsafe-type-assertion)
         to: string;
         text: string;
       }>;
@@ -220,7 +223,8 @@ describe('AuthService', () => {
           }),
         );
 
-        const updateCall = usuarioUpdate.mock.calls[0] as Array<{ // oxlint-disable-line typescript(no-unsafe-type-assertion)
+        const updateCall = usuarioUpdate.mock.calls[0] as Array<{
+          // oxlint-disable-line typescript(no-unsafe-type-assertion)
           data: { senhaHash: string };
         }>;
         const data = updateCall[0].data;
