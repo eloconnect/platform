@@ -8,7 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { Perfil } from '../../generated/prisma';
+import { Perfil } from '../../generated/prisma/enums';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
@@ -20,7 +20,6 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Utiliza getAllAndOverride para recolher os perfis definidos no método ou na classe
     const perfisPermitidos = this.reflector.getAllAndOverride<Perfil[]>(
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
