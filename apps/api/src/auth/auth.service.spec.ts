@@ -133,7 +133,7 @@ describe('AuthService', () => {
 
       expect(resposta.mensagem).toContain('Se o e-mail estiver cadastrado');
 
-      const firstCall = tokenCreate.mock.calls[0] as Array<{
+      const firstCall = tokenCreate.mock.calls[0] as unknown as Array<{
         data: { tokenHash: string; expiraEm: Date; tipo: string };
       }>;
       const data = firstCall[0].data;
@@ -141,7 +141,7 @@ describe('AuthService', () => {
       expect(data.tipo).toBe('RECUPERACAO_SENHA');
       expect(data.expiraEm.getTime()).toBeGreaterThan(Date.now());
 
-      const emailCall = send.mock.calls[0] as Array<{
+      const emailCall = send.mock.calls[0] as unknown as Array<{
         to: string;
         text: string;
       }>;
@@ -220,7 +220,7 @@ describe('AuthService', () => {
           }),
         );
 
-        const updateCall = usuarioUpdate.mock.calls[0] as Array<{
+        const updateCall = usuarioUpdate.mock.calls[0] as unknown as Array<{
           data: { senhaHash: string };
         }>;
         const data = updateCall[0].data;
