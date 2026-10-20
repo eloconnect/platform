@@ -10,3 +10,10 @@ coverage/
 .vscode/*
 !.vscode/extensions.json
 *.tsbuildinfo
+
+# Instruções de ferramentas de IA geradas por pacotes (ver docs/decisoes-tecnicas.md).
+# O CLI do Prisma oferece instalar essas skills no terminal.
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
