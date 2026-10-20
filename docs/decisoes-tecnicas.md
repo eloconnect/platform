@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 12/10/2026.
+Última atualização: 20/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -121,6 +121,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Hash de senha: **argon2id**, com o pacote `@node-rs/argon2` (binários prontos, sem compilação na instalação), conforme o RNF04. O seed já usa esse pacote, e o login (US03) deve usar o mesmo.
 
+- Sessão: **JWT** válido por 1 hora, enviado no cabeçalho `Authorization: Bearer <token>`. No web, o token fica no `sessionStorage`. O mesmo formato serve para o app mobile do próximo semestre.
+
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
 
 - CI: **GitHub Actions** (`.github/workflows/ci.yml`), em todo PR para o `main` e em todo push no `main`. Instala com o lockfile travado e roda lint, formatação, build, testes e os testes e2e da API num Postgres 17 descartável. O check é obrigatório no ruleset do `main`. Não há filtro para PRs só de documentação, porque um check obrigatório que não roda deixa o PR travado.
@@ -132,9 +134,6 @@ Decididas no setup inicial do repositório (09/10/2026):
 - Ambiente de desenvolvimento: o projeto fica no sistema de arquivos do WSL (ex.: `~/projetos`), não em `/mnt/c`, por desempenho.
 
 - Pastas de instruções para ferramentas de IA geradas automaticamente por pacotes (ex.: `.claude/`, `.agents/`, `.windsurf/`) não entram no repositório.
-
-- **Autenticação e Sessão (JWT):** Utilização de JSON Web Tokens (JWT) com validade de 1 hora, transmitidos no cabeçalho de requisição (`Authorization: Bearer <token>`). No frontend web, o token é armazenado de forma flexível via `localStorage` (quando "Lembrar neste dispositivo" for selecionado) ou `sessionStorage`. O padrão JWT também foi adotado para garantir total compatibilidade com o futuro aplicativo mobile do próximo semestre.
-
 
 ## Repositório e dados do cliente
 
@@ -203,4 +202,3 @@ Decididas no setup inicial do repositório (09/10/2026):
 - P11: como registrar a responsabilidade do titular pelo compartilhamento do acesso com o contador (aviso com aceite no cadastro ou termo de uso formal).
 
 - Orientação sobre os aspectos jurídicos/trabalhistas do projeto se necessário
-
