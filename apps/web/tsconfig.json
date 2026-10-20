@@ -1,25 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "resolvePackageJsonExports": true,
-    "esModuleInterop": true,
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
     "isolatedModules": true,
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
-    "types": ["node", "vite/client"],
-    "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": ".",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "strictPropertyInitialization": false
-  }
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@eloconnect/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["src"]
 }
