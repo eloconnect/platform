@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 12/10/2026.
+Última atualização: 20/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -120,6 +120,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 - Migrations e seed: migrations versionadas em `apps/api/prisma/migrations` (a primeira é a `init`). O seed (`apps/api/prisma/seed.ts`, executado com `tsx`) cria só dados fictícios. No Prisma 7, o `migrate reset` não roda o seed sozinho, por isso o script `db:reset` chama os dois.
 
 - Hash de senha: **argon2id**, com o pacote `@node-rs/argon2` (binários prontos, sem compilação na instalação), conforme o RNF04. O seed já usa esse pacote, e o login (US03) deve usar o mesmo.
+
+- Sessão: **JWT** válido por 1 hora, enviado no cabeçalho `Authorization: Bearer <token>`. No web, o token fica no `sessionStorage`. O mesmo formato serve para o app mobile do próximo semestre.
 
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
 
