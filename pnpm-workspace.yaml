@@ -7,3 +7,9 @@ allowBuilds:
   esbuild: true
   prisma: true
   unrs-resolver: true
+
+# Mantém o pnpm-lock.yaml num documento só. Sem isso, o pnpm 12 grava antes uma
+# parte com a versão do próprio pnpm, e o grafo de dependências do GitHub (de
+# onde vêm os alertas do Dependabot) lê só essa parte. Efeito colateral: o pnpm
+# não troca de versão sozinho, então use `corepack enable` (ver README).
+pmOnFail: ignore
