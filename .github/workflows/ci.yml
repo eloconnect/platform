@@ -56,9 +56,8 @@ jobs:
       - name: Instalar dependências
         run: pnpm install --frozen-lockfile
 
-      # O Dependabot não mostra alertas deste repositório (o lockfile do pnpm 12
-      # tem dois documentos YAML), então a auditoria fica aqui. Só as dependências
-      # de produção, a partir de moderada.
+      # Segunda proteção, além dos alertas do Dependabot. Só as dependências de
+      # produção, a partir de moderada.
       - name: Auditoria das dependências de produção
         run: pnpm audit --prod --audit-level=moderate
 

@@ -103,7 +103,7 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 Decididas no setup inicial do repositório (09/10/2026):
 
-- Gerenciador de pacotes: **pnpm** (workspaces). Scripts de instalação de dependências precisam ser aprovados com `pnpm approve-builds`; a lista de aprovados fica no `pnpm-workspace.yaml`.
+- Gerenciador de pacotes: **pnpm** (workspaces). Scripts de instalação de dependências precisam ser aprovados com `pnpm approve-builds`; a lista de aprovados fica no `pnpm-workspace.yaml`. A versão do pnpm vem do campo `packageManager` do `package.json` e é ativada com `corepack enable`, porque o pnpm não troca de versão sozinho (ver `pmOnFail` em Segurança do repositório).
 
 - Node.js **24 (LTS)**, fixado no `.nvmrc`.
 
@@ -129,7 +129,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Lint e formatação: **oxlint** (com regras de React e jsx-a11y) e **Prettier** no monorepo inteiro, com hooks de commit (husky, lint-staged e commitlint). Arquivos Markdown ficam fora do Prettier. Detalhes no CONTRIBUTING.
 
-- Segurança do repositório: secret scanning com push protection (o push com credencial é bloqueado), auditoria das dependências no CI e Dependabot. Os alertas de vulnerabilidade do Dependabot não aparecem para este repositório, provavelmente porque o lockfile do pnpm 12 tem dois documentos YAML e o primeiro lista só o próprio pnpm. Por isso, a auditoria roda no CI, inclusive numa execução semanal, que pega vulnerabilidades novas mesmo sem PR. As atualizações comuns (`.github/dependabot.yml`) chegam uma vez por mês, num PR por ecossistema, sem versões major, porque TypeScript 6, Prisma 7 e Node 24 são fixados de propósito.
+- Segurança do repositório: secret scanning com push protection (o push com credencial é bloqueado), Dependabot e auditoria das dependências no CI. O pnpm 12 grava no começo do `pnpm-lock.yaml` uma parte só com a versão do próprio pnpm, e o grafo de dependências do GitHub, de onde vêm os alertas do Dependabot, lê apenas essa parte. Por isso, o `pnpm-workspace.yaml` usa `pmOnFail: ignore`, que mantém o lockfile num documento só. A auditoria no CI (`pnpm audit --prod`, que também roda toda segunda-feira) fica como segunda proteção. As atualizações comuns (`.github/dependabot.yml`) chegam uma vez por mês, num PR por ecossistema, sem versões major, porque TypeScript 6, Prisma 7 e Node 24 são fixados de propósito.
 
 - Ambiente de desenvolvimento: o projeto fica no sistema de arquivos do WSL (ex.: `~/projetos`), não em `/mnt/c`, por desempenho.
 
