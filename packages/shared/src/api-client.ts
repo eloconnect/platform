@@ -1,3 +1,10 @@
+import type {
+  EsqueciSenhaRequest,
+  LoginRequest,
+  LoginResponse,
+  MensagemResponse,
+  RedefinirSenhaRequest,
+} from './auth.js';
 import type { HealthResponse } from './health.js';
 
 /** Erro de uma chamada à API, com o status HTTP. */
@@ -51,6 +58,12 @@ export function createApiClient(
 
   return {
     getHealth: () => requisitar<HealthResponse>('GET', '/health'),
+    login: (dados: LoginRequest) =>
+      requisitar<LoginResponse>('POST', '/auth/login', dados),
+    solicitarRecuperacaoSenha: (dados: EsqueciSenhaRequest) =>
+      requisitar<MensagemResponse>('POST', '/auth/esqueci-senha', dados),
+    redefinirSenha: (dados: RedefinirSenhaRequest) =>
+      requisitar<MensagemResponse>('POST', '/auth/redefinir-senha', dados),
   };
 }
 

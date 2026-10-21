@@ -1,17 +1,17 @@
-// Tema do Elo Connect. Público majoritariamente idoso (RNF01, RNF02):
-// fonte grande, alto contraste, botões grandes e foco bem visível.
+// Tema do Elo Connect.
+// Visual compacto, acessibilidade e cabeçalho responsivo.
 
-// Cores com contraste calculado contra texto branco (WCAG AA exige 4,5:1).
-// As cores padrão do Bootstrap ficam no limite (4,5:1); estas têm folga.
-$primary: #0b4f8c; //   8,4:1
-$secondary: #495057; // 8,2:1
-$success: #146c43; //   6,5:1
-$danger: #b02a37; //    6,5:1
-$info: #055160; //      8,9:1
-$body-color: #1b1f23; // 16,6:1 sobre branco
+// ---------- Variáveis Bootstrap ----------
 
-// 1rem = 18px: tudo que o Bootstrap mede em rem cresce junto.
-// Em porcentagem, respeita quem aumentou a fonte no navegador.
+$primary: #0b4f8c;
+$secondary: #495057;
+$success: #146c43;
+$danger: #b02a37;
+$info: #055160;
+$body-color: #1b1f23;
+
+$largura-vitrine: 34rem;
+
 $font-size-root: 112.5%;
 $line-height-base: 1.6;
 
@@ -20,7 +20,51 @@ $navbar-nav-link-padding-x: 0.75rem;
 
 @import 'bootstrap/scss/bootstrap';
 
+// ---------- Estrutura global ----------
+
 #raiz {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  min-width: 320px;
+  background: #f5f7fc;
+}
+
+// Acessibilidade: fontes entre 18px e 25px.
+body,
+p,
+span,
+a,
+li,
+label,
+input,
+button,
+.btn,
+small,
+.small {
+  font-size: clamp(1.125rem, 1.3vw, 1.5625rem) !important;
+}
+
+h1 {
+  font-size: clamp(1.375rem, 1.8vw, 1.5625rem) !important;
+  font-weight: 700;
+}
+
+h2,
+.titulo-secao {
+  font-size: clamp(1.25rem, 1.6vw, 1.5625rem) !important;
+  font-weight: 700;
+}
+
+h3 {
+  font-size: clamp(1.125rem, 1.4vw, 1.4rem) !important;
+  font-weight: 700;
+}
+
+.aplicativo {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -34,7 +78,8 @@ main {
   }
 }
 
-// Alvo de toque confortável (mínimo de 44px).
+// ---------- Acessibilidade ----------
+
 .btn,
 .form-control,
 .form-select,
@@ -42,15 +87,12 @@ main {
   min-height: 2.75rem;
 }
 
-// Foco visível em qualquer fundo: anel preto por dentro e amarelo por fora.
-// Substitui o foco padrão do Bootstrap, que é fraco (sombra translúcida).
 :focus-visible {
   outline: 3px solid #ffbf47 !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 5px #1b1f23 !important;
 }
 
-// Link "Pular para o conteúdo": aparece só quando recebe foco pelo teclado.
 .link-pular:focus {
   position: absolute;
   top: 0.5rem;
@@ -61,47 +103,618 @@ main {
   color: $body-color;
   font-weight: 600;
 }
-// No final do arquivo tema.scss
+
+// ---------- Cabeçalho ----------
+
+.site-header {
+  position: relative;
+  z-index: 1050;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 0.15rem 0.75rem #1b2c4c0c;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 4.5rem;
+  padding-block: 0.5rem;
+  border-bottom: 1px solid #e2e6ef;
+  background: #fff;
+}
+
+.cabecalho-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+
+  gap: 1.25rem;
+  width: calc(100% - 2rem);
+  max-width: 1400px;
+
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// ---------- Marca e logotipo ----------
+
+.marca-elo {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  white-space: nowrap;
+  color: $primary;
+  font-weight: 750;
+  text-decoration: none;
+  z-index: 2;
+  justify-content: center;
+}
+
+.marca-elo:hover {
+  color: darken($primary, 8%);
+}
+
+.marca-elo-nome,
+.nome-elo {
+  white-space: nowrap;
+}
 
 .logo-elo-connect {
-  width: 3.5rem; // ~63px
-  height: 3.5rem;
-  background-color: $primary;
-  border-radius: 50%;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  width: 4.75rem;
+  height: 4.75rem;
+  overflow: hidden;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 50%;
+  background: transparent;
 
-  // ROTAÇÃO DE -50 GRAUS APLICADA AQUI
-  transform: rotate(48deg);
-  transition: transform 0.3s ease; // Suaviza se houver alguma interação
-
-  svg,
-  img {
-    width: 2rem; // ~36px
-    height: 2rem;
+  img,
+  svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: none !important;
+    background: transparent;
   }
 }
-// Estilo para os botões de navegação no cabeçalho
-.navbar-nav {
-  .nav-link {
-    border-radius: 0.5rem; // ~8px de borda arredondada
-    padding: 0.5rem 1rem;
-    transition: all 0.2s ease-in-out;
 
-    &:hover,
-    &:focus-visible {
-      background-color: rgba($primary, 0.08);
-      color: $primary;
-    }
+// ---------- Navegação ----------
 
-    // Se o botão for a página atual (ativa) ou o botão destacado "Entrar"
-    &.active,
-    &.btn-entrar {
-      border: 1px solid $primary;
-      color: $primary;
-      font-weight: 600;
-    }
+.menu-recolhivel {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  justify-content: flex-start;
+  min-width: 0;
+  gap: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.menu-principal,
+.primary-nav .navbar-nav {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.75rem !important;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.menu-principal .nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.menu-principal .nav-link:hover,
+.menu-principal .nav-link.active {
+  background: #edf1ff;
+  color: $primary;
+}
+
+.acao-cabecalho {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-left: auto;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+// O botão de menu fica oculto no desktop.
+.menu-mobile-toggle,
+.primary-nav .navbar-toggler {
+  display: none !important;
+}
+
+// ---------- Marca da tela de login ----------
+
+.marca-elo-centralizada {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  text-align: center;
+
+  .logo-elo-connect {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .marca-elo-nome {
+    font-size: 1.125rem;
+  }
+
+  .marca-elo-descricao {
+    color: $secondary;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+}
+
+// ---------- Estrutura geral ----------
+
+.pagina-principal {
+  width: 100%;
+}
+
+.pagina-principal > .container {
+  max-width: 1200px;
+}
+
+.site-footer {
+  border-top: 1px solid #e2e6ef;
+  background: #fff;
+  color: #535d70;
+  text-align: center;
+}
+
+// ---------- Cartões da página inicial ----------
+
+.inicio-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border: 1px solid #e2e6f2;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 0.35rem 0.9rem #263c710c;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.inicio-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.65rem 1.3rem #263c7118;
+}
+
+.inicio-card h3 {
+  margin-bottom: 0.5rem;
+  color: $primary;
+}
+
+.texto-card {
+  margin-bottom: 1rem;
+  color: $secondary;
+}
+
+.link-card {
+  margin-top: auto;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+// ---------- Cartões de conteúdo ----------
+
+.cartao-pagina {
+  width: 100%;
+  max-width: 58rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid #e2e6ef;
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 0.35rem 1rem #263c7112;
+}
+
+.cartao-pagina h1 {
+  margin: 0;
+  color: #202a3c;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.pagina-descricao {
+  max-width: 44rem;
+  margin: 0.85rem 0 1.5rem;
+  color: #535d70;
+}
+
+// ---------- Login ----------
+
+.cartao-autenticacao {
+  max-width: 36rem;
+  margin-block: clamp(1rem, 4vh, 3rem);
+
+  h1 {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+}
+
+.layout-autenticacao {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 15% 15%, #e1e6ff 0, transparent 42%), #f3f2ff;
+}
+
+.conteudo-autenticacao {
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  padding-block: clamp(1rem, 4vh, 3rem);
+}
+
+.conteudo-autenticacao > .container {
+  max-width: 42rem;
+}
+
+.conteudo-autenticacao .cartao-pagina {
+  width: 100%;
+}
+
+.rodape-autenticacao {
+  padding: 1rem;
+  color: #535d70;
+  text-align: center;
+}
+
+.alternador-acesso {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  background: #e9eaff;
+}
+
+.alternador-acesso a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border-radius: 0.55rem;
+  color: #344057;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.alternador-acesso a:hover,
+.alternador-acesso .alternador-acesso-ativo {
+  background: #fff;
+  color: $primary;
+  box-shadow: 0 0.15rem 0.4rem #263c7112;
+}
+
+// ---------- Vitrine (página inicial) ----------
+
+.pagina-principal-vitrine {
+  padding-block: 0 !important;
+  background: #f3f4f6;
+}
+
+.pagina-principal-vitrine > .container-vitrine {
+  max-width: none;
+  padding: 0;
+}
+
+.vitrine {
+  overflow: hidden;
+  color: #202a3c;
+  background: #f3f4f6;
+}
+
+.vitrine-container {
+  width: min(100% - 3rem, $largura-vitrine);
+  margin-inline: auto;
+}
+
+.vitrine-hero {
+  padding-block: clamp(1.5rem, 4vw, 3rem);
+  background: #f3f4f6;
+}
+
+.vitrine-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #dae5ff;
+  border-radius: 999px;
+  color: #1248a4 !important;
+  font-size: 0.85rem;
+  font-weight: 650;
+  white-space: normal;
+}
+
+.vitrine-hero h1 {
+  max-width: 44rem;
+  margin: 0;
+  color: #1d2940;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.vitrine-resumo {
+  max-width: 42rem;
+  margin: 0.9rem 0 1.5rem;
+  color: #4c566b;
+  line-height: 1.55;
+}
+
+.inicio-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.vitrine-cta {
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.vitrine-secao {
+  padding-block: clamp(1.5rem, 3.5vw, 3rem);
+  background: #f3f4f6;
+}
+
+.vitrine-secao .titulo-secao {
+  margin-bottom: 1rem;
+}
+
+.vitrine-rodape {
+  padding-block: 1.5rem;
+  background: #f3f4f6;
+  color: #344057;
+}
+
+.vitrine-rodape-base-conteudo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3rem;
+  padding-block: 0.75rem;
+  border-top: 1px solid #e2e6ef;
+}
+
+// =========================================
+// DESKTOP — 992px ou mais
+// =========================================
+
+@media (min-width: 992px) {
+  .cabecalho-container {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .menu-mobile-toggle,
+  .primary-nav .navbar-toggler {
+    display: none !important;
+  }
+
+  .menu-recolhivel,
+  .menu-recolhivel.collapse,
+  .menu-recolhivel.collapsing {
+    display: flex !important;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: flex-start;
+    width: auto;
+    height: auto !important;
+    min-width: 0;
+    overflow: visible;
+    margin-left: 0.5rem;
+    margin-right: 0;
+    gap: 1.5rem;
+  }
+
+  .menu-principal,
+  .primary-nav .navbar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .menu-principal .nav-link {
+    white-space: nowrap;
+  }
+
+  .acao-cabecalho {
+    width: auto;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+}
+
+// =========================================
+// CELULAR E TABLET — abaixo de 992px
+// =========================================
+
+@media (max-width: 991.98px) {
+  .cabecalho-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: calc(100% - 2rem);
+  }
+
+  .marca-elo {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: calc(100% - 52px);
+  }
+
+  .logo-elo-connect {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .marca-elo-nome,
+  .nome-elo {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .menu-mobile-toggle,
+  .primary-nav .navbar-toggler {
+    position: static;
+    display: inline-flex !important;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    margin: 0 0 0 auto;
+  }
+
+  .menu-recolhivel {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .menu-recolhivel.collapse:not(.show) {
+    display: none !important;
+  }
+
+  .menu-recolhivel.collapse.show {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    height: auto !important;
+    overflow: visible;
+  }
+
+  .menu-recolhivel.collapsing {
+    flex-basis: 100%;
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .menu-principal,
+  .primary-nav .navbar-nav {
+    display: flex;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 0.25rem !important;
+    width: 100%;
+    margin: 0;
+    padding: 0.5rem 0 0;
+  }
+
+  .menu-principal .nav-link {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    white-space: normal;
+  }
+
+  .acao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin: 0.5rem 0 0;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .vitrine-container {
+    width: calc(100% - 2rem);
+  }
+
+  .vitrine-rodape-base-conteudo {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .inicio-acoes {
+    flex-direction: column;
+  }
+
+  .inicio-acoes .btn {
+    width: 100%;
+  }
+
+  .cartao-pagina.cartao-autenticacao {
+    padding: 1.25rem;
+  }
+}
+
+// ---------- Campos de senha ----------
+
+.input-senha {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.input-senha .form-control {
+  min-width: 0;
+  flex: 1;
+}
+
+// ---------- Preferência por movimento reduzido ----------
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
