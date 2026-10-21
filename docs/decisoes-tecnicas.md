@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 20/10/2026.
+Última atualização: 21/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -125,11 +125,11 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
 
-- CI: **GitHub Actions** (`.github/workflows/ci.yml`), em todo PR para o `main` e em todo push no `main`. Instala com o lockfile travado e roda lint, formatação, build, testes e os testes e2e da API num Postgres 17 descartável. O check é obrigatório no ruleset do `main`. Não há filtro para PRs só de documentação, porque um check obrigatório que não roda deixa o PR travado.
+- CI: **GitHub Actions** (`.github/workflows/ci.yml`), em todo PR para o `main`, em todo push no `main` e toda segunda-feira. Instala com o lockfile travado e roda a auditoria das dependências de produção (`pnpm audit --prod`, a partir de moderada), lint, formatação, build, testes e os testes e2e da API num Postgres 17 descartável. O check é obrigatório no ruleset do `main`. Não há filtro para PRs só de documentação, porque um check obrigatório que não roda deixa o PR travado.
 
 - Lint e formatação: **oxlint** (com regras de React e jsx-a11y) e **Prettier** no monorepo inteiro, com hooks de commit (husky, lint-staged e commitlint). Arquivos Markdown ficam fora do Prettier. Detalhes no CONTRIBUTING.
 
-- Segurança do repositório: secret scanning com push protection (o push com credencial é bloqueado) e Dependabot. Os alertas e as correções de vulnerabilidade chegam na hora. As atualizações comuns (`.github/dependabot.yml`) chegam uma vez por mês, num PR por ecossistema, sem versões major, porque TypeScript 6, Prisma 7 e Node 24 são fixados de propósito.
+- Segurança do repositório: secret scanning com push protection (o push com credencial é bloqueado), auditoria das dependências no CI e Dependabot. Os alertas de vulnerabilidade do Dependabot não aparecem para este repositório, provavelmente porque o lockfile do pnpm 12 tem dois documentos YAML e o primeiro lista só o próprio pnpm. Por isso, a auditoria roda no CI, inclusive numa execução semanal, que pega vulnerabilidades novas mesmo sem PR. As atualizações comuns (`.github/dependabot.yml`) chegam uma vez por mês, num PR por ecossistema, sem versões major, porque TypeScript 6, Prisma 7 e Node 24 são fixados de propósito.
 
 - Ambiente de desenvolvimento: o projeto fica no sistema de arquivos do WSL (ex.: `~/projetos`), não em `/mnt/c`, por desempenho.
 
