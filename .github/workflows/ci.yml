@@ -1,5 +1,6 @@
-# Lint, formatação, build e testes em todo PR para o main e em todo push no main.
-# Os testes e2e da API rodam num Postgres 17 descartável, criado só para o job.
+# Auditoria, lint, formatação, build e testes em todo PR para o main, em todo push
+# no main e toda segunda-feira. Os testes e2e da API rodam num Postgres 17
+# descartável, criado só para o job.
 name: CI
 
 on:
@@ -7,6 +8,10 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # Semanal, para a auditoria pegar vulnerabilidades novas mesmo sem PR.
+  # Segunda-feira, 8h de Brasília.
+  schedule:
+    - cron: '0 11 * * 1'
 
 permissions:
   contents: read
@@ -50,6 +55,11 @@ jobs:
 
       - name: Instalar dependências
         run: pnpm install --frozen-lockfile
+
+      # Segunda proteção, além dos alertas do Dependabot. Só as dependências de
+      # produção, a partir de moderada.
+      - name: Auditoria das dependências de produção
+        run: pnpm audit --prod --audit-level=moderate
 
       - name: Lint
         run: pnpm lint
