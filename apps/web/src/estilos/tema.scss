@@ -61,3 +61,32 @@ main {
   color: $body-color;
   font-weight: 600;
 }
+
+.cartao-pagina {
+  width: 100%;
+  max-width: 58rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid #e2e6ef;
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 0.35rem 1rem #263c7112;
+}
+
+.cartao-pagina h1 {
+  margin: 0;
+  color: #202a3c;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+}
+
+.cartao-autenticacao {
+  max-width: 36rem;
+  margin-block: clamp(1rem, 4vh, 3rem);
+
+  h1 {
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+}
