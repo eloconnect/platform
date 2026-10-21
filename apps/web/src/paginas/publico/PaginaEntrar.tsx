@@ -26,7 +26,7 @@ export function PaginaEntrar() {
     setErro(null);
     try {
       const sessao = await api.login({ email: email.trim(), senha });
-      salvarSessao(sessao, false);
+      salvarSessao(sessao);
       await navegar(destinoPorPerfil(sessao.usuario.perfil));
     } catch (e) {
       // A mensagem depende só do status, nunca do texto do erro (que pode vir

@@ -3,19 +3,15 @@ import type { LoginResponse } from '@eloconnect/shared';
 const CHAVE = 'eloconnect.sessao';
 
 /**
- * Guarda a sessão no navegador: só até fechar a aba, ou neste dispositivo
- * quando o usuário marca "Lembrar neste dispositivo".
+ * Guarda a sessão no navegador, só até fechar a aba. O token vale 1 hora, então
+ * não há sessão persistente entre visitas.
  */
-export function salvarSessao(sessao: LoginResponse, lembrar: boolean): void {
-  limparSessao();
-  (lembrar ? localStorage : sessionStorage).setItem(
-    CHAVE,
-    JSON.stringify(sessao),
-  );
+export function salvarSessao(sessao: LoginResponse): void {
+  sessionStorage.setItem(CHAVE, JSON.stringify(sessao));
 }
 
 export function lerSessao(): LoginResponse | null {
-  const bruto = localStorage.getItem(CHAVE) ?? sessionStorage.getItem(CHAVE);
+  const bruto = sessionStorage.getItem(CHAVE);
   if (!bruto) return null;
   try {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
@@ -30,7 +26,6 @@ export function lerToken(): string | null {
 }
 
 export function limparSessao(): void {
-  localStorage.removeItem(CHAVE);
   sessionStorage.removeItem(CHAVE);
 }
 

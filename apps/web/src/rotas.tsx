@@ -8,6 +8,7 @@ import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
 import { PaginaEsqueciSenha } from './paginas/publico/PaginaEsqueciSenha';
 import { PaginaInicial } from './paginas/publico/PaginaInicial';
 import { PaginaNaoEncontrada } from './paginas/publico/PaginaNaoEncontrada';
+import { PaginaRedefinirSenha } from './paginas/publico/PaginaRedefinirSenha';
 import { PaginaStatus } from './paginas/publico/PaginaStatus';
 
 /**
@@ -22,6 +23,7 @@ export const rotas: RouteObject[] = [
       { index: true, element: <PaginaInicial /> },
       { path: 'entrar', element: <PaginaEntrar /> },
       { path: 'esqueci-senha', element: <PaginaEsqueciSenha /> },
+      { path: 'redefinir-senha', element: <PaginaRedefinirSenha /> },
       { path: 'status', element: <PaginaStatus /> },
       { path: '*', element: <PaginaNaoEncontrada /> },
     ],
