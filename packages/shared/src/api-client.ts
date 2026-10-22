@@ -6,6 +6,7 @@ import type {
   RedefinirSenhaRequest,
 } from './auth.js';
 import type { HealthResponse } from './health.js';
+import type { PaginaInicialResponse } from './publico.js';
 
 /** Erro de uma chamada à API, com o status HTTP. */
 export class ApiError extends Error {
@@ -64,6 +65,8 @@ export function createApiClient(
       requisitar<MensagemResponse>('POST', '/auth/esqueci-senha', dados),
     redefinirSenha: (dados: RedefinirSenhaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/redefinir-senha', dados),
+    getPaginaInicial: () =>
+      requisitar<PaginaInicialResponse>('GET', '/publico/pagina-inicial'),
   };
 }
 

@@ -6,7 +6,10 @@ import { api } from './api';
 import { rotas } from './rotas';
 
 vi.mock('./api', () => ({
-  api: { getHealth: vi.fn<ApiClient['getHealth']>() },
+  api: {
+    getHealth: vi.fn<ApiClient['getHealth']>(),
+    getPaginaInicial: vi.fn<ApiClient['getPaginaInicial']>(),
+  },
 }));
 
 function abrir(caminho: string) {
@@ -20,13 +23,31 @@ function abrir(caminho: string) {
 describe('Rotas', () => {
   beforeEach(() => {
     vi.mocked(api.getHealth).mockReset();
+    vi.mocked(api.getPaginaInicial).mockReset();
+
+    vi.mocked(api.getPaginaInicial).mockResolvedValue({
+      configuracao: {
+        titulo: 'Informações do sindicato',
+        descricao: 'Acesse os serviços disponíveis no portal.',
+        imagemUrl: null,
+        imagemAlt: null,
+      },
+      beneficios: [],
+      convencoes: [],
+      noticias: [],
+    });
   });
 
   it('abre a página inicial com o link para pular ao conteúdo', () => {
     abrir('/');
+
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Elo Connect' }),
+      screen.getByRole('link', { name: 'Elo Connect' }),
     ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('link', { name: 'Pular para o conteúdo' }),
+    ).toHaveAttribute('href', '#conteudo');
     expect(
       screen.getByRole('link', { name: 'Pular para o conteúdo' }),
     ).toBeInTheDocument();
