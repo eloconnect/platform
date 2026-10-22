@@ -42,7 +42,7 @@ No Windows, o projeto roda no **WSL2** (Ubuntu). Tudo abaixo é feito no termina
 
 1. **Pasta do projeto no WSL**, por exemplo `~/projetos`. Não use `/mnt/c/...`: o acesso ao disco do Windows deixa a instalação e o build muito lentos.
 2. **Docker**: Docker Desktop no Windows com a integração do WSL ligada (Settings → Resources → WSL integration), ou o Docker Engine instalado no próprio WSL. Confira com `docker info`.
-3. **Node.js 24** pelo [nvm](https://github.com/nvm-sh/nvm). A versão está no `.nvmrc`.
+3. **Node.js 24, a partir da 24.22.1**, pelo [nvm](https://github.com/nvm-sh/nvm). A versão principal está no `.nvmrc`, e a mínima, no `engines` do `package.json`.
 4. **pnpm** pelo corepack, que já vem com o Node. A versão está no `package.json`.
 
 ## Como rodar
@@ -111,7 +111,8 @@ O CI roda lint, formatação, build, testes e e2e em todo PR, e PR com o CI verm
 
 - **Porta 5432 ocupada:** há outro PostgreSQL rodando, no WSL ou no Windows. No WSL, pare com `sudo service postgresql stop`; no Windows, pare o serviço "postgresql" em Serviços. Depois rode `pnpm bootstrap` de novo.
 - **`docker: command not found` ou "Cannot connect to the Docker daemon":** abra o Docker Desktop e confira a integração com o WSL.
-- **Versão errada do Node:** rode `nvm install` na raiz do projeto. O bootstrap avisa quando a versão não é a 24.
+- **Versão errada do Node:** rode `nvm install` e depois `corepack enable` na raiz do projeto. O `pnpm install` e o bootstrap recusam versões abaixo da 24.22.1.
+- **`pnpm: command not found` depois de instalar um Node novo:** rode `corepack enable`. Ele precisa ser ativado em cada versão do Node instalada pelo nvm.
 - **`pnpm` pede aprovação ao adicionar uma dependência:** pacotes com script de instalação precisam ser aprovados com `pnpm approve-builds`. A lista de aprovados fica no `pnpm-workspace.yaml` e entra no PR.
 - **A API não encontra `@eloconnect/shared`:** rode `pnpm --filter @eloconnect/shared build` (o bootstrap já faz isso).
 - **Erro de tipo do Prisma ou tabela inexistente depois de um `git pull`:** o schema mudou. Rode `pnpm bootstrap`, que gera o client de novo e aplica as migrations novas.

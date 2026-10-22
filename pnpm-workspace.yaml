@@ -13,3 +13,7 @@ allowBuilds:
 # onde vêm os alertas do Dependabot) lê só essa parte. Efeito colateral: o pnpm
 # não troca de versão sozinho, então use `corepack enable` (ver README).
 pmOnFail: ignore
+
+# Recusa a instalação com um Node fora do `engines` do package.json (mínimo
+# 24.22.1, com as correções de segurança de outubro de 2026).
+engineStrict: true

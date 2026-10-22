@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 21/10/2026.
+Última atualização: 22/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -105,7 +105,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Gerenciador de pacotes: **pnpm** (workspaces). Scripts de instalação de dependências precisam ser aprovados com `pnpm approve-builds`; a lista de aprovados fica no `pnpm-workspace.yaml`. A versão do pnpm vem do campo `packageManager` do `package.json` e é ativada com `corepack enable`, porque o pnpm não troca de versão sozinho (ver `pmOnFail` em Segurança do repositório).
 
-- Node.js **24 (LTS)**, fixado no `.nvmrc`.
+- Node.js **24 (LTS)**, fixado no `.nvmrc`, a partir da **24.22.1**, que traz as correções de segurança de 20/10/2026 (entre elas, a do decodificador Brotli, que o Express usa para descomprimir o corpo das requisições). A versão mínima fica no `engines` do `package.json`, e o `engineStrict` do `pnpm-workspace.yaml` faz o `pnpm install` recusar versões mais antigas. O CI usa sempre a 24.x mais recente (`check-latest`).
 
 - TypeScript **6**, fixado. O TypeScript 7 (novo compilador nativo) ainda não tem compatibilidade garantida com o NestJS CLI, o Jest e as ferramentas de lint.
 
