@@ -20,10 +20,28 @@ function rodar(titulo, comando, args, dica) {
   if (status !== 0) falhar(dica);
 }
 
+// O Node principal vem do .nvmrc, e a versão mínima, do engines do package.json.
 const nodeEsperado = readFileSync(join(raiz, '.nvmrc'), 'utf8').trim();
-if (process.versions.node.split('.')[0] !== nodeEsperado) {
+const nodeMinimo = JSON.parse(
+  readFileSync(join(raiz, 'package.json'), 'utf8'),
+).engines.node.replace('>=', '');
+
+function versaoMenor(atual, minima) {
+  const a = atual.split('.').map(Number);
+  const m = minima.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if (a[i] !== m[i]) return a[i] < m[i];
+  }
+  return false;
+}
+
+const nodeAtual = process.versions.node;
+if (
+  nodeAtual.split('.')[0] !== nodeEsperado ||
+  versaoMenor(nodeAtual, nodeMinimo)
+) {
   falhar(
-    `Este projeto usa o Node ${nodeEsperado}, e você está com o ${process.versions.node}. Rode \`nvm install\` na raiz do projeto.`,
+    `Este projeto usa o Node ${nodeEsperado}, a partir da ${nodeMinimo}, e você está com o ${nodeAtual}. Rode \`nvm install\` e depois \`corepack enable\` na raiz do projeto.`,
   );
 }
 
