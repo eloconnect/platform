@@ -48,9 +48,16 @@ export function PaginaInicial() {
         <Alert variant="danger" role="alert">
           Não foi possível carregar as informações. Tente novamente mais tarde.
         </Alert>
-        <Link to="/entrar" className="btn btn-primary btn-lg">
-          Entrar
-        </Link>
+
+        <div className="d-flex flex-wrap gap-3">
+          <Link to="/entrar" className="btn btn-primary btn-lg">
+            Entrar
+          </Link>
+
+          <Link to="/cadastro" className="btn btn-outline-primary btn-lg">
+            Criar conta
+          </Link>
+        </div>
       </main>
     );
   }
@@ -79,6 +86,10 @@ export function PaginaInicial() {
         <div className="d-flex flex-wrap gap-3">
           <Link to="/entrar" className="btn btn-primary btn-lg">
             Entrar
+          </Link>
+
+          <Link to="/cadastro" className="btn btn-outline-primary btn-lg">
+            Criar conta
           </Link>
         </div>
       </section>
