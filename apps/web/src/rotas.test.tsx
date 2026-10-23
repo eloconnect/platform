@@ -8,7 +8,6 @@ import { rotas } from './rotas';
 vi.mock('./api', () => ({
   api: {
     getHealth: vi.fn<ApiClient['getHealth']>(),
-    getPaginaInicial: vi.fn<ApiClient['getPaginaInicial']>(),
   },
 }));
 
@@ -23,19 +22,15 @@ function abrir(caminho: string) {
 describe('Rotas', () => {
   beforeEach(() => {
     vi.mocked(api.getHealth).mockReset();
-    vi.mocked(api.getPaginaInicial).mockReset();
+  });
+  it('abre a página de cadastro em construção', () => {
+    abrir('/cadastro');
 
-    vi.mocked(api.getPaginaInicial).mockResolvedValue({
-      configuracao: {
-        titulo: 'Informações do sindicato',
-        descricao: 'Acesse os serviços disponíveis no portal.',
-        imagemUrl: null,
-        imagemAlt: null,
-      },
-      beneficios: [],
-      convencoes: [],
-      noticias: [],
-    });
+    expect(
+      screen.getByRole('heading', {
+        name: /cadastro em construção/i,
+      }),
+    ).toBeInTheDocument();
   });
 
   it('abre a página inicial com o link para pular ao conteúdo', () => {

@@ -6,7 +6,6 @@ import { HealthController } from './health.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-import { PublicoModule } from './publico/publico.module';
 
 @Module({
   imports: [
@@ -14,7 +13,6 @@ import { PublicoModule } from './publico/publico.module';
     PrismaModule,
     AuthModule,
     EmailModule,
-    PublicoModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

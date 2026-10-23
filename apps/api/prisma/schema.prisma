@@ -361,13 +361,3 @@ model Beneficio {
   criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 }
-
-/// Configuração editável da página inicial pública.
-model ConfiguracaoPaginaInicial {
-  id           Int      @id @default(1)
-  titulo       String   @default("Informações do sindicato para farmácias associadas")
-  descricao    String   @default("Acesse informações sobre benefícios, convenções coletivas e suporte. Entre no portal para consultar os serviços disponíveis.")
-  imagemUrl    String?
-  imagemAlt    String?
-  atualizadoEm DateTime @updatedAt
-}
