@@ -6,7 +6,9 @@ import { api } from './api';
 import { rotas } from './rotas';
 
 vi.mock('./api', () => ({
-  api: { getHealth: vi.fn<ApiClient['getHealth']>() },
+  api: {
+    getHealth: vi.fn<ApiClient['getHealth']>(),
+  },
 }));
 
 function abrir(caminho: string) {
@@ -21,12 +23,26 @@ describe('Rotas', () => {
   beforeEach(() => {
     vi.mocked(api.getHealth).mockReset();
   });
+  it('abre a página de cadastro em construção', () => {
+    abrir('/cadastro');
+
+    expect(
+      screen.getByRole('heading', {
+        name: /cadastro em construção/i,
+      }),
+    ).toBeInTheDocument();
+  });
 
   it('abre a página inicial com o link para pular ao conteúdo', () => {
     abrir('/');
+
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Elo Connect' }),
+      screen.getByRole('link', { name: 'Elo Connect' }),
     ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('link', { name: 'Pular para o conteúdo' }),
+    ).toHaveAttribute('href', '#conteudo');
     expect(
       screen.getByRole('link', { name: 'Pular para o conteúdo' }),
     ).toBeInTheDocument();
