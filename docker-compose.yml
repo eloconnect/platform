@@ -6,8 +6,9 @@ services:
       POSTGRES_USER: eloconnect
       POSTGRES_PASSWORD: eloconnect
       POSTGRES_DB: eloconnect
+    # Só a própria máquina acessa: a senha de desenvolvimento está no repositório público.
     ports:
-      - '5432:5432'
+      - '127.0.0.1:5432:5432'
     # Usado pelo `docker compose up --wait` (pnpm bootstrap) para esperar o banco aceitar conexões.
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U eloconnect -d eloconnect']
@@ -16,6 +17,17 @@ services:
       retries: 15
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # Captura os e-mails da API em desenvolvimento. Nada sai da máquina: o Mailpit
+  # não reenvia mensagens, e elas somem quando o container para (sem volume).
+  mailpit:
+    image: axllent/mailpit:v1.31.6
+    container_name: eloconnect-mailpit
+    # Só a própria máquina acessa: 1025 recebe os e-mails (SMTP) e 8025 é a
+    # caixa de entrada no navegador (http://localhost:8025).
+    ports:
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:8025:8025'
 
 volumes:
   pgdata:

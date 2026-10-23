@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 22/10/2026.
+Última atualização: 23/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -97,7 +97,18 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 - Hospedagem: free tier. Volume estimado: até ~2.000 associados, ~150 com contribuição ativa, menos de 400 acessos mensais. Verificar os termos dos planos gratuitos, pois alguns proíbem uso comercial.
 
-- E-mail transacional: verificar limites diários do serviço gratuito escolhido (cobrança formal para ~2.000 destinatários pode exigir envio escalonado).
+- E-mail transacional: em produção, um provedor com plano grátis e SMTP, porque a API envia por SMTP (Nodemailer). Pesquisa de 23/10/2026 (os limites mudam; conferir antes de contratar):
+
+  - **Brevo**: 300 e-mails por dia (cerca de 9.000 por mês), com SMTP e sem prazo de validade. Os e-mails do plano grátis levam a marca do Brevo.
+  - **Mailjet**: 200 por dia (6.000 por mês), com SMTP e sem cartão.
+  - **Resend**: 100 por dia (3.000 por mês). O SMTP exige domínio verificado.
+  - **Gmail pessoal**: cerca de 500 destinatários por dia, mas o remetente seria um endereço @gmail.com, a senha de app dá acesso à caixa inteira e a conta pode ser bloqueada por envio automático. Descartado.
+  - **Google Workspace**: 2.000 e-mails por usuário por dia (ou até 10.000 pelo SMTP relay). É pago, então só faz sentido se o sindicato já usar o Workspace.
+  - SendGrid e Amazon SES não têm plano grátis permanente.
+
+  Recomendação: **Brevo**, pelo maior limite diário. O limite vale para todos os envios, então a cobrança formal aos ~2.000 associados (RNF09) precisa ser escalonada em vários dias, deixando folga diária para os e-mails urgentes (recuperação de senha, boletos e lembretes). A escolha final fica junto com a hospedagem (#28).
+
+  Depende de um domínio do sindicato (ou do projeto) com acesso ao DNS, para configurar SPF e DKIM e o remetente `nao-responda@<domínio>` (perguntar ao cliente). Pergunta para os professores (P07): o provedor recebe nome e e-mail dos associados; que cuidados de LGPD isso exige? A chave ou senha do provedor fica só nas configurações da hospedagem, nunca no repositório.
 
 ## Ambiente e ferramentas
 
@@ -123,7 +134,9 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Sessão: **JWT** válido por 1 hora, enviado no cabeçalho `Authorization: Bearer <token>`. No web, o token fica no `sessionStorage`. O mesmo formato serve para o app mobile do próximo semestre.
 
-- Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento.
+- Banco local: **PostgreSQL 17 no Docker Compose** (`docker-compose.yml` na raiz), com credenciais só de desenvolvimento. As portas do banco e do Mailpit ficam presas ao `127.0.0.1`: só a própria máquina acessa, porque as senhas de desenvolvimento estão no repositório público.
+
+- E-mail em desenvolvimento: **Mailpit** no Docker Compose, com a versão fixada. Ele recebe os e-mails da API (SMTP na porta 1025) e mostra numa caixa de entrada em `http://localhost:8025`. Não reenvia nada para fora e não guarda as mensagens depois que o container para. O `.env.example` já aponta o SMTP para ele, e o `pnpm bootstrap` acrescenta ao `.env` as variáveis novas do exemplo, sem mexer nas que já existem.
 
 - CI: **GitHub Actions** (`.github/workflows/ci.yml`), em todo PR para o `main`, em todo push no `main` e toda segunda-feira. Instala com o lockfile travado e roda a auditoria das dependências de produção (`pnpm audit --prod`, a partir de moderada), lint, formatação, build, testes e os testes e2e da API num Postgres 17 descartável. O check é obrigatório no ruleset do `main`. Não há filtro para PRs só de documentação, porque um check obrigatório que não roda deixa o PR travado.
 

@@ -73,6 +73,7 @@ O `pnpm dev` sobe a API, o web e o shared juntos, recarregando a cada alteraçã
 
 - Web: <http://localhost:5173> (a página `/status` mostra se a API e o banco estão ok).
 - API: <http://localhost:3000/api> (`GET /api/health` confere a API e o banco).
+- E-mails: <http://localhost:8025> (caixa de entrada do Mailpit, ver abaixo).
 
 ### Usuários de desenvolvimento
 
@@ -85,7 +86,19 @@ O seed cria só dados fictícios. A senha de todos é `eloconnect123`.
 | `associado@example.com` | Associado adimplente |
 | `inadimplente@example.com` | Associado inadimplente |
 
-O login entra com as issues #16 (API) e #17 (tela).
+### E-mails em desenvolvimento
+
+Os e-mails da API (por exemplo, o link de recuperação de senha) vão para o Mailpit, que sobe junto com o banco no `pnpm bootstrap`. Eles aparecem na caixa de entrada <http://localhost:8025> e não saem da sua máquina: o Mailpit não reenvia nada para fora, mesmo que o destinatário seja um e-mail real, e as mensagens somem quando o container para.
+
+Para testar a recuperação de senha de ponta a ponta:
+
+1. Com o `pnpm dev` rodando, abra <http://localhost:5173/esqueci-senha> e informe `associado@example.com`.
+2. Abra <http://localhost:8025>, entre no e-mail "Redefinição de senha" e clique no link.
+3. Crie a nova senha e entre com ela em <http://localhost:5173/entrar>.
+
+Para voltar à senha `eloconnect123`, rode `pnpm --filter api db:reset`.
+
+O banco e o Mailpit só aceitam conexões da própria máquina, porque as senhas de desenvolvimento estão no repositório.
 
 ## Comandos
 
@@ -103,13 +116,15 @@ Todos rodam na raiz do projeto.
 | `pnpm --filter api db:seed` | Roda o seed (não faz nada se o banco já tiver dados) |
 | `pnpm --filter api db:reset` | **Apaga** o banco local e recria com migrations e seed |
 | `pnpm --filter api db:studio` | Abre o Prisma Studio para ver os dados |
-| `docker compose down` | Para o banco (os dados ficam guardados no volume) |
+| `docker compose down` | Para o banco e o Mailpit (os dados do banco ficam guardados no volume) |
 
 O CI roda lint, formatação, build, testes e e2e em todo PR, e PR com o CI vermelho não entra no `main`.
 
 ## Problemas comuns
 
 - **Porta 5432 ocupada:** há outro PostgreSQL rodando, no WSL ou no Windows. No WSL, pare com `sudo service postgresql stop`; no Windows, pare o serviço "postgresql" em Serviços. Depois rode `pnpm bootstrap` de novo.
+- **Porta 1025 ou 8025 ocupada:** há outro Mailpit (ou MailHog) rodando. Pare o outro e rode `pnpm bootstrap` de novo.
+- **O e-mail não aparece no Mailpit:** confira se o `apps/api/.env` tem `SMTP_HOST="localhost"` e `SMTP_PORT=1025`. Quem criou o `.env` antes do Mailpit pode estar com o exemplo antigo (`smtp.example.com`); o bootstrap avisa nesse caso.
 - **`docker: command not found` ou "Cannot connect to the Docker daemon":** abra o Docker Desktop e confira a integração com o WSL.
 - **Versão errada do Node:** rode `nvm install` e depois `corepack enable` na raiz do projeto. O `pnpm install` e o bootstrap recusam versões abaixo da 24.22.1.
 - **`pnpm: command not found` depois de instalar um Node novo:** rode `corepack enable`. Ele precisa ser ativado em cada versão do Node instalada pelo nvm.
