@@ -5,8 +5,8 @@ export function PaginaCadastro() {
   useTituloPagina('Cadastro em construção');
 
   return (
-    <main className="container py-5">
-      <section aria-labelledby="titulo-cadastro">
+    <>
+      <section className="container py-5" aria-labelledby="titulo-cadastro">
         <h1 id="titulo-cadastro" className="h2 mb-3">
           Cadastro em construção
         </h1>
@@ -22,6 +22,6 @@ export function PaginaCadastro() {
           Voltar à página inicial
         </Link>
       </section>
-    </main>
+    </>
   );
 }
