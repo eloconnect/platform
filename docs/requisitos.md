@@ -1,6 +1,6 @@
 # Elo Connect — Requisitos (v3)
 
-Consolidado a partir da entrevista e das respostas complementares do cliente. Última atualização: 09/10/2026.
+Consolidado a partir da entrevista e das respostas complementares do cliente. Última atualização: 24/10/2026.
 
 **Legenda de status**
 
@@ -225,3 +225,4 @@ As user stories (US01 a US39) são mantidas como issues no GitHub Projects da or
 | P09 | Carga inicial: em que formato está hoje a lista dos ~150 associados que já pagam (planilha, sistema anterior)? | Cliente | RF08, RF10, implantação |
 | P10 | Boleto avulso: é gerado na hora ou entra no lote mensal? Segue o vencimento do dia 10 e os lembretes? O pagamento libera os benefícios por qual período? | Cliente | RN24, RF37, RF16 |
 | P11 | Responsabilidade pelo compartilhamento do acesso com o contador (RN29): um aviso com caixa de aceite no primeiro cadastro basta, ou é preciso um termo de uso formal? O sistema deve registrar data/hora do aceite? Permitir o compartilhamento de credenciais entra em conflito com a LGPD para os dados financeiros do associado? | Prof. Poli | RN29, RF04, RNF05 |
+| P12 | Quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção? A demonstração do PI usa o plano grátis da Vercel, que é só para uso não comercial e por isso não serve para o sistema em produção. | Cliente | Hospedagem e e-mail de produção (decisoes-tecnicas.md), RNF09 |
