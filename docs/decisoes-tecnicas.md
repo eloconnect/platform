@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 23/10/2026.
+Última atualização: 24/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -95,7 +95,11 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 - Biblioteca de componentes: **React Bootstrap**, com tema próprio em Sass para o público idoso (fonte base de 18px, cores com contraste acima do AA, foco bem visível). Decidida no [ADR-002](adr/0002-biblioteca-componentes.md).
 
-- Hospedagem: free tier. Volume estimado: até ~2.000 associados, ~150 com contribuição ativa, menos de 400 acessos mensais. Verificar os termos dos planos gratuitos, pois alguns proíbem uso comercial.
+- Hospedagem: volume estimado de até ~2.000 associados, ~150 com contribuição ativa e menos de 400 acessos mensais. Estudo de 20 a 24/10/2026 (#28):
+
+  - **Demonstração do PI** (entrega até o fim de 2026): **Vercel** no plano grátis (Hobby) para as telas e a API, e **Neon** (Postgres grátis, sem prazo de validade) para o banco, só com dados fictícios. A Vercel roda o NestJS como uma função, sem configuração. Na #29, a API passa a usar o `waitUntil` para o e-mail enviado depois da resposta, e as tarefas agendadas (lote mensal e lembretes) usam os Cron Jobs da Vercel. Os PDFs das convenções (RF21) ficam no Vercel Blob, numa área privada servida pela API, com 1 GB grátis.
+  - **Produção** (sistema do cliente): o plano grátis da Vercel é só para uso pessoal e não comercial, então não serve. A hospedagem de produção depende de quanto o sindicato pode gastar por mês (P12).
+  - Avaliados e descartados: Render (o plano grátis dorme depois de 15 minutos sem acesso e leva cerca de 1 minuto para acordar, e o Postgres grátis expira em 30 dias), Koyeb (sem plano grátis para contas novas desde fevereiro de 2026, segundo fontes de terceiros) e Supabase (pausa o banco depois de 7 dias sem uso).
 
 - E-mail transacional: em produção, um provedor com plano grátis e SMTP, porque a API envia por SMTP (Nodemailer). Pesquisa de 23/10/2026 (os limites mudam; conferir antes de contratar):
 
@@ -106,7 +110,7 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
   - **Google Workspace**: 2.000 e-mails por usuário por dia (ou até 10.000 pelo SMTP relay). É pago, então só faz sentido se o sindicato já usar o Workspace.
   - SendGrid e Amazon SES não têm plano grátis permanente.
 
-  Recomendação: **Brevo**, pelo maior limite diário. O limite vale para todos os envios, então a cobrança formal aos ~2.000 associados (RNF09) precisa ser escalonada em vários dias, deixando folga diária para os e-mails urgentes (recuperação de senha, boletos e lembretes). A escolha final fica junto com a hospedagem (#28).
+  Recomendação: **Brevo**, pelo maior limite diário. O limite vale para todos os envios, então a cobrança formal aos ~2.000 associados (RNF09) precisa ser escalonada em vários dias, deixando folga diária para os e-mails urgentes (recuperação de senha, boletos e lembretes). A escolha final fica junto com a hospedagem de produção (P12).
 
   Depende de um domínio do sindicato (ou do projeto) com acesso ao DNS, para configurar SPF e DKIM e o remetente `nao-responda@<domínio>` (perguntar ao cliente). Pergunta para os professores (P07): o provedor recebe nome e e-mail dos associados; que cuidados de LGPD isso exige? A chave ou senha do provedor fica só nas configurações da hospedagem, nunca no repositório.
 
@@ -207,6 +211,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 - P09: em que formato está a lista atual dos ~150 associados que já pagam (para a carga inicial)?
 
 - P10: regras do boleto avulso (geração, vencimento, lembretes e período de acesso aos benefícios).
+
+- P12: quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção.
 
 ### Com os professores
 
