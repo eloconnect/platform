@@ -6,7 +6,6 @@ import { HealthController } from './health.controller';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-import { BeneficiosController } from './beneficios/beneficios.controller';
 
 @Module({
   imports: [
@@ -15,7 +14,7 @@ import { BeneficiosController } from './beneficios/beneficios.controller';
     AuthModule,
     EmailModule,
   ],
-  controllers: [AppController, HealthController, BeneficiosController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -10,6 +10,6 @@ import { AccessStatusGuard } from './guards/access-status.guard';
   imports: [JwtModule.register({}), EmailModule],
   controllers: [AuthController],
   providers: [AuthService, RolesGuard, AccessStatusGuard],
-  exports: [RolesGuard, AccessStatusGuard],
+  exports: [JwtModule, RolesGuard, AccessStatusGuard],
 })
 export class AuthModule {}
