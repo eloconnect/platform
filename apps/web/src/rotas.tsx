@@ -10,6 +10,7 @@ import { PaginaInicial } from './paginas/publico/PaginaInicial';
 import { PaginaNaoEncontrada } from './paginas/publico/PaginaNaoEncontrada';
 import { PaginaRedefinirSenha } from './paginas/publico/PaginaRedefinirSenha';
 import { PaginaStatus } from './paginas/publico/PaginaStatus';
+import { PaginaCadastro } from './paginas/publico/PaginaCadastro';
 
 /**
  * Rotas do app, em três áreas: pública, do associado e da sede.
@@ -26,6 +27,7 @@ export const rotas: RouteObject[] = [
       { path: 'redefinir-senha', element: <PaginaRedefinirSenha /> },
       { path: 'status', element: <PaginaStatus /> },
       { path: '*', element: <PaginaNaoEncontrada /> },
+      { path: 'cadastro', element: <PaginaCadastro /> },
     ],
   },
   {

@@ -1,10 +1,16 @@
 // Prepara o ambiente de desenvolvimento depois do `pnpm install`: confere o
-// Node e o Docker, cria o .env da API, sobe o banco, gera o client do Prisma,
+// Node e o Docker, cria ou completa o .env da API, sobe o banco e o Mailpit,
+// gera o client do Prisma,
 // aplica as migrations, roda o seed e compila o shared. Pode ser rodado de
 // novo sem apagar nada, inclusive depois de um `git pull`.
 // Para recriar o banco do zero: `pnpm --filter api db:reset`.
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, readFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  copyFileSync,
+  existsSync,
+  readFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 const raiz = join(import.meta.dirname, '..');
@@ -56,19 +62,57 @@ if (docker.error || docker.status !== 0) {
   );
 }
 
+// Se o .env já existe, só acrescenta as variáveis novas do .env.example (com os
+// comentários delas), sem mexer nas que já estão lá.
+const exemplo = join(raiz, 'apps/api/.env.example');
 const env = join(raiz, 'apps/api/.env');
-if (existsSync(env)) {
-  console.log('\n✔ apps/api/.env já existe e foi mantido.');
-} else {
-  copyFileSync(join(raiz, 'apps/api/.env.example'), env);
+const chaveDaLinha = (linha) => /^([A-Z0-9_]+)=/.exec(linha)?.[1];
+
+if (!existsSync(env)) {
+  copyFileSync(exemplo, env);
   console.log('\n✔ apps/api/.env criado a partir do .env.example.');
+} else {
+  const atual = readFileSync(env, 'utf8');
+  const existentes = new Set(atual.split('\n').map(chaveDaLinha));
+  const novas = [];
+  let comentarios = [];
+  for (const linha of readFileSync(exemplo, 'utf8').split('\n')) {
+    if (linha.startsWith('#')) {
+      comentarios.push(linha);
+      continue;
+    }
+    const chave = chaveDaLinha(linha);
+    if (chave && !existentes.has(chave)) {
+      novas.push({ chave, texto: [...comentarios, linha].join('\n') });
+    }
+    comentarios = [];
+  }
+
+  if (novas.length > 0) {
+    const separador = atual.endsWith('\n') ? '\n' : '\n\n';
+    appendFileSync(
+      env,
+      `${separador}${novas.map((nova) => nova.texto).join('\n\n')}\n`,
+    );
+    console.log(
+      `\n✔ apps/api/.env mantido, com as variáveis novas do .env.example: ${novas.map((nova) => nova.chave).join(', ')}.`,
+    );
+  } else {
+    console.log('\n✔ apps/api/.env já existe e foi mantido.');
+  }
+
+  if (/^SMTP_HOST="?smtp\.example\.com"?\s*$/m.test(atual)) {
+    console.log(
+      '\n⚠ O SMTP_HOST do apps/api/.env ainda é o exemplo antigo (smtp.example.com). Para ver os e-mails no Mailpit, use SMTP_HOST="localhost" e SMTP_PORT=1025.',
+    );
+  }
 }
 
 rodar(
-  'Subindo o banco (PostgreSQL no Docker)',
+  'Subindo o banco (PostgreSQL) e o Mailpit no Docker',
   'docker',
   ['compose', 'up', '-d', '--wait'],
-  'Não foi possível subir o banco. Se a porta 5432 estiver ocupada, veja "Problemas comuns" no README.',
+  'Não foi possível subir o banco e o Mailpit. Se a porta 5432, 1025 ou 8025 estiver ocupada, veja "Problemas comuns" no README.',
 );
 rodar(
   'Gerando o client do Prisma',
@@ -95,4 +139,6 @@ rodar(
   'A compilação do packages/shared falhou.',
 );
 
-console.log('\n✔ Tudo pronto. Rode `pnpm dev` e abra http://localhost:5173');
+console.log(
+  '\n✔ Tudo pronto. Rode `pnpm dev` e abra http://localhost:5173. Os e-mails de desenvolvimento aparecem em http://localhost:8025.',
+);
