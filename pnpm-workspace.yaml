@@ -17,6 +17,9 @@ pmOnFail: ignore
 # Recusa a instalação com um Node fora do `engines` do package.json (mínimo
 # 24.22.1, com as correções de segurança de outubro de 2026).
 engineStrict: true
+# Overrides temporários de segurança para dependências transitivas
+# utilizadas pelo Express. Remover quando as dependências do NestJS
+# passarem a fornecer versões corrigidas compatíveis.
 overrides:
   body-parser: ^2.4.0
   multer: ^2.5.0
