@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 24/10/2026.
+Última atualização: 26/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -124,7 +124,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - TypeScript **6**, fixado. O TypeScript 7 (novo compilador nativo) ainda não tem compatibilidade garantida com o NestJS CLI, o Jest e as ferramentas de lint.
 
-- API: NestJS em **CommonJS com Jest**, pela compatibilidade com a documentação do NestJS e para evitar extensões `.js` nos imports. O `packages/shared` também compila em CommonJS.
+- API: NestJS em **ESM com Jest** (`"type": "module"` no `package.json` da API). Até 26/10/2026 a API era CommonJS, mas o NestJS 12 é distribuído só em ESM e o carregador de funções da Vercel não aceita `require()` de módulo ESM, então a API caía ao iniciar. Consequências: os imports relativos terminam em `.js`, mesmo nos arquivos `.ts` (sem a extensão, o build falha); nos testes, o `jest` vem de `import { jest } from '@jest/globals'`; e o client do Prisma é gerado em ESM. O `packages/shared` continua compilando em CommonJS, que a API importa sem problema.
 
 - Convenções da API: prefixo global `/api`; CORS liberado para o front em desenvolvimento (`http://localhost:5173`); variáveis de ambiente lidas do `.env` via `ConfigModule`; validação global de entrada com `ValidationPipe`. O `GET /api/health` também verifica a conexão com o banco.
 

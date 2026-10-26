@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import type { HealthResponse } from '@eloconnect/shared';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from './prisma/prisma.service.js';
 
 @Controller('health')
 export class HealthController {

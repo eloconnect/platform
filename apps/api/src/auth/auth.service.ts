@@ -8,12 +8,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { TipoToken } from '../generated/prisma/enums';
-import { EmailService } from '../email/email.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { EsqueciSenhaDto } from './dto/esqueci-senha.dto';
-import { LoginDto } from './dto/login.dto';
-import { RedefinirSenhaDto } from './dto/redefinir-senha.dto';
+import { TipoToken } from '../generated/prisma/enums.js';
+import { EmailService } from '../email/email.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { EsqueciSenhaDto } from './dto/esqueci-senha.dto.js';
+import { LoginDto } from './dto/login.dto.js';
+import { RedefinirSenhaDto } from './dto/redefinir-senha.dto.js';
 
 const VALIDADE_TOKEN_RECUPERACAO_MS = 60 * 60 * 1000;
 const MENSAGEM_RECUPERACAO =

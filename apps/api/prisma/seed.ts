@@ -4,7 +4,7 @@
 import 'dotenv/config';
 import { hash } from '@node-rs/argon2';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaClient } from '../src/generated/prisma/client.js';
 
 /** Senha de todos os usuários de desenvolvimento. */
 const SENHA_DEV = 'eloconnect123';

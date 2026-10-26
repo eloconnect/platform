@@ -1,8 +1,9 @@
+import { jest } from '@jest/globals';
 import { InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
-import { EmailService } from './email.service';
+import { EmailService } from './email.service.js';
 
 describe('EmailService', () => {
   const sendMail = jest.fn();
