@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { createHash } from 'node:crypto';
 import {
   BadRequestException,
@@ -7,9 +8,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { hash, verify } from '@node-rs/argon2';
-import { EmailService } from '../email/email.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { AuthService } from './auth.service';
+import { EmailService } from '../email/email.service.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { AuthService } from './auth.service.js';
 
 describe('AuthService', () => {
   const senha = 'senha-segura';

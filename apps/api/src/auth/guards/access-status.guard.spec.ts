@@ -1,6 +1,7 @@
+import { jest } from '@jest/globals';
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AccessStatusGuard } from './access-status.guard';
+import { AccessStatusGuard } from './access-status.guard.js';
 
 function criarContexto(user?: { sub?: string; perfil?: string }) {
   return {

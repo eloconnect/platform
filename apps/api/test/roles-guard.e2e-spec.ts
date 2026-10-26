@@ -5,8 +5,8 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { Roles } from '../src/auth/decorators/roles.decorator';
-import { RolesGuard } from '../src/auth/guards/roles.guard';
+import { Roles } from '../src/auth/decorators/roles.decorator.js';
+import { RolesGuard } from '../src/auth/guards/roles.guard.js';
 
 const SEGREDO = 'segredo-so-para-teste-com-mais-de-32-caracteres';
 

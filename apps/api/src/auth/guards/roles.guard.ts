@@ -8,8 +8,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { Perfil } from '../../generated/prisma/enums';
-import { ROLES_KEY } from '../decorators/roles.decorator';
+import { Perfil } from '../../generated/prisma/enums.js';
+import { ROLES_KEY } from '../decorators/roles.decorator.js';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

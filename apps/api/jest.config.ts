@@ -17,7 +17,7 @@ const config: Config = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   moduleNameMapper: {
-    // O client gerado pelo Prisma importa os próprios arquivos .ts com extensão .js.
+    // Em ESM, os imports relativos terminam em .js; o Jest resolve para o .ts.
     '^(\\.{1,2}/.*)\\.js$': '$1',
     ...pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
   },

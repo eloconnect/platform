@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { EmailModule } from '../email/email.module';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { RolesGuard } from './guards/roles.guard';
-import { AccessStatusGuard } from './guards/access-status.guard';
+import { EmailModule } from '../email/email.module.js';
+import { AuthController } from './auth.controller.js';
+import { AuthService } from './auth.service.js';
+import { RolesGuard } from './guards/roles.guard.js';
+import { AccessStatusGuard } from './guards/access-status.guard.js';
 
 @Module({
   imports: [JwtModule.register({}), EmailModule],

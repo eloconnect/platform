@@ -6,8 +6,8 @@
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PrismaService } from '../../prisma/prisma.service';
-import { REQUIRE_FINANCIAL_ACCESS_KEY } from '../decorators/require-access.decorator';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { REQUIRE_FINANCIAL_ACCESS_KEY } from '../decorators/require-access.decorator.js';
 import { podeAcessarRecursoRestrito } from '@eloconnect/shared';
 
 interface UsuarioAutenticado {
