@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/api/:caminho*",
+      "destination": "https://eloconnect-api.vercel.app/api/:caminho*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

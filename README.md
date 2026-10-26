@@ -100,6 +100,16 @@ Para voltar à senha `eloconnect123`, rode `pnpm --filter api db:reset`.
 
 O banco e o Mailpit só aceitam conexões da própria máquina, porque as senhas de desenvolvimento estão no repositório.
 
+## Demonstração
+
+A demonstração do PI fica em <https://eloconnect.vercel.app>, com os mesmos usuários fictícios do seed (tabela acima). Ela é atualizada sozinha a cada merge no `main`.
+
+- Os dados são fictícios e podem ser recriados a qualquer momento.
+- A recuperação de senha não envia e-mail na demonstração, porque ainda não há provedor (P12).
+- Depois de um tempo sem acesso, a primeira resposta pode demorar alguns segundos.
+
+Como ela está configurada: [docs/deploy.md](docs/deploy.md).
+
 ## Comandos
 
 Todos rodam na raiz do projeto.
