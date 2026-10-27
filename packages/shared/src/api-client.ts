@@ -1,3 +1,4 @@
+import type { FiltrosAssociados, ListaAssociados } from './associados.js';
 import type {
   EsqueciSenhaRequest,
   LoginRequest,
@@ -80,7 +81,24 @@ export function createApiClient(
       requisitar<MensagemResponse>('POST', '/auth/esqueci-senha', dados),
     redefinirSenha: (dados: RedefinirSenhaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/redefinir-senha', dados),
+    listarAssociados: (filtros: FiltrosAssociados = {}) =>
+      requisitar<ListaAssociados>(
+        'GET',
+        `/associados${montarQuery({ ...filtros })}`,
+      ),
   };
+}
+
+/** "?chave=valor&..." só com os valores informados; vazio se não houver nenhum. */
+function montarQuery(
+  parametros: Record<string, string | number | boolean | undefined>,
+): string {
+  const query = new URLSearchParams();
+  for (const [chave, valor] of Object.entries(parametros)) {
+    if (valor !== undefined && valor !== '') query.set(chave, String(valor));
+  }
+  const texto = query.toString();
+  return texto ? `?${texto}` : '';
 }
 
 export type ApiClient = ReturnType<typeof createApiClient>;

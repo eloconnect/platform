@@ -7,6 +7,16 @@ export function normalizarCnpj(valor: string): string {
 }
 
 /**
+ * CNPJ com a pontuação de costume, para mostrar na tela.
+ * Ex.: "11222333000181" vira "11.222.333/0001-81". Fora do tamanho, volta como veio.
+ */
+export function formatarCnpj(valor: string): string {
+  const cnpj = normalizarCnpj(valor);
+  if (cnpj.length !== 14) return valor;
+  return `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
+}
+
+/**
  * Confere o formato e os dígitos verificadores do CNPJ, com ou sem pontuação.
  * Aceita o CNPJ alfanumérico, emitido pela Receita desde julho de 2026
  * (IN RFB 2.229/2024): os 12 primeiros caracteres podem ter letras, e cada

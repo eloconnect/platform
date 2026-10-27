@@ -8,6 +8,7 @@ export function LayoutAdmin() {
       inicio="/admin"
       itensMenu={[
         { para: '/admin', texto: 'Painel' },
+        { para: '/admin/associados', texto: 'Associados' },
         { para: '/', texto: 'Sair', aoClicar: limparSessao },
       ]}
     />

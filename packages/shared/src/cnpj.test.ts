@@ -1,10 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { cnpjValido, normalizarCnpj } from './cnpj.js';
+import { cnpjValido, formatarCnpj, normalizarCnpj } from './cnpj.js';
 
 describe('normalizarCnpj', () => {
   it('tira a pontuação e passa as letras para maiúsculas', () => {
     expect(normalizarCnpj('12.abc.345/01de-35')).toBe('12ABC34501DE35');
     expect(normalizarCnpj(' 11.222.333/0001-81 ')).toBe('11222333000181');
+  });
+});
+
+describe('formatarCnpj', () => {
+  it('põe a pontuação no CNPJ numérico e no alfanumérico', () => {
+    expect(formatarCnpj('11222333000181')).toBe('11.222.333/0001-81');
+    expect(formatarCnpj('12ABC34501DE35')).toBe('12.ABC.345/01DE-35');
+  });
+
+  it('devolve como veio quando o tamanho não é de CNPJ', () => {
+    expect(formatarCnpj('123')).toBe('123');
   });
 });
 
