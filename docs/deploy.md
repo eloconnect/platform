@@ -39,10 +39,18 @@ O SMTP fica sem configurar. A recuperação de senha responde normalmente, mas o
 Rode uma vez, da sua máquina, depois do primeiro deploy. Copie a `DATABASE_URL_UNPOOLED` do painel do Neon e use direto no comando, sem salvar em arquivo. Comece a linha com um espaço, para ela não ficar no histórico do terminal:
 
 ```bash
- DATABASE_URL='<cole aqui a DATABASE_URL_UNPOOLED>' pnpm --filter api db:seed
+ DATABASE_URL='<cole aqui a DATABASE_URL_UNPOOLED>' SEED_SENHA='<senha da equipe>' pnpm --filter api db:seed
 ```
 
-Os usuários são os mesmos de desenvolvimento (README). A senha deles é pública, então qualquer pessoa com o link entra como admin. Para uma demonstração com dados fictícios isso é aceitável, mas avise quem for ver.
+Os usuários são os mesmos de desenvolvimento (README), mas a senha é a da `SEED_SENHA`, combinada só com a equipe. Sem ela, o seed usa a senha pública de desenvolvimento, e qualquer pessoa com o link entraria como admin.
+
+### Recriar o banco da demonstração
+
+Para trocar a senha ou voltar aos dados iniciais. **Apaga todos os dados da demonstração**, reaplica as migrations e roda o seed:
+
+```bash
+ DATABASE_URL='<cole aqui a DATABASE_URL_UNPOOLED>' SEED_SENHA='<senha da equipe>' pnpm --filter api db:reset
+```
 
 ## Prévias de PR
 
