@@ -19,6 +19,26 @@ export interface Associado {
   atualizadoEm: string;
 }
 
+export type StatusCancelamento = 'PENDENTE' | 'APROVADA' | 'RECUSADA';
+
+/** Pedido de cancelamento feito pelo associado. Datas em texto ISO. */
+export interface SolicitacaoCancelamento {
+  id: string;
+  status: StatusCancelamento;
+  motivo: string | null;
+  observacaoSede: string | null;
+  solicitadaEm: string;
+  decididaEm: string | null;
+  /** Quem da sede aprovou ou recusou. */
+  decididaPor: { nome: string } | null;
+}
+
+/** Perfil do associado para a sede (RF07). */
+export interface AssociadoDetalhe extends Associado {
+  /** Da mais recente para a mais antiga. */
+  cancelamentos: SolicitacaoCancelamento[];
+}
+
 /** Cadastro pela sede (RF08). O CNPJ pode vir com ou sem pontuação. */
 export interface CriarAssociadoRequest {
   cnpj: string;

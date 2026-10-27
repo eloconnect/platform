@@ -1,9 +1,13 @@
-// Lista, cadastro, edição e inativação de associados pela sede (US06, US08:
-// RF06, RF08), com o registro de cada ação no log de auditoria (RN26). Roda no
-// banco de teste (preparar-banco.mjs); os dados ficam lá, então cada teste usa
-// CNPJs e nomes novos.
+// Lista, perfil, cadastro, edição e inativação de associados pela sede (US06,
+// US07, US08: RF06 a RF08), com o registro de cada ação no log de auditoria
+// (RN26). Roda no banco de teste (preparar-banco.mjs); os dados ficam lá, então
+// cada teste usa CNPJs e nomes novos.
 import 'dotenv/config';
-import { cnpjValido, type ListaAssociados } from '@eloconnect/shared';
+import {
+  cnpjValido,
+  type AssociadoDetalhe,
+  type ListaAssociados,
+} from '@eloconnect/shared';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -164,6 +168,49 @@ describe('Associados (e2e)', () => {
       404,
     );
     await comoAdmin(http().get('/associados/nao-e-uuid')).expect(400);
+  });
+
+  it('o perfil traz as solicitações de cancelamento, da mais recente (RF07)', async () => {
+    const { id } = await criar();
+    await prisma.solicitacaoCancelamento.create({
+      data: {
+        associadoId: id,
+        status: 'RECUSADA',
+        motivo: 'Primeiro pedido',
+        observacaoSede: 'Observação fictícia',
+        solicitadaEm: new Date('2026-09-01T12:00:00Z'),
+        decididaEm: new Date('2026-09-02T12:00:00Z'),
+        decididaPorId: adminId,
+      },
+    });
+    await prisma.solicitacaoCancelamento.create({
+      data: {
+        associadoId: id,
+        solicitadaEm: new Date('2026-10-01T12:00:00Z'),
+      },
+    });
+
+    const resposta = await comoAdmin(http().get(`/associados/${id}`)).expect(
+      200,
+    );
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    const perfil = resposta.body as AssociadoDetalhe;
+    expect(perfil.id).toBe(id);
+    expect(perfil.cancelamentos).toEqual([
+      expect.objectContaining({
+        status: 'PENDENTE',
+        motivo: null,
+        solicitadaEm: '2026-10-01T12:00:00.000Z',
+        decididaPor: null,
+      }),
+      expect.objectContaining({
+        status: 'RECUSADA',
+        motivo: 'Primeiro pedido',
+        observacaoSede: 'Observação fictícia',
+        decididaEm: '2026-09-02T12:00:00.000Z',
+        decididaPor: { nome: 'Admin de Teste' },
+      }),
+    ]);
   });
 
   it('edita e grava só o que mudou; a contribuição tem ação própria', async () => {

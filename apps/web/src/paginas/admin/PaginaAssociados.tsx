@@ -1,5 +1,4 @@
 import type {
-  AssociadoResumo,
   FiltrosAssociados,
   ListaAssociados,
   StatusAssociado,
@@ -18,6 +17,7 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+import { textosSituacao } from './situacaoAssociado';
 
 const OPCOES_SITUACAO: [StatusAssociado, string][] = [
   ['ADIMPLENTE', 'Adimplente'],
@@ -194,7 +194,7 @@ export function PaginaAssociados() {
                   </td>
                   <td>
                     <ul className="list-unstyled mb-0">
-                      {situacao(associado).map((texto) => (
+                      {textosSituacao(associado).map((texto) => (
                         <li key={texto}>{texto}</li>
                       ))}
                     </ul>
@@ -259,20 +259,4 @@ function resumo(total: number): string {
   if (total === 0) return 'Nenhum associado encontrado.';
   if (total === 1) return '1 associado encontrado.';
   return `${total} associados encontrados.`;
-}
-
-/** Situação em texto, com as marcas à parte (não só cor). */
-function situacao(associado: AssociadoResumo): string[] {
-  const textos = [
-    associado.situacao === 'ADIMPLENTE' ? 'Adimplente' : 'Inadimplente',
-  ];
-  if (associado.cancelamentoSolicitado) textos.push('Cancelamento solicitado');
-  if (associado.acessoManual === 'BLOQUEADO') {
-    textos.push('Acesso bloqueado pela sede');
-  }
-  if (associado.acessoManual === 'LIBERADO') {
-    textos.push('Acesso liberado pela sede');
-  }
-  if (associado.inativadoEm) textos.push('Inativado');
-  return textos;
 }

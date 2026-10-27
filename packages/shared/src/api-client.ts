@@ -1,4 +1,8 @@
-import type { FiltrosAssociados, ListaAssociados } from './associados.js';
+import type {
+  AssociadoDetalhe,
+  FiltrosAssociados,
+  ListaAssociados,
+} from './associados.js';
 import type {
   EsqueciSenhaRequest,
   LoginRequest,
@@ -85,6 +89,11 @@ export function createApiClient(
       requisitar<ListaAssociados>(
         'GET',
         `/associados${montarQuery({ ...filtros })}`,
+      ),
+    buscarAssociado: (id: string) =>
+      requisitar<AssociadoDetalhe>(
+        'GET',
+        `/associados/${encodeURIComponent(id)}`,
       ),
   };
 }

@@ -5,6 +5,7 @@ import { LayoutPublico } from './layouts/LayoutPublico';
 import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
+import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
 import { PaginaEsqueciSenha } from './paginas/publico/PaginaEsqueciSenha';
@@ -51,6 +52,7 @@ export const rotas: RouteObject[] = [
     children: [
       { index: true, element: <PaginaInicioAdmin /> },
       { path: 'associados', element: <PaginaAssociados /> },
+      { path: 'associados/:id', element: <PaginaPerfilAssociado /> },
     ],
   },
 ];
