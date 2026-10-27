@@ -187,6 +187,25 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 A imutabilidade é garantida **pelo próprio banco**: triggers recusam UPDATE, DELETE e TRUNCATE nessas tabelas (migration `init`), mesmo que o código da API tenha um erro. O teste `apps/api/test/imutabilidade.e2e-spec.ts` confere isso. Para corrigir um registro errado, inclua um registro novo; nunca altere o antigo.
 
+**Como gravar no log de auditoria.** Toda ação de um usuário da sede chama o `AuditoriaService` (`apps/api/src/auditoria/`) dentro da mesma transação da alteração. Assim, a alteração e o registro entram juntos, ou nenhum dos dois entra:
+
+```ts
+await this.prisma.$transaction(async (tx) => {
+  const antes = await tx.associado.findUniqueOrThrow({ where: { id } });
+  await tx.associado.update({ where: { id }, data: dados });
+  await this.auditoria.registrar(tx, {
+    usuarioId, // o `sub` do token
+    acao: 'ASSOCIADO_EDITADO',
+    entidade: 'Associado',
+    entidadeId: id,
+    associadoId: id,
+    ...diferencas(antes, dados), // só os campos que mudaram
+  });
+});
+```
+
+Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/auditoria.ts`), que cada funcionalidade nova completa. O `valorAnterior` e o `valorNovo` guardam só os campos que mudaram, e as datas viram texto ISO.
+
 ## O que depende de pendência
 
 | Ponto do modelo | Pendência | Situação atual |

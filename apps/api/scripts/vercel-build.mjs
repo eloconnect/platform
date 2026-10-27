@@ -7,6 +7,10 @@ function rodar(comando, env = {}) {
   execSync(comando, { stdio: 'inherit', env: { ...process.env, ...env } });
 }
 
+// O client do Prisma é gerado no postinstall, mas a Vercel reaproveita o
+// node_modules do build anterior e, sem mudança no lockfile, a instalação não
+// roda o postinstall. Por isso o build gera o client sempre.
+rodar('pnpm exec prisma generate');
 rodar('pnpm --filter @eloconnect/shared build');
 
 if (process.env.VERCEL_ENV === 'production') {

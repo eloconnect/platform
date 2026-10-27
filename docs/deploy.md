@@ -12,7 +12,7 @@ São dois projetos na Vercel, ligados ao mesmo repositório:
 | `eloconnect-api` | `apps/api` | <https://eloconnect-api.vercel.app> |
 
 - As telas encaminham `/api` para a API (`apps/web/vercel.json`), como o Vite faz em desenvolvimento. O navegador fala com um endereço só, então não há CORS.
-- A API roda como uma função da Vercel (NestJS sem configuração). O build (`apps/api/scripts/vercel-build.mjs`) compila o `packages/shared` e, só no deploy de produção, aplica as migrations.
+- A API roda como uma função da Vercel (NestJS sem configuração). O build (`apps/api/scripts/vercel-build.mjs`) gera o client do Prisma, compila o `packages/shared` e, só no deploy de produção, aplica as migrations. O client é gerado no próprio build porque a Vercel reaproveita o `node_modules` do deploy anterior e, quando o lockfile não muda, a instalação não roda o `postinstall`.
 - Cada merge no `main` publica as duas. A Vercel pula o projeto que não mudou.
 
 ## Banco (Neon)
