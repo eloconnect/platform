@@ -110,4 +110,35 @@ describe('createApiClient', () => {
       expect.objectContaining({ method: 'GET' }),
     );
   });
+
+  it('cadastra, edita, inativa e reativa associados', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({}))),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+    const dados = { cnpj: '11222333000181', razaoSocial: 'Farmácia Teste' };
+
+    await cliente.criarAssociado(dados);
+    await cliente.editarAssociado('id-01', { razaoSocial: 'Outro nome' });
+    await cliente.inativarAssociado('id-01');
+    await cliente.reativarAssociado('id-01');
+    expect(
+      fetchFalso.mock.calls.map(([url, init]) => [
+        url,
+        init?.method,
+        init?.body,
+      ]),
+    ).toEqual([
+      ['/api/associados', 'POST', JSON.stringify(dados)],
+      [
+        '/api/associados/id-01',
+        'PATCH',
+        JSON.stringify({ razaoSocial: 'Outro nome' }),
+      ],
+      ['/api/associados/id-01/inativar', 'POST', undefined],
+      ['/api/associados/id-01/reativar', 'POST', undefined],
+    ]);
+  });
 });

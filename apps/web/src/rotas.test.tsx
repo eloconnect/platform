@@ -105,6 +105,7 @@ describe('Áreas logadas', () => {
   it.each([
     ['/admin', 'ADMIN', 'Painel da sede'],
     ['/admin/associados', 'ADMIN', 'Associados'],
+    ['/admin/associados/novo', 'ADMIN', 'Cadastrar associado'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
   ] as const)('%s abre para o perfil %s', (caminho, perfil, titulo) => {
     entrarComo(perfil);

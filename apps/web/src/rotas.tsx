@@ -4,6 +4,7 @@ import { LayoutAssociado } from './layouts/LayoutAssociado';
 import { LayoutPublico } from './layouts/LayoutPublico';
 import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
+import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssociado';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
@@ -52,7 +53,12 @@ export const rotas: RouteObject[] = [
     children: [
       { index: true, element: <PaginaInicioAdmin /> },
       { path: 'associados', element: <PaginaAssociados /> },
+      { path: 'associados/novo', element: <PaginaFormularioAssociado /> },
       { path: 'associados/:id', element: <PaginaPerfilAssociado /> },
+      {
+        path: 'associados/:id/editar',
+        element: <PaginaFormularioAssociado />,
+      },
     ],
   },
 ];
