@@ -31,4 +31,48 @@ describe('createApiClient', () => {
     await expect(cliente.getHealth()).rejects.toMatchObject({ status: 503 });
     await expect(cliente.getHealth()).rejects.toBeInstanceOf(ApiError);
   });
+
+  it('manda o token da sessão no cabeçalho Authorization', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(new Response(JSON.stringify({})));
+    const cliente = createApiClient('/api', fetchFalso, {
+      obterToken: () => 'token-da-sessao',
+    });
+
+    await cliente.getHealth();
+    expect(fetchFalso.mock.calls[0][1]?.headers).toMatchObject({
+      Authorization: 'Bearer token-da-sessao',
+    });
+  });
+
+  it('avisa quando a API recusa o token (401)', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(new Response('{}', { status: 401 }));
+    const aoNaoAutorizado = vi.fn<() => void>();
+    const cliente = createApiClient('/api', fetchFalso, {
+      obterToken: () => 'token-vencido',
+      aoNaoAutorizado,
+    });
+
+    await expect(cliente.getHealth()).rejects.toMatchObject({ status: 401 });
+    expect(aoNaoAutorizado).toHaveBeenCalledOnce();
+  });
+
+  it('não avisa no 401 de uma chamada sem token, como o login', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(new Response('{}', { status: 401 }));
+    const aoNaoAutorizado = vi.fn<() => void>();
+    const cliente = createApiClient('/api', fetchFalso, {
+      obterToken: () => null,
+      aoNaoAutorizado,
+    });
+
+    await expect(
+      cliente.login({ email: 'teste@example.com', senha: 'errada' }),
+    ).rejects.toMatchObject({ status: 401 });
+    expect(aoNaoAutorizado).not.toHaveBeenCalled();
+  });
 });

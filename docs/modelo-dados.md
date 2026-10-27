@@ -230,7 +230,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 
 ## Dados de desenvolvimento
 
-O seed (`apps/api/prisma/seed.ts`) cria só dados fictícios (RNF10): CNPJs gerados com dígito verificador válido e e-mails `@example.com`. A senha de todos os usuários é `eloconnect123`.
+O seed (`apps/api/prisma/seed.ts`) cria só dados fictícios (RNF10): CNPJs gerados com dígito verificador válido e e-mails `@example.com`. A senha de todos os usuários é `eloconnect123`. Na demonstração, a senha vem da variável `SEED_SENHA` ([deploy.md](deploy.md)).
 
 | Usuário | Perfil | Para testar |
 | --- | --- | --- |

@@ -1,9 +1,11 @@
-import type { ApiClient } from '@eloconnect/shared';
+import type { ApiClient, Perfil } from '@eloconnect/shared';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from './api';
 import { rotas } from './rotas';
+import { lerSessao, salvarSessao } from './sessao';
 
 vi.mock('./api', () => ({
   api: {
@@ -54,8 +56,6 @@ describe('Rotas', () => {
   it.each([
     ['/entrar', 'Entrar'],
     ['/esqueci-senha', 'Esqueci minha senha'],
-    ['/associado', 'Área do associado'],
-    ['/admin', 'Painel da sede'],
     ['/nao-existe', 'Página não encontrada'],
   ])('%s mostra "%s"', (caminho, titulo) => {
     abrir(caminho);
@@ -80,5 +80,58 @@ describe('Rotas', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'A API não respondeu',
     );
+  });
+});
+
+function entrarComo(perfil: Perfil) {
+  salvarSessao({
+    accessToken: 'token',
+    usuario: { id: 'id', email: 'teste@example.com', nome: 'Teste', perfil },
+  });
+}
+
+describe('Áreas logadas', () => {
+  beforeEach(() => sessionStorage.clear());
+
+  it.each([
+    ['/admin', 'ADMIN', 'Painel da sede'],
+    ['/associado', 'ASSOCIADO', 'Área do associado'],
+  ] as const)('%s abre para o perfil %s', (caminho, perfil, titulo) => {
+    entrarComo(perfil);
+    abrir(caminho);
+    expect(
+      screen.getByRole('heading', { level: 1, name: titulo }),
+    ).toBeInTheDocument();
+  });
+
+  it.each(['/admin', '/associado'])(
+    '%s sem login vai para o login',
+    (caminho) => {
+      abrir(caminho);
+      expect(
+        screen.getByRole('heading', { level: 1, name: 'Entrar' }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    ['/admin', 'ASSOCIADO', 'Área do associado'],
+    ['/associado', 'ADMIN', 'Painel da sede'],
+  ] as const)(
+    '%s com o perfil %s vai para a própria área',
+    (caminho, perfil, titulo) => {
+      entrarComo(perfil);
+      abrir(caminho);
+      expect(
+        screen.getByRole('heading', { level: 1, name: titulo }),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it('"Sair" encerra a sessão', async () => {
+    entrarComo('ADMIN');
+    abrir('/admin');
+    await userEvent.click(screen.getByRole('link', { name: 'Sair' }));
+    expect(lerSessao()).toBeNull();
   });
 });

@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router';
 import { LayoutAdmin } from './layouts/LayoutAdmin';
 import { LayoutAssociado } from './layouts/LayoutAssociado';
 import { LayoutPublico } from './layouts/LayoutPublico';
+import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
@@ -32,12 +33,20 @@ export const rotas: RouteObject[] = [
   },
   {
     path: '/associado',
-    element: <LayoutAssociado />,
+    element: (
+      <RotaProtegida perfil="ASSOCIADO">
+        <LayoutAssociado />
+      </RotaProtegida>
+    ),
     children: [{ index: true, element: <PaginaInicioAssociado /> }],
   },
   {
     path: '/admin',
-    element: <LayoutAdmin />,
+    element: (
+      <RotaProtegida perfil="ADMIN">
+        <LayoutAdmin />
+      </RotaProtegida>
+    ),
     children: [{ index: true, element: <PaginaInicioAdmin /> }],
   },
 ];
