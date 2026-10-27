@@ -10,6 +10,7 @@ import { lerSessao, salvarSessao } from './sessao';
 vi.mock('./api', () => ({
   api: {
     getHealth: vi.fn<ApiClient['getHealth']>(),
+    listarAssociados: vi.fn<ApiClient['listarAssociados']>(),
   },
 }));
 
@@ -91,10 +92,19 @@ function entrarComo(perfil: Perfil) {
 }
 
 describe('Áreas logadas', () => {
-  beforeEach(() => sessionStorage.clear());
+  beforeEach(() => {
+    sessionStorage.clear();
+    vi.mocked(api.listarAssociados).mockResolvedValue({
+      itens: [],
+      total: 0,
+      pagina: 1,
+      porPagina: 20,
+    });
+  });
 
   it.each([
     ['/admin', 'ADMIN', 'Painel da sede'],
+    ['/admin/associados', 'ADMIN', 'Associados'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
   ] as const)('%s abre para o perfil %s', (caminho, perfil, titulo) => {
     entrarComo(perfil);

@@ -3,6 +3,7 @@ import { LayoutAdmin } from './layouts/LayoutAdmin';
 import { LayoutAssociado } from './layouts/LayoutAssociado';
 import { LayoutPublico } from './layouts/LayoutPublico';
 import { RotaProtegida } from './layouts/RotaProtegida';
+import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
@@ -47,6 +48,9 @@ export const rotas: RouteObject[] = [
         <LayoutAdmin />
       </RotaProtegida>
     ),
-    children: [{ index: true, element: <PaginaInicioAdmin /> }],
+    children: [
+      { index: true, element: <PaginaInicioAdmin /> },
+      { path: 'associados', element: <PaginaAssociados /> },
+    ],
   },
 ];

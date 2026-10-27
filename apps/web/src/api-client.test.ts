@@ -75,4 +75,26 @@ describe('createApiClient', () => {
     ).rejects.toMatchObject({ status: 401 });
     expect(aoNaoAutorizado).not.toHaveBeenCalled();
   });
+
+  it('lista associados só com os filtros informados', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({}))),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await cliente.listarAssociados();
+    await cliente.listarAssociados({
+      busca: 'farmácia 01',
+      status: 'ADIMPLENTE',
+      contribuicaoAtiva: false,
+      incluirInativos: undefined,
+      pagina: 2,
+    });
+    expect(fetchFalso.mock.calls.map(([url]) => url)).toEqual([
+      '/api/associados',
+      '/api/associados?busca=farm%C3%A1cia+01&status=ADIMPLENTE&contribuicaoAtiva=false&pagina=2',
+    ]);
+  });
 });
