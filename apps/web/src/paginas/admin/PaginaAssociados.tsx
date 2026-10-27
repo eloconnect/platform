@@ -89,6 +89,9 @@ export function PaginaAssociados() {
   return (
     <>
       <h1>Associados</h1>
+      <Link className="btn btn-primary btn-lg mb-4" to="/admin/associados/novo">
+        Cadastrar associado
+      </Link>
 
       {/* A key recria o formulário quando o endereço muda (ex.: "Voltar"). */}
       <Form

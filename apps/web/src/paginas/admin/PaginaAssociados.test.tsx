@@ -89,6 +89,9 @@ describe('PaginaAssociados', () => {
     expect(
       screen.getByRole('link', { name: 'Drogaria Exemplo 02 Ltda' }),
     ).toHaveAttribute('href', '/admin/associados/id-02');
+    expect(
+      screen.getByRole('link', { name: 'Cadastrar associado' }),
+    ).toHaveAttribute('href', '/admin/associados/novo');
   });
 
   it('busca com os filtros escolhidos', async () => {

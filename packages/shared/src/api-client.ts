@@ -1,5 +1,8 @@
 import type {
+  Associado,
   AssociadoDetalhe,
+  CriarAssociadoRequest,
+  EditarAssociadoRequest,
   FiltrosAssociados,
   ListaAssociados,
 } from './associados.js';
@@ -94,6 +97,24 @@ export function createApiClient(
       requisitar<AssociadoDetalhe>(
         'GET',
         `/associados/${encodeURIComponent(id)}`,
+      ),
+    criarAssociado: (dados: CriarAssociadoRequest) =>
+      requisitar<Associado>('POST', '/associados', dados),
+    editarAssociado: (id: string, dados: EditarAssociadoRequest) =>
+      requisitar<Associado>(
+        'PATCH',
+        `/associados/${encodeURIComponent(id)}`,
+        dados,
+      ),
+    inativarAssociado: (id: string) =>
+      requisitar<Associado>(
+        'POST',
+        `/associados/${encodeURIComponent(id)}/inativar`,
+      ),
+    reativarAssociado: (id: string) =>
+      requisitar<Associado>(
+        'POST',
+        `/associados/${encodeURIComponent(id)}/reativar`,
       ),
   };
 }
