@@ -7,12 +7,14 @@ import {
   AuditoriaService,
   diferencas,
 } from '../auditoria/auditoria.service.js';
+import { normalizarCnpj } from '@eloconnect/shared';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
   CriarAssociadoDto,
   EditarAssociadoDto,
 } from './dto/associado.dto.js';
+import type { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
 /** Campos que a API devolve para a sede. */
 const CAMPOS = {
@@ -32,14 +34,81 @@ const CAMPOS = {
 } satisfies Prisma.AssociadoSelect;
 
 const ENTIDADE = 'Associado';
+const POR_PAGINA = 20;
 
-/** Cadastro, edição e inativação de associados pela sede (RF08). */
+/** Lista, cadastro, edição e inativação de associados pela sede (RF06, RF08). */
 @Injectable()
 export class AssociadosService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
   ) {}
+
+  /**
+   * Lista com busca por nome ou CNPJ, filtros e páginas (RF06). Os
+   * inativados ficam de fora, a menos que sejam pedidos.
+   */
+  async listar({
+    busca,
+    status,
+    contribuicaoAtiva,
+    incluirInativos,
+    pagina = 1,
+  }: FiltrosAssociadosDto) {
+    const texto = busca?.trim();
+    const cnpj = texto ? normalizarCnpj(texto) : '';
+    const where: Prisma.AssociadoWhereInput = {
+      ...(incluirInativos ? {} : { inativadoEm: null }),
+      ...(contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva }),
+      ...(status === 'CANCELAMENTO_SOLICITADO'
+        ? { cancelamentos: { some: { status: 'PENDENTE' } } }
+        : status
+          ? { situacao: status }
+          : {}),
+      ...(texto
+        ? {
+            OR: [
+              { razaoSocial: { contains: texto, mode: 'insensitive' } },
+              { nomeFantasia: { contains: texto, mode: 'insensitive' } },
+              ...(cnpj ? [{ cnpj: { contains: cnpj } }] : []),
+            ],
+          }
+        : {}),
+    };
+
+    const [total, linhas] = await this.prisma.$transaction([
+      this.prisma.associado.count({ where }),
+      this.prisma.associado.findMany({
+        where,
+        orderBy: [{ razaoSocial: 'asc' }, { id: 'asc' }],
+        skip: (pagina - 1) * POR_PAGINA,
+        take: POR_PAGINA,
+        select: {
+          id: true,
+          cnpj: true,
+          razaoSocial: true,
+          nomeFantasia: true,
+          situacao: true,
+          acessoManual: true,
+          contribuicaoAtiva: true,
+          inativadoEm: true,
+          _count: {
+            select: { cancelamentos: { where: { status: 'PENDENTE' } } },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      itens: linhas.map(({ _count, ...linha }) => ({
+        ...linha,
+        cancelamentoSolicitado: _count.cancelamentos > 0,
+      })),
+      total,
+      pagina,
+      porPagina: POR_PAGINA,
+    };
+  }
 
   async buscar(id: string) {
     const associado = await this.prisma.associado.findUnique({

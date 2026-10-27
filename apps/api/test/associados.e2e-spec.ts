@@ -1,8 +1,9 @@
-// Cadastro, edição e inativação de associados pela sede (US08, RF08), com o
-// registro de cada ação no log de auditoria (RN26). Roda no banco de teste
-// (preparar-banco.ts); os dados ficam lá, então cada teste usa CNPJs novos.
+// Lista, cadastro, edição e inativação de associados pela sede (US06, US08:
+// RF06, RF08), com o registro de cada ação no log de auditoria (RN26). Roda no
+// banco de teste (preparar-banco.mjs); os dados ficam lá, então cada teste usa
+// CNPJs e nomes novos.
 import 'dotenv/config';
-import { cnpjValido } from '@eloconnect/shared';
+import { cnpjValido, type ListaAssociados } from '@eloconnect/shared';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -22,6 +23,8 @@ function cnpjNovo(): string {
   }
   throw new Error('Não achei os dígitos verificadores.');
 }
+
+const idsDe = (lista: ListaAssociados) => lista.itens.map((item) => item.id);
 
 describe('Associados (e2e)', () => {
   let app: INestApplication<App>;
@@ -229,5 +232,138 @@ describe('Associados (e2e)', () => {
       'ASSOCIADO_INATIVADO',
       'ASSOCIADO_REATIVADO',
     ]);
+  });
+
+  describe('lista (RF06)', () => {
+    // Texto único por execução, porque o banco de teste guarda os dados.
+    const marca = `Lista ${crypto.randomUUID().slice(0, 8)}`;
+    const ids: Record<string, string> = {};
+    const cnpjs: Record<string, string> = {};
+
+    async function listar(query: Record<string, string | number> = {}) {
+      const resposta = await comoAdmin(http().get('/associados'))
+        .query({ busca: marca, ...query })
+        .expect(200);
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      return resposta.body as ListaAssociados;
+    }
+
+    beforeAll(async () => {
+      const criarDireto = async (
+        letra: string,
+        dados: Record<string, unknown> = {},
+      ) => {
+        cnpjs[letra] = cnpjNovo();
+        const associado = await prisma.associado.create({
+          data: {
+            cnpj: cnpjs[letra],
+            razaoSocial: `Farmácia ${marca} ${letra}`,
+            ...dados,
+          },
+        });
+        ids[letra] = associado.id;
+      };
+      await criarDireto('A', {
+        situacao: 'ADIMPLENTE',
+        contribuicaoAtiva: true,
+      });
+      await criarDireto('B');
+      await criarDireto('C', {
+        situacao: 'ADIMPLENTE',
+        contribuicaoAtiva: true,
+      });
+      await prisma.solicitacaoCancelamento.create({
+        data: { associadoId: ids.C },
+      });
+      await criarDireto('D', { inativadoEm: new Date() });
+      // Achado pelo nome fantasia, não pela razão social.
+      await criarDireto('E', {
+        razaoSocial: 'Outra Razão Social',
+        nomeFantasia: `Drogaria ${marca}`,
+      });
+    });
+
+    it('recusa sem token (401) e com token de associado (403)', async () => {
+      await http().get('/associados').expect(401);
+      await http()
+        .get('/associados')
+        .set('Authorization', `Bearer ${tokenAssociado}`)
+        .expect(403);
+    });
+
+    it('busca por razão social ou nome fantasia, sem os inativados', async () => {
+      const lista = await listar();
+      expect(lista).toMatchObject({ total: 4, pagina: 1, porPagina: 20 });
+      expect(idsDe(lista)).toEqual([ids.A, ids.B, ids.C, ids.E]);
+      expect(lista.itens[2]).toMatchObject({
+        cnpj: cnpjs.C,
+        situacao: 'ADIMPLENTE',
+        contribuicaoAtiva: true,
+        cancelamentoSolicitado: true,
+        acessoManual: null,
+        inativadoEm: null,
+      });
+      expect(lista.itens[0].cancelamentoSolicitado).toBe(false);
+    });
+
+    it('não diferencia maiúsculas de minúsculas', async () => {
+      const lista = await listar({ busca: marca.toUpperCase() });
+      expect(lista.total).toBe(4);
+    });
+
+    it('busca pelo CNPJ com ou sem pontuação', async () => {
+      const cnpj = cnpjs.A;
+      const formatado = `${cnpj.slice(0, 2)}.${cnpj.slice(2, 5)}.${cnpj.slice(5, 8)}/${cnpj.slice(8, 12)}-${cnpj.slice(12)}`;
+      expect(idsDe(await listar({ busca: formatado }))).toEqual([ids.A]);
+      expect(idsDe(await listar({ busca: cnpj }))).toEqual([ids.A]);
+    });
+
+    it.each([
+      ['ADIMPLENTE', ['A', 'C']],
+      ['INADIMPLENTE', ['B', 'E']],
+      ['CANCELAMENTO_SOLICITADO', ['C']],
+    ])('filtra pelo status %s', async (status, letras) => {
+      const lista = await listar({ status });
+      expect(idsDe(lista)).toEqual(letras.map((letra) => ids[letra]));
+    });
+
+    it.each([
+      ['true', ['A', 'C']],
+      ['false', ['B', 'E']],
+    ])('filtra por "Recebe boleto mensal" = %s', async (valor, letras) => {
+      const lista = await listar({ contribuicaoAtiva: valor });
+      expect(idsDe(lista)).toEqual(letras.map((letra) => ids[letra]));
+    });
+
+    it('mostra os inativados quando pedido', async () => {
+      const lista = await listar({ incluirInativos: 'true' });
+      expect(idsDe(lista)).toEqual([ids.A, ids.B, ids.C, ids.D, ids.E]);
+    });
+
+    it('divide em páginas de 20', async () => {
+      const outraMarca = `Paginas ${crypto.randomUUID().slice(0, 8)}`;
+      for (let i = 0; i < 21; i++) {
+        await prisma.associado.create({
+          data: {
+            cnpj: cnpjNovo(),
+            razaoSocial: `Farmácia ${outraMarca} ${String(i).padStart(2, '0')}`,
+          },
+        });
+      }
+      const pagina1 = await listar({ busca: outraMarca });
+      const pagina2 = await listar({ busca: outraMarca, pagina: 2 });
+      expect(pagina1).toMatchObject({ total: 21, pagina: 1 });
+      expect(pagina1.itens).toHaveLength(20);
+      expect(pagina2).toMatchObject({ total: 21, pagina: 2 });
+      expect(pagina2.itens).toHaveLength(1);
+    });
+
+    it.each([
+      ['status desconhecido', { status: 'OUTRO' }],
+      ['página zero', { pagina: 0 }],
+      ['filtro desconhecido', { municipio: 'Cuiabá' }],
+    ])('recusa %s (400)', async (_motivo, query) => {
+      await comoAdmin(http().get('/associados')).query(query).expect(400);
+    });
   });
 });
