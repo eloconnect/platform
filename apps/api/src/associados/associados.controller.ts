@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator.js';
@@ -14,13 +15,19 @@ import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { AssociadosService } from './associados.service.js';
 import { CriarAssociadoDto, EditarAssociadoDto } from './dto/associado.dto.js';
+import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
-/** Gestão de associados pela sede (US08, RF08). Só admin. */
+/** Gestão de associados pela sede (US06, US08: RF06, RF08). Só admin. */
 @Controller('associados')
 @UseGuards(RolesGuard)
 @Roles('ADMIN')
 export class AssociadosController {
   constructor(private readonly associados: AssociadosService) {}
+
+  @Get()
+  listar(@Query() filtros: FiltrosAssociadosDto) {
+    return this.associados.listar(filtros);
+  }
 
   @Get(':id')
   buscar(@Param('id', ParseUUIDPipe) id: string) {
