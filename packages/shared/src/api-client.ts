@@ -20,6 +20,16 @@ export class ApiError extends Error {
 
 type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
 
+export interface OpcoesApiClient {
+  /** Token da sessão, enviado em `Authorization: Bearer`. */
+  obterToken?: () => string | null;
+  /**
+   * Chamado quando a API recusa o token (401), por exemplo depois que ele
+   * vence. Chamadas sem token, como o login com a senha errada, não chamam.
+   */
+  aoNaoAutorizado?: () => void;
+}
+
 /**
  * Cliente da API do Elo Connect, usado pelo web (e depois pelo app mobile).
  * Cada endpoint novo da API ganha um método aqui, com os tipos deste pacote.
@@ -30,21 +40,27 @@ export function createApiClient(
   baseUrl: string,
   // Arrow function para não perder o `this` do fetch do navegador.
   fetchImpl: Fetch = (input, init) => fetch(input, init),
+  { obterToken, aoNaoAutorizado }: OpcoesApiClient = {},
 ) {
   async function requisitar<T>(
     metodo: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE',
     caminho: string,
     corpo?: unknown,
   ): Promise<T> {
+    const token = obterToken?.() ?? null;
     const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
       method: metodo,
       headers: {
         Accept: 'application/json',
         ...(corpo === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: corpo === undefined ? undefined : JSON.stringify(corpo),
       credentials: 'include',
     });
+    if (resposta.status === 401 && token) {
+      aoNaoAutorizado?.();
+    }
     if (!resposta.ok) {
       throw new ApiError(
         resposta.status,

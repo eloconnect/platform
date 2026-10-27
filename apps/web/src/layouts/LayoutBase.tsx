@@ -7,6 +7,8 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router';
 export interface ItemMenu {
   para: string;
   texto: string;
+  /** Executado ao clicar, antes de navegar (ex.: encerrar a sessão no "Sair"). */
+  aoClicar?: () => void;
 }
 
 /**
@@ -53,7 +55,13 @@ export function LayoutBase({
             <Navbar.Collapse id="menu-principal">
               <Nav as="nav" aria-label="Menu principal" className="ms-auto">
                 {itensMenu.map((item) => (
-                  <Nav.Link key={item.para} as={NavLink} to={item.para} end>
+                  <Nav.Link
+                    key={item.para}
+                    as={NavLink}
+                    to={item.para}
+                    end
+                    onClick={item.aoClicar}
+                  >
                     {item.texto}
                   </Nav.Link>
                 ))}
