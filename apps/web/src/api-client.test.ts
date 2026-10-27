@@ -97,4 +97,17 @@ describe('createApiClient', () => {
       '/api/associados?busca=farm%C3%A1cia+01&status=ADIMPLENTE&contribuicaoAtiva=false&pagina=2',
     ]);
   });
+
+  it('busca o perfil do associado pelo id', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValue(new Response(JSON.stringify({})));
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await cliente.buscarAssociado('id-01');
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/associados/id-01',
+      expect.objectContaining({ method: 'GET' }),
+    );
+  });
 });
