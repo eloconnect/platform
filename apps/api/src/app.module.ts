@@ -6,6 +6,7 @@ import { HealthController } from './health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { EmailModule } from './email/email.module.js';
+import { AssociadosModule } from './associados/associados.module.js';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { EmailModule } from './email/email.module.js';
     PrismaModule,
     AuthModule,
     EmailModule,
+    AssociadosModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

@@ -218,6 +218,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Lista de benefícios | P06 | Tabela genérica (título, descrição, ordem). |
 | Aceite do compartilhamento com o contador | P11 | **Fora do modelo**. Se for preciso registrar data e hora do aceite, entra um campo em `Usuario`. |
 | Retenção e exclusão de dados (LGPD) | P07 | Inativação em vez de exclusão. Revisar quando houver orientação. |
+| Efeitos da inativação e reativação do associado | P13 | A inativação só preenche `inativadoEm` (o guard já barra benefícios e suporte); a reativação limpa o campo. |
 | Campos do Sicredi (nosso número, linha digitável, Pix) | Estudo #40 | Provisórios. |
 | Onde ficam os PDFs das convenções | Estudo #28 | `arquivoUrl` genérico. |
 

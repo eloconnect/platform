@@ -118,8 +118,8 @@ Todos rodam na raiz do projeto.
 | --- | --- |
 | `pnpm dev` | Sobe API, web e shared com recarga automática |
 | `pnpm build` | Build de todos os pacotes |
-| `pnpm test` | Testes unitários (Jest na API, Vitest no web) |
-| `pnpm --filter api test:e2e` | Testes e2e da API (precisa do banco no ar) |
+| `pnpm test` | Testes unitários (Jest na API, Vitest no web e no shared) |
+| `pnpm --filter api test:e2e` | Testes e2e da API (precisa do banco no ar). Rodam num banco separado, `eloconnect_test`, criado na primeira vez |
 | `pnpm lint` / `pnpm lint:fix` | Lint do monorepo / corrige o que for automático |
 | `pnpm format` / `pnpm format:check` | Formata / só confere a formatação |
 | `pnpm --filter api db:migrate` | Cria uma migration depois de alterar o schema |

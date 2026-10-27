@@ -94,7 +94,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | --- | --- | --- | --- |
 | RF06 | Listar associados com status (adimplente / inadimplente / cancelamento solicitado), com busca e filtro (inclusive por contribuição ativa). | Must | [Validado] |
 | RF07 | Visualizar perfil completo do associado: dados cadastrais, status, histórico de boletos/pagamentos e solicitações. | Must | [Validado] |
-| RF08 | Cadastrar, editar e inativar associados manualmente, incluindo marcar ou desmarcar a contribuição ativa. | Must | [Validado] |
+| RF08 | Cadastrar, editar e inativar associados manualmente, incluindo marcar ou desmarcar a contribuição ativa. | Must | [Validado] — reativar um associado inativado: [A confirmar] (P13) |
 | RF09 | Bloquear/desbloquear manualmente o acesso de um associado a benefícios. | Must | [Validado] |
 
 ### 4.3 Cobrança (integração Sicredi)
@@ -226,3 +226,4 @@ As user stories (US01 a US39) são mantidas como issues no GitHub Projects da or
 | P10 | Boleto avulso: é gerado na hora ou entra no lote mensal? Segue o vencimento do dia 10 e os lembretes? O pagamento libera os benefícios por qual período? | Cliente | RN24, RF37, RF16 |
 | P11 | Responsabilidade pelo compartilhamento do acesso com o contador (RN29): um aviso com caixa de aceite no primeiro cadastro basta, ou é preciso um termo de uso formal? O sistema deve registrar data/hora do aceite? Permitir o compartilhamento de credenciais entra em conflito com a LGPD para os dados financeiros do associado? | Prof. Poli | RN29, RF04, RNF05 |
 | P12 | Quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção? A demonstração do PI usa o plano grátis da Vercel, que é só para uso não comercial e por isso não serve para o sistema em produção. | Cliente | Hospedagem e e-mail de produção (decisoes-tecnicas.md), RNF09 |
+| P13 | O que a inativação de um associado muda? A conta de acesso dele continua entrando? A cobrança recorrente para? A sede pode reativar um associado inativado (por exemplo, depois de uma inativação por engano)? | Cliente | RF08 |
