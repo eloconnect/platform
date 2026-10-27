@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 26/10/2026.
+Última atualização: 27/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -213,6 +213,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 - P10: regras do boleto avulso (geração, vencimento, lembretes e período de acesso aos benefícios).
 
 - P12: quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção.
+
+- P13: o que a inativação de um associado muda (conta de acesso e cobrança recorrente) e se a sede pode reativá-lo.
 
 ### Com os professores
 
