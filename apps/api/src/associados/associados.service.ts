@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -16,6 +18,7 @@ import {
   type MinhaConta,
   type StatusAssociado,
 } from '@eloconnect/shared';
+import { EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
@@ -54,6 +57,13 @@ const FILTRO_STATUS: Record<StatusAssociado, Prisma.AssociadoWhereInput> = {
   CANCELAMENTO_SOLICITADO: { cancelamentos: { some: { status: 'PENDENTE' } } },
 };
 
+interface TrocaDeEmail {
+  anterior: string;
+  novo: string;
+  /** A conta já tem senha; senão, o associado ainda precisa criar a senha. */
+  contaConfirmada: boolean;
+}
+
 /** Ação do log para cada decisão sobre o acesso (RN11). */
 const ACAO_ACESSO = {
   BLOQUEADO: 'ACESSO_BLOQUEADO',
@@ -67,9 +77,12 @@ const ACAO_ACESSO = {
  */
 @Injectable()
 export class AssociadosService {
+  private readonly logger = new Logger(AssociadosService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
+    private readonly email: EmailService,
   ) {}
 
   /**
@@ -204,13 +217,24 @@ export class AssociadosService {
    * Edita os dados e a contribuição ativa. A mudança na contribuição ativa
    * ("Recebe boleto mensal") gera uma ação própria no log (RN25, RN26).
    */
+  /**
+   * Edição do cadastro. O e-mail do cadastro é o mesmo da conta de acesso
+   * (RN34): se o associado tem conta, trocar o e-mail troca também o login,
+   * invalida os links de senha já enviados e avisa os dois endereços.
+   */
   async editar(usuarioId: string, id: string, dados: EditarAssociadoDto) {
-    return this.comCnpjUnico(() =>
+    const { associado, trocaDeEmail } = await this.comCnpjUnico(() =>
       this.prisma.$transaction(async (tx) => {
         const antes = await tx.associado.findUnique({ where: { id } });
         if (!antes) {
           throw new NotFoundException('Associado não encontrado.');
         }
+        const trocaDeEmail = await this.trocarEmailDaConta(
+          tx,
+          usuarioId,
+          id,
+          dados.email,
+        );
         const associado = await tx.associado.update({
           where: { id },
           data: dados,
@@ -242,9 +266,109 @@ export class AssociadosService {
             ...mudancaContribuicao,
           });
         }
-        return associado;
+        return { associado, trocaDeEmail };
       }),
     );
+    if (trocaDeEmail) {
+      this.avisarTrocaDeEmail(
+        associado.nomeFantasia ?? associado.razaoSocial,
+        trocaDeEmail,
+      );
+    }
+    return associado;
+  }
+
+  /**
+   * Leva o e-mail novo do cadastro para a conta de acesso, se houver (RN34).
+   * Devolve a troca feita, para o aviso por e-mail depois da transação.
+   */
+  private async trocarEmailDaConta(
+    tx: Prisma.TransactionClient,
+    usuarioId: string,
+    associadoId: string,
+    email: string | null | undefined,
+  ): Promise<TrocaDeEmail | null> {
+    if (email === undefined) return null;
+    const conta = await tx.usuario.findUnique({
+      where: { associadoId },
+      select: { id: true, email: true, emailConfirmadoEm: true },
+    });
+    if (!conta) return null;
+    if (!email) {
+      throw new BadRequestException({
+        message:
+          'O associado tem conta de acesso: o e-mail não pode ficar vazio.',
+        campo: 'email',
+      });
+    }
+    const novo = email.toLowerCase();
+    if (novo === conta.email) return null;
+    const outraConta = await tx.usuario.findUnique({
+      where: { email: novo },
+      select: { id: true },
+    });
+    if (outraConta) {
+      throw new ConflictException({
+        message: 'Este e-mail já é usado na conta de outra farmácia.',
+        campo: 'email',
+      });
+    }
+    await tx.usuario.update({ where: { id: conta.id }, data: { email: novo } });
+    // Os links de senha mandados para o e-mail antigo deixam de valer.
+    await tx.tokenUsuario.updateMany({
+      where: { usuarioId: conta.id, usadoEm: null },
+      data: { usadoEm: new Date() },
+    });
+    await this.auditoria.registrar(tx, {
+      usuarioId,
+      acao: 'CONTA_EMAIL_ALTERADO',
+      entidade: 'Usuario',
+      entidadeId: conta.id,
+      associadoId,
+      valorAnterior: { email: conta.email },
+      valorNovo: { email: novo },
+    });
+    return {
+      anterior: conta.email,
+      novo,
+      contaConfirmada: conta.emailConfirmadoEm !== null,
+    };
+  }
+
+  /** Não aguarda o envio: a troca já foi gravada, e o aviso não pode desfazê-la. */
+  private avisarTrocaDeEmail(nome: string, troca: TrocaDeEmail) {
+    const mensagens = [
+      {
+        to: troca.novo,
+        subject: 'Seu e-mail de acesso mudou - Elo Connect',
+        text: [
+          `Olá, ${nome}.`,
+          '',
+          'A sede do sindicato trocou o e-mail de acesso da sua farmácia no Elo Connect para este endereço.',
+          troca.contaConfirmada
+            ? `A partir de agora, entre com ${troca.novo} e a sua senha. Se não lembra a senha, use "Esqueci minha senha" na tela de entrar.`
+            : 'Para criar a sua senha, use "Criar conta" na página inicial, com o CNPJ da farmácia.',
+        ].join('\n'),
+      },
+      {
+        to: troca.anterior,
+        subject: 'Seu e-mail de acesso mudou - Elo Connect',
+        text: [
+          `Olá, ${nome}.`,
+          '',
+          'A sede do sindicato trocou o e-mail de acesso da sua farmácia no Elo Connect. Este endereço não entra mais na conta.',
+          'Se você não pediu essa troca, fale com a sede do sindicato.',
+        ].join('\n'),
+      },
+    ];
+    for (const mensagem of mensagens) {
+      void this.email.send(mensagem).catch((error: unknown) => {
+        this.logger.error(
+          'Falha ao enviar o aviso de troca de e-mail.',
+          error instanceof Error ? error.stack : undefined,
+        );
+      });
+    }
   }
 
   /**

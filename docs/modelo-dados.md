@@ -163,6 +163,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Conta criada pelo CNPJ** (RF05, RN21). No primeiro pedido, o sistema cria o `Usuario` com o e-mail do cadastro do associado e sem senha (`senhaHash` nulo), e manda um token `CONFIRMACAO_EMAIL`, válido por 24 horas. Ao criar a senha pelo link, a conta ganha `senhaHash` e `emailConfirmadoEm` e passa a entrar. Enquanto isso não acontece, o login recusa a conta.
 
+**E-mail único por farmácia** (RN34). O e-mail do cadastro do associado é o mesmo da conta. Quando a sede troca o e-mail de um associado que tem conta, o `Usuario.email` muda junto, os tokens ainda não usados deixam de valer, o log de auditoria ganha a ação `CONTA_EMAIL_ALTERADO` e o associado recebe um aviso no e-mail antigo e no novo. Se o e-mail novo já for de outra conta, a API recusa (409).
+
 **Situação armazenada, com override manual** (RN09 a RN11, RN22):
 
 - `situacao` (ADIMPLENTE ou INADIMPLENTE) é a situação **automática**. O pagamento torna o associado adimplente (RF15), e o job de expiração, 30 dias após o vencimento sem pagamento, o torna inadimplente (RF16). Novo associado começa INADIMPLENTE e sem contribuição ativa. Na tela, INADIMPLENTE sem contribuição ativa aparece como "Sem contribuição ativa" (RN22).

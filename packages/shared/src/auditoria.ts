@@ -10,6 +10,8 @@ export const ACOES_AUDITORIA = [
   'ASSOCIADO_REATIVADO',
   'CONTRIBUICAO_ATIVADA',
   'CONTRIBUICAO_INTERROMPIDA',
+  // Troca do e-mail de acesso junto com o do cadastro (RN34)
+  'CONTA_EMAIL_ALTERADO',
   // Acesso manual (RN11): bloquear, liberar ou voltar a seguir o pagamento
   'ACESSO_BLOQUEADO',
   'ACESSO_LIBERADO',

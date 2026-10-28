@@ -14,6 +14,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module.js';
+import { EmailService, type EmailMessage } from '../src/email/email.service.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 
 process.env.JWT_SECRET ??= 'segredo-so-para-teste-com-mais-de-32-caracteres';
@@ -31,6 +32,12 @@ function cnpjNovo(): string {
 const idsDe = (lista: ListaAssociados) => lista.itens.map((item) => item.id);
 
 describe('Associados (e2e)', () => {
+  // E-mails "enviados" pela API, no lugar do SMTP.
+  const enviados: EmailMessage[] = [];
+  const send = (mensagem: EmailMessage) => {
+    enviados.push(mensagem);
+    return Promise.resolve();
+  };
   let app: INestApplication<App>;
   let prisma: PrismaService;
   let tokenAdmin: string;
@@ -48,9 +55,10 @@ describe('Associados (e2e)', () => {
     });
 
   beforeAll(async () => {
-    const modulo = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const modulo = await Test.createTestingModule({ imports: [AppModule] })
+      .overrideProvider(EmailService)
+      .useValue({ send })
+      .compile();
     app = modulo.createNestApplication();
     // Mesma validação do main.ts.
     app.useGlobalPipes(
@@ -252,6 +260,99 @@ describe('Associados (e2e)', () => {
       email,
       criadaEm: expect.any(String),
       confirmadaEm: null,
+    });
+  });
+
+  describe('troca do e-mail, que também é o de acesso (RN34)', () => {
+    async function comConta(email: string) {
+      const { id } = await criar({ email });
+      const conta = await prisma.usuario.create({
+        data: {
+          email: email.toLowerCase(),
+          nome: 'Conta',
+          perfil: 'ASSOCIADO',
+          associadoId: id,
+          senhaHash: 'x',
+          emailConfirmadoEm: new Date(),
+        },
+      });
+      return { id, conta };
+    }
+    const editar = (id: string, dados: Record<string, unknown>) =>
+      comoAdmin(http().patch(`/associados/${id}`)).send(dados);
+
+    beforeEach(() => {
+      enviados.length = 0;
+    });
+
+    it('troca o login, invalida os links de senha e avisa os dois e-mails', async () => {
+      const antigo = `antigo-${crypto.randomUUID()}@example.com`;
+      const novo = `novo-${crypto.randomUUID()}@example.com`;
+      const { id, conta } = await comConta(antigo);
+      const link = await prisma.tokenUsuario.create({
+        data: {
+          usuarioId: conta.id,
+          tipo: 'RECUPERACAO_SENHA',
+          tokenHash: crypto.randomUUID(),
+          expiraEm: new Date(Date.now() + 60_000),
+        },
+      });
+
+      await editar(id, { email: novo.toUpperCase() }).expect(200);
+
+      const depois = await prisma.usuario.findUniqueOrThrow({
+        where: { id: conta.id },
+      });
+      expect(depois.email).toBe(novo);
+      const linkDepois = await prisma.tokenUsuario.findUniqueOrThrow({
+        where: { id: link.id },
+      });
+      expect(linkDepois.usadoEm).not.toBeNull();
+      expect(enviados.map((mensagem) => mensagem.to).sort()).toEqual(
+        [antigo, novo].sort(),
+      );
+      expect(await logsDo(id)).toContainEqual(
+        expect.objectContaining({
+          acao: 'CONTA_EMAIL_ALTERADO',
+          entidade: 'Usuario',
+          entidadeId: conta.id,
+          valorAnterior: { email: antigo },
+          valorNovo: { email: novo },
+        }),
+      );
+    });
+
+    it('recusa o e-mail que já é de outra conta (409, campo e-mail)', async () => {
+      const ocupado = `ocupado-${crypto.randomUUID()}@example.com`;
+      await comConta(ocupado);
+      const { id, conta } = await comConta(
+        `meu-${crypto.randomUUID()}@example.com`,
+      );
+
+      const resposta = await editar(id, { email: ocupado }).expect(409);
+      expect(resposta.body).toMatchObject({ campo: 'email' });
+      expect(
+        (await prisma.usuario.findUniqueOrThrow({ where: { id: conta.id } }))
+          .email,
+      ).toBe(conta.email);
+      expect(enviados).toHaveLength(0);
+    });
+
+    it('não deixa o associado com conta sem e-mail (400, campo e-mail)', async () => {
+      const { id } = await comConta(
+        `com-conta-${crypto.randomUUID()}@example.com`,
+      );
+
+      const resposta = await editar(id, { email: '' }).expect(400);
+      expect(resposta.body).toMatchObject({ campo: 'email' });
+    });
+
+    it('sem conta, troca só o cadastro e não manda aviso', async () => {
+      const { id } = await criar({ email: 'sem-conta@example.com' });
+
+      await editar(id, { email: 'outro-sem-conta@example.com' }).expect(200);
+      await editar(id, { email: '' }).expect(200);
+      expect(enviados).toHaveLength(0);
     });
   });
 
