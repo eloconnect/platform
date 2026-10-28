@@ -281,6 +281,87 @@ describe('Associados (e2e)', () => {
     ]);
   });
 
+  describe('acesso manual (RF09, RN11)', () => {
+    const definir = (id: string, dados: Record<string, unknown>) =>
+      comoAdmin(http().put(`/associados/${id}/acesso`)).send(dados);
+
+    it('bloqueia, libera e volta ao automático, com o motivo só no log', async () => {
+      const { id } = await criar();
+
+      const bloqueado = await definir(id, {
+        acessoManual: 'BLOQUEADO',
+        motivo: ' Motivo fictício de bloqueio ',
+      }).expect(200);
+      expect(bloqueado.body).toMatchObject({ acessoManual: 'BLOQUEADO' });
+      expect(bloqueado.body).not.toHaveProperty('motivo');
+      await definir(id, {
+        acessoManual: 'LIBERADO',
+        motivo: 'Motivo fictício de liberação',
+      }).expect(200);
+      const automatico = await definir(id, {
+        acessoManual: null,
+        motivo: 'Volta a seguir o pagamento',
+      }).expect(200);
+      expect(automatico.body).toMatchObject({ acessoManual: null });
+      // Já está no automático: nada muda e nada vai para o log.
+      await definir(id, { acessoManual: null, motivo: 'De novo' }).expect(200);
+
+      const logs = (await logsDo(id)).slice(1);
+      expect(logs).toEqual([
+        expect.objectContaining({
+          usuarioId: adminId,
+          acao: 'ACESSO_BLOQUEADO',
+          valorAnterior: { acessoManual: null },
+          valorNovo: {
+            acessoManual: 'BLOQUEADO',
+            motivo: 'Motivo fictício de bloqueio',
+          },
+        }),
+        expect.objectContaining({
+          acao: 'ACESSO_LIBERADO',
+          valorAnterior: { acessoManual: 'BLOQUEADO' },
+          valorNovo: {
+            acessoManual: 'LIBERADO',
+            motivo: 'Motivo fictício de liberação',
+          },
+        }),
+        expect.objectContaining({
+          acao: 'ACESSO_AUTOMATICO',
+          valorAnterior: { acessoManual: 'LIBERADO' },
+          valorNovo: {
+            acessoManual: null,
+            motivo: 'Volta a seguir o pagamento',
+          },
+        }),
+      ]);
+    });
+
+    it.each([
+      ['sem motivo', { acessoManual: 'BLOQUEADO' }],
+      ['com motivo vazio', { acessoManual: 'BLOQUEADO', motivo: '  ' }],
+      ['sem a decisão', { motivo: 'Motivo fictício' }],
+      ['com decisão desconhecida', { acessoManual: 'OUTRO', motivo: 'x' }],
+    ])('recusa %s (400)', async (_caso, dados) => {
+      const { id } = await criar();
+      await definir(id, dados).expect(400);
+      expect(await logsDo(id)).toHaveLength(1);
+    });
+
+    it('recusa associado inexistente (404) e token de associado (403)', async () => {
+      await definir(crypto.randomUUID(), {
+        acessoManual: 'BLOQUEADO',
+        motivo: 'Motivo fictício',
+      }).expect(404);
+      const { id } = await criar();
+      await http()
+        .put(`/associados/${id}/acesso`)
+        .set('Authorization', `Bearer ${tokenAssociado}`)
+        .send({ acessoManual: 'BLOQUEADO', motivo: 'Motivo fictício' })
+        .expect(403);
+      expect(await logsDo(id)).toHaveLength(1);
+    });
+  });
+
   describe('lista (RF06)', () => {
     // Texto único por execução, porque o banco de teste guarda os dados.
     const marca = `Lista ${crypto.randomUUID().slice(0, 8)}`;

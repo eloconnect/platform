@@ -12,6 +12,7 @@ vi.mock('../../api', () => ({
     buscarAssociado: vi.fn<ApiClient['buscarAssociado']>(),
     inativarAssociado: vi.fn<ApiClient['inativarAssociado']>(),
     reativarAssociado: vi.fn<ApiClient['reativarAssociado']>(),
+    definirAcesso: vi.fn<ApiClient['definirAcesso']>(),
   },
 }));
 
@@ -63,6 +64,7 @@ describe('PaginaPerfilAssociado', () => {
     vi.mocked(api.buscarAssociado).mockReset();
     vi.mocked(api.inativarAssociado).mockReset();
     vi.mocked(api.reativarAssociado).mockReset();
+    vi.mocked(api.definirAcesso).mockReset();
   });
 
   it('mostra a situação, os dados cadastrais e o espaço dos boletos', async () => {
@@ -275,5 +277,118 @@ describe('PaginaPerfilAssociado', () => {
     expect(await within(janela).findByRole('alert')).toHaveTextContent(
       'Não foi possível inativar agora.',
     );
+  });
+
+  describe('acesso a benefícios e suporte (RF09)', () => {
+    it.each([
+      [
+        'segue o pagamento',
+        { acessoManual: null, situacao: 'INADIMPLENTE' },
+        'Segue o pagamento. Hoje está bloqueado.',
+        ['Bloquear acesso', 'Liberar acesso'],
+      ],
+      [
+        'bloqueado pela sede',
+        { acessoManual: 'BLOQUEADO' },
+        'Bloqueado pela sede, mesmo que o pagamento esteja em dia.',
+        ['Liberar acesso', 'Voltar a seguir o pagamento'],
+      ],
+      [
+        'liberado pela sede',
+        { acessoManual: 'LIBERADO' },
+        'Liberado pela sede, mesmo que o pagamento esteja em atraso.',
+        ['Bloquear acesso', 'Voltar a seguir o pagamento'],
+      ],
+    ] as const)(
+      'mostra o acesso %s e as outras opções',
+      async (_caso, dados, texto, botoes) => {
+        vi.mocked(api.buscarAssociado).mockResolvedValue(associado(dados));
+        abrir();
+
+        await screen.findByRole('heading', { level: 1 });
+        const acesso = secao('Acesso a benefícios e suporte');
+        expect(acesso).toHaveTextContent(texto);
+        expect(
+          within(acesso)
+            .getAllByRole('button')
+            .map((botao) => botao.textContent),
+        ).toEqual(botoes);
+      },
+    );
+
+    it('bloqueia com o motivo depois de confirmar', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.definirAcesso).mockResolvedValue(
+        associado({ acessoManual: 'BLOQUEADO' }),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Bloquear acesso' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Bloquear o acesso?',
+      });
+      await userEvent.type(
+        within(janela).getByLabelText(/^Motivo/),
+        ' Motivo fictício ',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Confirmar' }),
+      );
+
+      expect(api.definirAcesso).toHaveBeenCalledWith('id-01', {
+        acessoManual: 'BLOQUEADO',
+        motivo: 'Motivo fictício',
+      });
+      expect(await screen.findByText('Acesso bloqueado.')).toBeInTheDocument();
+      expect(secao('Acesso a benefícios e suporte')).toHaveTextContent(
+        'Bloqueado pela sede',
+      );
+      expect(secao('Situação')).toHaveTextContent('Acesso bloqueado pela sede');
+    });
+
+    it('não envia sem motivo', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Liberar acesso' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Liberar o acesso?',
+      });
+      await userEvent.type(within(janela).getByLabelText(/^Motivo/), '   ');
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Confirmar' }),
+      );
+
+      expect(
+        within(janela).getByLabelText(/^Motivo/),
+      ).toHaveAccessibleDescription(/Escreva o motivo\./);
+      expect(api.definirAcesso).not.toHaveBeenCalled();
+    });
+
+    it('avisa na janela quando não consegue mudar o acesso', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.definirAcesso).mockRejectedValue(new ApiError(500, 'erro'));
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Bloquear acesso' }),
+      );
+      const janela = await screen.findByRole('dialog');
+      await userEvent.type(
+        within(janela).getByLabelText(/^Motivo/),
+        'Motivo fictício',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Confirmar' }),
+      );
+
+      expect(await within(janela).findByRole('alert')).toHaveTextContent(
+        'Não foi possível mudar o acesso agora.',
+      );
+    });
   });
 });

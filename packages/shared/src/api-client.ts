@@ -2,6 +2,7 @@ import type {
   Associado,
   AssociadoDetalhe,
   CriarAssociadoRequest,
+  DefinirAcessoRequest,
   EditarAssociadoRequest,
   FiltrosAssociados,
   ListaAssociados,
@@ -115,6 +116,12 @@ export function createApiClient(
       requisitar<Associado>(
         'POST',
         `/associados/${encodeURIComponent(id)}/reativar`,
+      ),
+    definirAcesso: (id: string, dados: DefinirAcessoRequest) =>
+      requisitar<Associado>(
+        'PUT',
+        `/associados/${encodeURIComponent(id)}/acesso`,
+        dados,
       ),
   };
 }
