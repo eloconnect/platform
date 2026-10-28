@@ -29,6 +29,7 @@ function associado(dados: Partial<AssociadoDetalhe> = {}): AssociadoDetalhe {
     contribuicaoAtiva: true,
     situacao: 'ADIMPLENTE',
     acessoManual: null,
+    acessoManualAte: null,
     inativadoEm: null,
     criadoEm: '2026-10-01T12:00:00.000Z',
     atualizadoEm: '2026-10-01T12:00:00.000Z',
@@ -343,9 +344,22 @@ describe('PaginaPerfilAssociado', () => {
       ],
       [
         'liberado pela sede',
-        { acessoManual: 'LIBERADO' },
-        'Liberado pela sede, mesmo que o pagamento esteja em atraso.',
+        {
+          acessoManual: 'LIBERADO',
+          acessoManualAte: '2099-11-04T12:00:00.000Z',
+        },
+        'Liberado pela sede até 04/11/2099, mesmo que o pagamento esteja em atraso. Depois, volta a seguir o pagamento.',
         ['Bloquear acesso', 'Voltar a seguir o pagamento'],
+      ],
+      [
+        'com a liberação vencida, que volta a seguir o pagamento',
+        {
+          acessoManual: 'LIBERADO',
+          acessoManualAte: '2026-10-01T12:00:00.000Z',
+          situacao: 'INADIMPLENTE',
+        },
+        'Segue o pagamento. Hoje está bloqueado.',
+        ['Bloquear acesso', 'Liberar acesso'],
       ],
     ] as const)(
       'mostra o acesso %s e as outras opções',

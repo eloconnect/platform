@@ -8,7 +8,10 @@
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { REQUIRE_FINANCIAL_ACCESS_KEY } from '../decorators/require-access.decorator.js';
-import { podeAcessarRecursoRestrito } from '@eloconnect/shared';
+import {
+  acessoManualEmVigor,
+  podeAcessarRecursoRestrito,
+} from '@eloconnect/shared';
 
 interface UsuarioAutenticado {
   sub?: string;
@@ -60,6 +63,7 @@ export class AccessStatusGuard implements CanActivate {
           select: {
             situacao: true,
             acessoManual: true,
+            acessoManualAte: true,
             inativadoEm: true,
           },
         },
@@ -74,9 +78,13 @@ export class AccessStatusGuard implements CanActivate {
       throw new ForbiddenException('Associado sem acesso a este recurso.');
     }
 
+    // A liberação manual vencida volta a seguir o pagamento (RN11).
     const permitido = podeAcessarRecursoRestrito(
       registro.associado.situacao,
-      registro.associado.acessoManual,
+      acessoManualEmVigor(
+        registro.associado.acessoManual,
+        registro.associado.acessoManualAte,
+      ),
     );
 
     if (!permitido) {

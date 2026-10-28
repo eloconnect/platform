@@ -6,6 +6,7 @@ import type {
   EditarAssociadoRequest,
   FiltrosAssociados,
   ListaAssociados,
+  MinhaConta,
 } from './associados.js';
 import type {
   ConfirmarContaRequest,
@@ -123,6 +124,7 @@ export function createApiClient(
         'POST',
         `/associados/${encodeURIComponent(id)}/reativar`,
       ),
+    minhaConta: () => requisitar<MinhaConta>('GET', '/minha-conta'),
     definirAcesso: (id: string, dados: DefinirAcessoRequest) =>
       requisitar<Associado>(
         'PUT',

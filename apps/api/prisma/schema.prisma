@@ -106,6 +106,9 @@ model Associado {
   situacao          SituacaoAssociado @default(INADIMPLENTE)
   /// Nulo = segue a situação automática (RN11).
   acessoManual      AcessoManual?
+  /// Fim da liberação manual, 7 dias depois dela (RN11). Nulo no bloqueio,
+  /// que vale até a sede mudar. Conferido na hora, sem job.
+  acessoManualAte   DateTime?
   /// Inativação manual pela sede (RF08). Não há exclusão de associado.
   inativadoEm       DateTime?
   criadoEm          DateTime          @default(now())

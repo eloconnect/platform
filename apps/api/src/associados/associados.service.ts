@@ -8,8 +8,12 @@ import {
   diferencas,
 } from '../auditoria/auditoria.service.js';
 import {
+  acessoManualEmVigor,
+  DIAS_LIBERACAO_MANUAL,
   normalizarCnpj,
+  textoSituacao,
   type AcaoAuditoria,
+  type MinhaConta,
   type StatusAssociado,
 } from '@eloconnect/shared';
 import { Prisma } from '../generated/prisma/client.js';
@@ -33,6 +37,7 @@ const CAMPOS = {
   contribuicaoAtiva: true,
   situacao: true,
   acessoManual: true,
+  acessoManualAte: true,
   inativadoEm: true,
   criadoEm: true,
   atualizadoEm: true,
@@ -112,6 +117,7 @@ export class AssociadosService {
           nomeFantasia: true,
           situacao: true,
           acessoManual: true,
+          acessoManualAte: true,
           contribuicaoAtiva: true,
           inativadoEm: true,
           _count: {
@@ -253,8 +259,8 @@ export class AssociadosService {
   /**
    * Bloqueia, libera ou devolve ao automático o acesso a benefícios e suporte
    * (RF09, RN11). A decisão da sede prevalece sobre a situação automática, e
-   * os jobs de cobrança não a mudam. O motivo fica só no log de auditoria.
-   * TODO(P17): até quando vale a liberação. Por enquanto, até a sede mudar.
+   * os jobs de cobrança não a mudam. A liberação vale 7 dias; o bloqueio, até
+   * a sede mudar. O motivo fica só no log de auditoria.
    */
   async definirAcesso(
     usuarioId: string,
@@ -266,7 +272,11 @@ export class AssociadosService {
       if (!antes) {
         throw new NotFoundException('Associado não encontrado.');
       }
-      const mudanca = diferencas(antes, { acessoManual });
+      const acessoManualAte =
+        acessoManual === 'LIBERADO'
+          ? new Date(Date.now() + DIAS_LIBERACAO_MANUAL * 24 * 60 * 60 * 1000)
+          : null;
+      const mudanca = diferencas(antes, { acessoManual, acessoManualAte });
       // Já está como pedido: nada muda e nada vai para o log.
       if (!mudanca) {
         return tx.associado.findUniqueOrThrow({
@@ -276,7 +286,7 @@ export class AssociadosService {
       }
       const associado = await tx.associado.update({
         where: { id },
-        data: { acessoManual },
+        data: { acessoManual, acessoManualAte },
         select: CAMPOS,
       });
       await this.auditoria.registrar(tx, {
@@ -290,6 +300,42 @@ export class AssociadosService {
       });
       return associado;
     });
+  }
+
+  /**
+   * O que o associado vê na área dele: a situação e, se a sede liberou o
+   * acesso, até quando a liberação vale (RN11, RN22).
+   */
+  async minhaConta(usuarioId: string): Promise<MinhaConta> {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      select: {
+        associado: {
+          select: {
+            razaoSocial: true,
+            nomeFantasia: true,
+            situacao: true,
+            contribuicaoAtiva: true,
+            acessoManual: true,
+            acessoManualAte: true,
+          },
+        },
+      },
+    });
+    const associado = usuario?.associado;
+    if (!associado) {
+      throw new NotFoundException('Associado não encontrado.');
+    }
+    const liberado =
+      acessoManualEmVigor(associado.acessoManual, associado.acessoManualAte) ===
+      'LIBERADO';
+    return {
+      nome: associado.nomeFantasia ?? associado.razaoSocial,
+      situacao: textoSituacao(associado),
+      acessoLiberadoAte: liberado
+        ? (associado.acessoManualAte?.toISOString() ?? null)
+        : null,
+    };
   }
 
   /** Desfaz a inativação. [A confirmar] com o cliente (P13). */

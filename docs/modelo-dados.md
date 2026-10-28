@@ -56,6 +56,7 @@ erDiagram
         boolean contribuicaoAtiva
         SituacaoAssociado situacao "ADIMPLENTE, INADIMPLENTE"
         AcessoManual acessoManual "LIBERADO, BLOQUEADO, nulo"
+        datetime acessoManualAte "fim da liberação (7 dias)"
         datetime inativadoEm
     }
     SolicitacaoCancelamento {
@@ -166,7 +167,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 - `situacao` (ADIMPLENTE ou INADIMPLENTE) é a situação **automática**. O pagamento torna o associado adimplente (RF15), e o job de expiração, 30 dias após o vencimento sem pagamento, o torna inadimplente (RF16). Novo associado começa INADIMPLENTE e sem contribuição ativa. Na tela, INADIMPLENTE sem contribuição ativa aparece como "Sem contribuição ativa" (RN22).
 - `acessoManual` guarda a decisão **manual** da sede (RN11). Fica nulo enquanto a sede não interfere, e o acesso segue a situação automática. Com valor (LIBERADO ou BLOQUEADO), prevalece sobre a situação, e os jobs automáticos não o alteram.
-- **Acesso a benefícios e suporte** = `acessoManual`, se preenchido; senão, `situacao`.
+- A liberação manual vale 7 dias (RN11): `acessoManualAte` guarda o fim dela. Vencida, ela deixa de contar e o acesso volta a seguir a `situacao`, sem job (a data é conferida na hora, como no boleto vencido). O bloqueio manual não tem data e vale até a sede mudar.
+- **Acesso a benefícios e suporte** = `acessoManual` em vigor (`acessoManualEmVigor`, no `packages/shared`), se preenchido; senão, `situacao`.
 - "Cancelamento solicitado" (RF06) não é um terceiro valor de situação: é o associado ter uma `SolicitacaoCancelamento` PENDENTE.
 
 **Contribuição ativa** (`contribuicaoAtiva`) define quem entra no lote mensal e recebe lembretes (RN05, RN22). É ligada pelo próprio associado (RN23) e desligada por cancelamento aprovado ou pela sede (RN25).

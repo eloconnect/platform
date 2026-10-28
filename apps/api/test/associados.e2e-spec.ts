@@ -336,10 +336,16 @@ describe('Associados (e2e)', () => {
       }).expect(200);
       expect(bloqueado.body).toMatchObject({ acessoManual: 'BLOQUEADO' });
       expect(bloqueado.body).not.toHaveProperty('motivo');
-      await definir(id, {
+      const liberado = await definir(id, {
         acessoManual: 'LIBERADO',
         motivo: 'Motivo fictício de liberação',
       }).expect(200);
+      // A liberação vale 7 dias (RN11).
+      const dias =
+        (new Date(liberado.body.acessoManualAte).getTime() - Date.now()) /
+        (24 * 60 * 60 * 1000);
+      expect(dias).toBeGreaterThan(6.9);
+      expect(dias).toBeLessThanOrEqual(7);
       const automatico = await definir(id, {
         acessoManual: null,
         motivo: 'Volta a seguir o pagamento',
@@ -361,17 +367,22 @@ describe('Associados (e2e)', () => {
         }),
         expect.objectContaining({
           acao: 'ACESSO_LIBERADO',
-          valorAnterior: { acessoManual: 'BLOQUEADO' },
+          valorAnterior: { acessoManual: 'BLOQUEADO', acessoManualAte: null },
           valorNovo: {
             acessoManual: 'LIBERADO',
+            acessoManualAte: liberado.body.acessoManualAte,
             motivo: 'Motivo fictício de liberação',
           },
         }),
         expect.objectContaining({
           acao: 'ACESSO_AUTOMATICO',
-          valorAnterior: { acessoManual: 'LIBERADO' },
+          valorAnterior: {
+            acessoManual: 'LIBERADO',
+            acessoManualAte: liberado.body.acessoManualAte,
+          },
           valorNovo: {
             acessoManual: null,
+            acessoManualAte: null,
             motivo: 'Volta a seguir o pagamento',
           },
         }),
@@ -401,6 +412,61 @@ describe('Associados (e2e)', () => {
         .send({ acessoManual: 'BLOQUEADO', motivo: 'Motivo fictício' })
         .expect(403);
       expect(await logsDo(id)).toHaveLength(1);
+    });
+  });
+
+  describe('minha conta, na área do associado (RN11, RN22)', () => {
+    async function contaDe(associadoId: string) {
+      const usuario = await prisma.usuario.create({
+        data: {
+          email: `minha-conta-${crypto.randomUUID()}@example.com`,
+          nome: 'Conta',
+          perfil: 'ASSOCIADO',
+          associadoId,
+        },
+      });
+      const token = await app.get(JwtService).signAsync(
+        { perfil: 'ASSOCIADO' },
+        {
+          secret: process.env.JWT_SECRET,
+          subject: usuario.id,
+          expiresIn: 300,
+        },
+      );
+      return () =>
+        http().get('/minha-conta').set('Authorization', `Bearer ${token}`);
+    }
+
+    it('mostra a situação e o aviso enquanto a liberação vale', async () => {
+      const { id } = await criar({ contribuicaoAtiva: true });
+      const minhaConta = await contaDe(id);
+
+      await minhaConta().expect(200, {
+        nome: 'Farmácia Teste Ltda',
+        situacao: 'Inadimplente',
+        acessoLiberadoAte: null,
+      });
+
+      const liberado = await comoAdmin(http().put(`/associados/${id}/acesso`))
+        .send({ acessoManual: 'LIBERADO', motivo: 'Motivo fictício' })
+        .expect(200);
+      expect((await minhaConta().expect(200)).body.acessoLiberadoAte).toBe(
+        liberado.body.acessoManualAte,
+      );
+
+      // Liberação vencida: o aviso some (a data é conferida na hora).
+      await prisma.associado.update({
+        where: { id },
+        data: { acessoManualAte: new Date(Date.now() - 1000) },
+      });
+      expect(
+        (await minhaConta().expect(200)).body.acessoLiberadoAte,
+      ).toBeNull();
+    });
+
+    it('recusa sem token (401) e a sede (403)', async () => {
+      await http().get('/minha-conta').expect(401);
+      await comoAdmin(http().get('/minha-conta')).expect(403);
     });
   });
 
