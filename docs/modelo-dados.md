@@ -1,6 +1,6 @@
 # Elo Connect — Modelo de Dados (DER)
 
-Última atualização: 11/10/2026.
+Última atualização: 27/10/2026.
 
 Fonte da verdade do banco: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma). Este documento explica o modelo e as decisões; se os dois divergirem, vale o schema, e este documento deve ser corrigido no mesmo PR.
 
@@ -164,7 +164,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Situação armazenada, com override manual** (RN09 a RN11, RN22):
 
-- `situacao` (ADIMPLENTE ou INADIMPLENTE) é a situação **automática**. O pagamento torna o associado adimplente (RF15) e o job de vencimento o torna inadimplente (RF16). Novo associado começa INADIMPLENTE, porque o glossário define inadimplente também como quem não contribui.
+- `situacao` (ADIMPLENTE ou INADIMPLENTE) é a situação **automática**. O pagamento torna o associado adimplente (RF15), e o job de expiração, 30 dias após o vencimento sem pagamento, o torna inadimplente (RF16). Novo associado começa INADIMPLENTE e sem contribuição ativa. Na tela, INADIMPLENTE sem contribuição ativa aparece como "Sem contribuição ativa" (RN22).
 - `acessoManual` guarda a decisão **manual** da sede (RN11). Fica nulo enquanto a sede não interfere, e o acesso segue a situação automática. Com valor (LIBERADO ou BLOQUEADO), prevalece sobre a situação, e os jobs automáticos não o alteram.
 - **Acesso a benefícios e suporte** = `acessoManual`, se preenchido; senão, `situacao`.
 - "Cancelamento solicitado" (RF06) não é um terceiro valor de situação: é o associado ter uma `SolicitacaoCancelamento` PENDENTE.
@@ -212,22 +212,22 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 
 | Ponto do modelo | Pendência | Situação atual |
 | --- | --- | --- |
-| Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, P09 e pergunta nova abaixo | Conjunto mínimo provisório. Novos campos entram por migration. |
-| Estados do boleto depois dos 30 dias de validade | P01 | Pode exigir um status a mais (ex.: EXPIRADO). |
-| Boleto ANUAL: fora do lote? renovação? | P04 | Tipo existe; regras de geração ainda não. |
-| Boleto AVULSO: geração, vencimento, período de acesso | P10 | Tipo existe; regras de geração ainda não. |
+| Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, RF42 | Conjunto mínimo provisório. Não existe lista atual dos associados (P09, respondida), então a planilha modelo da carga inicial parte deste conjunto. Novos campos entram por migration. |
+| Boleto depois dos 30 dias de validade | RN03, RN09 e P01 (em parte) | O boleto expira 30 dias após o vencimento, e a expiração bloqueia o acesso. Deve entrar um status EXPIRADO junto com o bloqueio automático (#49). Se os lembretes param na expiração, fica na P01. |
+| Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
+| Boleto AVULSO e boleto único dos meses em aberto (RN30) | P10 | O tipo AVULSO existe; regras de geração ainda não. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita (tabela nova, desenhada junto com a P10). |
+| Dois PDFs por convenção, completo e resumido (RN12) | — | `ConvencaoAnexo` precisa de um campo que diga se o PDF é o completo ou o resumido (com a #30). |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
-| Lista de benefícios | P06 | Tabela genérica (título, descrição, ordem). |
+| Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, ordem). Os dois grupos (assessoria jurídica e consultoria, RN32) entram como um campo de grupo; a regra de acesso de cada grupo depende da P15. |
+| Matriz e filiais (RN31) | P14 | **Fora do modelo**. Provavelmente, uma ligação da filial com a matriz no `Associado`. |
+| Confirmação automática do cancelamento (RN18) | — | Status APROVADA com `decididaPorId` nulo = confirmado pelo sistema depois de 15 dias sem recusa (#56). |
 | Aceite do compartilhamento com o contador | P11 | **Fora do modelo**. Se for preciso registrar data e hora do aceite, entra um campo em `Usuario`. |
 | Retenção e exclusão de dados (LGPD) | P07 | Inativação em vez de exclusão. Revisar quando houver orientação. |
 | Efeitos da inativação e reativação do associado | P13 | A inativação só preenche `inativadoEm` (o guard já barra benefícios e suporte); a reativação limpa o campo. |
 | Campos do Sicredi (nosso número, linha digitável, Pix) | Estudo #40 | Provisórios. |
 | Onde ficam os PDFs das convenções | Estudo #28 | `arquivoUrl` genérico. |
 
-**Perguntas novas para o cliente**, surgidas na modelagem:
-
-- Quais dados cadastrais da farmácia a sede usa hoje? (Pedir só os nomes das colunas da planilha ou da base, sem dados reais.)
-- A sede pode **recusar** um pedido de cancelamento (por exemplo, quando o associado desiste depois do contato da sede), ou só aprovar? O modelo prevê RECUSADA, mas o requisito (RN18) fala só em "validar".
+As duas perguntas que surgiram na modelagem foram respondidas em 27/10/2026: a sede não tem base com os dados das farmácias que já pagam (resposta 42), e a sede pode recusar um pedido de cancelamento em até 15 dias (resposta 28), o que confirma o status RECUSADA.
 
 **Fica para as próximas fases**, com migrations próprias: importação da base da JUCEMAT (P02), envio da cobrança formal (RF29) e o registro de e-mails enviados.
 
