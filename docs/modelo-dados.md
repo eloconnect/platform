@@ -32,7 +32,7 @@ erDiagram
         string email UK
         string senhaHash "nulo: conta sem senha ainda"
         string nome
-        Perfil perfil "ADMIN, ASSOCIADO"
+        Perfil perfil "ADMIN, ADMIN_BASICO, ASSOCIADO"
         boolean ativo
         datetime emailConfirmadoEm
         uuid associadoId FK,UK "só perfil ASSOCIADO"
@@ -158,7 +158,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **IDs em UUID v7.** Não expõem a quantidade de registros nas URLs e são ordenáveis por data de criação.
 
-**Usuário e associado são tabelas separadas.** O associado é a farmácia; o usuário é a conta de acesso. Um associado pode existir sem conta, como as ~1.850 farmácias que só recebem a cobrança formal. Cada associado tem no máximo uma conta, que o contador também usa (RN29). Usuários da sede têm perfil ADMIN e nenhum associado.
+**Usuário e associado são tabelas separadas.** O associado é a farmácia; o usuário é a conta de acesso. Um associado pode existir sem conta, como as ~1.850 farmácias que só recebem a cobrança formal. Cada associado tem no máximo uma conta, que o contador também usa (RN29). Usuários da sede têm perfil ADMIN (chave mestre, todas as funções) ou ADMIN_BASICO (publica conteúdo e consulta associados, RN33) e nenhum associado.
 
 **Conta criada pelo CNPJ** (RF05, RN21). No primeiro pedido, o sistema cria o `Usuario` com o e-mail do cadastro do associado e sem senha (`senhaHash` nulo), e manda um token `CONFIRMACAO_EMAIL`, válido por 24 horas. Ao criar a senha pelo link, a conta ganha `senhaHash` e `emailConfirmadoEm` e passa a entrar. Enquanto isso não acontece, o login recusa a conta.
 
@@ -239,8 +239,8 @@ O seed (`apps/api/prisma/seed.ts`) cria só dados fictícios (RNF10): CNPJs gera
 
 | Usuário | Perfil | Para testar |
 | --- | --- | --- |
-| `admin@example.com` | Admin | Painel da sede |
-| `sede@example.com` | Admin | Segundo usuário da sede (filtros do log de auditoria) |
+| `admin@example.com` | Admin (chave mestre) | Painel da sede, com todas as funções |
+| `sede@example.com` | Admin básico | Perfil básico da sede (RN33) e segundo usuário para os filtros do log de auditoria |
 | `associado@example.com` | Associado | Farmácia 01, adimplente, com boleto pago |
 | `inadimplente@example.com` | Associado | Farmácia 07, com boleto vencido em aberto |
 

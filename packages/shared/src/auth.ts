@@ -1,4 +1,8 @@
-export type Perfil = 'ADMIN' | 'ASSOCIADO';
+/**
+ * ADMIN e ADMIN_BASICO são os dois perfis da sede (RN33): o chave mestre, com
+ * todas as funções, e o básico, que publica conteúdo e consulta associados.
+ */
+export type Perfil = 'ADMIN' | 'ADMIN_BASICO' | 'ASSOCIADO';
 
 export interface LoginRequest {
   email: string;

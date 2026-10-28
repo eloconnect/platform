@@ -16,8 +16,11 @@ datasource db {
 // Acesso
 // ---------------------------------------------------------------------------
 
+/// Dois perfis da sede (RN33): ADMIN é o chave mestre, com todas as funções;
+/// ADMIN_BASICO publica conteúdo e consulta associados.
 enum Perfil {
   ADMIN
+  ADMIN_BASICO
   ASSOCIADO
 }
 

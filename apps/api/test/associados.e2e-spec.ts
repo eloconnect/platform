@@ -35,6 +35,7 @@ describe('Associados (e2e)', () => {
   let prisma: PrismaService;
   let tokenAdmin: string;
   let tokenAssociado: string;
+  let tokenBasico: string;
   let adminId: string;
 
   const http = () => request(app.getHttpServer());
@@ -80,6 +81,7 @@ describe('Associados (e2e)', () => {
       );
     tokenAdmin = await assinar('ADMIN', admin.id);
     tokenAssociado = await assinar('ASSOCIADO', crypto.randomUUID());
+    tokenBasico = await assinar('ADMIN_BASICO', crypto.randomUUID());
   });
 
   afterAll(() => app.close());
@@ -102,6 +104,26 @@ describe('Associados (e2e)', () => {
       .set('Authorization', `Bearer ${tokenAssociado}`)
       .send({})
       .expect(403);
+  });
+
+  it('o perfil básico da sede consulta, mas não altera (RN33)', async () => {
+    const { id } = await criar();
+    const comoBasico = (req: request.Test) =>
+      req.set('Authorization', `Bearer ${tokenBasico}`);
+
+    await comoBasico(http().get('/associados')).expect(200);
+    await comoBasico(http().get(`/associados/${id}`)).expect(200);
+    await comoBasico(http().post('/associados'))
+      .send({ cnpj: cnpjNovo(), razaoSocial: 'Farmácia Teste Ltda' })
+      .expect(403);
+    await comoBasico(http().patch(`/associados/${id}`))
+      .send({ razaoSocial: 'Outra Razão Social' })
+      .expect(403);
+    await comoBasico(http().post(`/associados/${id}/inativar`)).expect(403);
+    await comoBasico(http().put(`/associados/${id}/acesso`))
+      .send({ acessoManual: 'BLOQUEADO', motivo: 'Motivo fictício' })
+      .expect(403);
+    expect(await logsDo(id)).toHaveLength(1);
   });
 
   it('cadastra com o CNPJ normalizado e grava no log', async () => {

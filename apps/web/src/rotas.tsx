@@ -41,7 +41,7 @@ export const rotas: RouteObject[] = [
   {
     path: '/associado',
     element: (
-      <RotaProtegida perfil="ASSOCIADO">
+      <RotaProtegida perfis={['ASSOCIADO']}>
         <LayoutAssociado />
       </RotaProtegida>
     ),
@@ -50,18 +50,29 @@ export const rotas: RouteObject[] = [
   {
     path: '/admin',
     element: (
-      <RotaProtegida perfil="ADMIN">
+      <RotaProtegida perfis={['ADMIN', 'ADMIN_BASICO']}>
         <LayoutAdmin />
       </RotaProtegida>
     ),
     children: [
       { index: true, element: <PaginaInicioAdmin /> },
       { path: 'associados', element: <PaginaAssociados /> },
-      { path: 'associados/novo', element: <PaginaFormularioAssociado /> },
+      {
+        path: 'associados/novo',
+        element: (
+          <RotaProtegida perfis={['ADMIN']}>
+            <PaginaFormularioAssociado />
+          </RotaProtegida>
+        ),
+      },
       { path: 'associados/:id', element: <PaginaPerfilAssociado /> },
       {
         path: 'associados/:id/editar',
-        element: <PaginaFormularioAssociado />,
+        element: (
+          <RotaProtegida perfis={['ADMIN']}>
+            <PaginaFormularioAssociado />
+          </RotaProtegida>
+        ),
       },
     ],
   },

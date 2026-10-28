@@ -22,7 +22,10 @@ import {
 } from './dto/associado.dto.js';
 import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
-/** Gestão de associados pela sede (US06, US08, US09: RF06, RF08, RF09). Só admin. */
+/**
+ * Gestão de associados pela sede (US06, US08, US09: RF06, RF08, RF09). Só o
+ * chave mestre altera; o perfil básico só consulta (RN33).
+ */
 @Controller('associados')
 @UseGuards(RolesGuard)
 @Roles('ADMIN')
@@ -30,11 +33,13 @@ export class AssociadosController {
   constructor(private readonly associados: AssociadosService) {}
 
   @Get()
+  @Roles('ADMIN', 'ADMIN_BASICO')
   listar(@Query() filtros: FiltrosAssociadosDto) {
     return this.associados.listar(filtros);
   }
 
   @Get(':id')
+  @Roles('ADMIN', 'ADMIN_BASICO')
   buscar(@Param('id', ParseUUIDPipe) id: string) {
     return this.associados.buscar(id);
   }

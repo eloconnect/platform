@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../api';
+import { entrarComo } from '../../test/sessao';
 import { PaginaAssociados } from './PaginaAssociados';
 
 vi.mock('../../api', () => ({
@@ -45,8 +46,19 @@ function abrir(endereco = '/admin/associados') {
 
 describe('PaginaAssociados', () => {
   beforeEach(() => {
+    entrarComo('ADMIN');
     vi.mocked(api.listarAssociados).mockReset();
     vi.mocked(api.listarAssociados).mockResolvedValue(lista({}));
+  });
+
+  it('o perfil básico da sede não vê o botão de cadastrar (RN33)', async () => {
+    entrarComo('ADMIN_BASICO');
+    abrir();
+
+    await screen.findByText('Nenhum associado encontrado.');
+    expect(
+      screen.queryByRole('link', { name: 'Cadastrar associado' }),
+    ).not.toBeInTheDocument();
   });
 
   it('mostra cada associado com a situação em texto e o link do perfil', async () => {

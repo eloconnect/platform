@@ -81,7 +81,8 @@ async function main() {
       data: {
         email: 'sede@example.com',
         nome: 'Funcionária de Teste',
-        perfil: 'ADMIN',
+        // Perfil básico da sede (RN33): publica conteúdo e consulta associados.
+        perfil: 'ADMIN_BASICO',
         senhaHash,
         emailConfirmadoEm: new Date(),
       },

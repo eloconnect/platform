@@ -112,6 +112,8 @@ describe('Áreas logadas', () => {
     ['/admin', 'ADMIN', 'Painel da sede'],
     ['/admin/associados', 'ADMIN', 'Associados'],
     ['/admin/associados/novo', 'ADMIN', 'Cadastrar associado'],
+    ['/admin', 'ADMIN_BASICO', 'Painel da sede'],
+    ['/admin/associados', 'ADMIN_BASICO', 'Associados'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
   ] as const)('%s abre para o perfil %s', (caminho, perfil, titulo) => {
     entrarComo(perfil);
@@ -134,6 +136,9 @@ describe('Áreas logadas', () => {
   it.each([
     ['/admin', 'ASSOCIADO', 'Área do associado'],
     ['/associado', 'ADMIN', 'Painel da sede'],
+    ['/associado', 'ADMIN_BASICO', 'Painel da sede'],
+    // O cadastro é só do chave mestre (RN33).
+    ['/admin/associados/novo', 'ADMIN_BASICO', 'Painel da sede'],
   ] as const)(
     '%s com o perfil %s vai para a própria área',
     (caminho, perfil, titulo) => {

@@ -14,6 +14,7 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { Link, useLocation, useParams } from 'react-router';
 import { api } from '../../api';
+import { ehChaveMestre } from '../../sessao';
 import {
   AvisoSucesso,
   Botao,
@@ -155,6 +156,8 @@ function Perfil({
   associado: AssociadoDetalhe;
   aoAtualizar: (atualizado: Associado, aviso: string) => void;
 }) {
+  // O perfil básico da sede só consulta (RN33).
+  const chaveMestre = ehChaveMestre();
   const [confirmando, setConfirmando] = useState(false);
   const [decisaoAcesso, setDecisaoAcesso] = useState<
     (typeof DECISOES_ACESSO)[number] | null
@@ -177,20 +180,26 @@ function Perfil({
 
   return (
     <>
-      <div className="d-flex flex-wrap gap-3 mt-3">
-        <Link
-          className="btn btn-primary btn-lg"
-          to={`/admin/associados/${associado.id}/editar`}
-        >
-          Editar dados
-        </Link>
-        <Botao
-          variant={associado.inativadoEm ? 'outline-primary' : 'outline-danger'}
-          onClick={() => setConfirmando(true)}
-        >
-          {associado.inativadoEm ? 'Reativar associado' : 'Inativar associado'}
-        </Botao>
-      </div>
+      {chaveMestre && (
+        <div className="d-flex flex-wrap gap-3 mt-3">
+          <Link
+            className="btn btn-primary btn-lg"
+            to={`/admin/associados/${associado.id}/editar`}
+          >
+            Editar dados
+          </Link>
+          <Botao
+            variant={
+              associado.inativadoEm ? 'outline-primary' : 'outline-danger'
+            }
+            onClick={() => setConfirmando(true)}
+          >
+            {associado.inativadoEm
+              ? 'Reativar associado'
+              : 'Inativar associado'}
+          </Botao>
+        </div>
+      )}
       <JanelaInativacao
         associado={associado}
         aberta={confirmando}
@@ -218,19 +227,21 @@ function Perfil({
       <section className="mt-4">
         <h2>Acesso a benefícios e suporte</h2>
         <p>{textoAcesso(associado)}</p>
-        <div className="d-flex flex-wrap gap-3">
-          {DECISOES_ACESSO.filter(
-            ({ valor }) => valor !== associado.acessoManual,
-          ).map((decisao) => (
-            <Botao
-              key={decisao.botao}
-              variant="outline-primary"
-              onClick={() => setDecisaoAcesso(decisao)}
-            >
-              {decisao.botao}
-            </Botao>
-          ))}
-        </div>
+        {chaveMestre && (
+          <div className="d-flex flex-wrap gap-3">
+            {DECISOES_ACESSO.filter(
+              ({ valor }) => valor !== associado.acessoManual,
+            ).map((decisao) => (
+              <Botao
+                key={decisao.botao}
+                variant="outline-primary"
+                onClick={() => setDecisaoAcesso(decisao)}
+              >
+                {decisao.botao}
+              </Botao>
+            ))}
+          </div>
+        )}
         <JanelaAcesso
           associado={associado}
           decisao={decisaoAcesso}
