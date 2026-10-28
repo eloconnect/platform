@@ -12,6 +12,7 @@ import {
 const STATUS = [
   'ADIMPLENTE',
   'INADIMPLENTE',
+  'SEM_CONTRIBUICAO',
   'CANCELAMENTO_SOLICITADO',
 ] satisfies StatusAssociado[];
 

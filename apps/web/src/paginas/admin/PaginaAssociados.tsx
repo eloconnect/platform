@@ -22,6 +22,7 @@ import { textosSituacao } from './situacaoAssociado';
 const OPCOES_SITUACAO: [StatusAssociado, string][] = [
   ['ADIMPLENTE', 'Adimplente'],
   ['INADIMPLENTE', 'Inadimplente'],
+  ['SEM_CONTRIBUICAO', 'Sem contribuição ativa'],
   ['CANCELAMENTO_SOLICITADO', 'Cancelamento solicitado'],
 ];
 
