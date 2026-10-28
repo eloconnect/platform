@@ -30,7 +30,7 @@ erDiagram
     Usuario {
         uuid id PK
         string email UK
-        string senhaHash
+        string senhaHash "nulo: conta sem senha ainda"
         string nome
         Perfil perfil "ADMIN, ASSOCIADO"
         boolean ativo
@@ -160,6 +160,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Usuário e associado são tabelas separadas.** O associado é a farmácia; o usuário é a conta de acesso. Um associado pode existir sem conta, como as ~1.850 farmácias que só recebem a cobrança formal. Cada associado tem no máximo uma conta, que o contador também usa (RN29). Usuários da sede têm perfil ADMIN e nenhum associado.
 
+**Conta criada pelo CNPJ** (RF05, RN21). No primeiro pedido, o sistema cria o `Usuario` com o e-mail do cadastro do associado e sem senha (`senhaHash` nulo), e manda um token `CONFIRMACAO_EMAIL`, válido por 24 horas. Ao criar a senha pelo link, a conta ganha `senhaHash` e `emailConfirmadoEm` e passa a entrar. Enquanto isso não acontece, o login recusa a conta.
+
 **Situação armazenada, com override manual** (RN09 a RN11, RN22):
 
 - `situacao` (ADIMPLENTE ou INADIMPLENTE) é a situação **automática**. O pagamento torna o associado adimplente (RF15), e o job de expiração, 30 dias após o vencimento sem pagamento, o torna inadimplente (RF16). Novo associado começa INADIMPLENTE e sem contribuição ativa. Na tela, INADIMPLENTE sem contribuição ativa aparece como "Sem contribuição ativa" (RN22).
@@ -240,7 +242,7 @@ O seed (`apps/api/prisma/seed.ts`) cria só dados fictícios (RNF10): CNPJs gera
 | `associado@example.com` | Associado | Farmácia 01, adimplente, com boleto pago |
 | `inadimplente@example.com` | Associado | Farmácia 07, com boleto vencido em aberto |
 
-Também cria 20 associados (8 com contribuição ativa), o lote do mês passado com boletos e transações, uma convenção, notícias e benefícios de exemplo. Cenários incluídos: o associado 5 está adimplente mas bloqueado manualmente pela sede, e o associado 3 tem um pedido de cancelamento pendente.
+Também cria 20 associados (8 com contribuição ativa), o lote do mês passado com boletos e transações, uma convenção, notícias e benefícios de exemplo. Cenários incluídos: o associado 5 está adimplente mas bloqueado manualmente pela sede, e o associado 3 tem um pedido de cancelamento pendente. Os associados 2 a 6 e 8 a 20 têm e-mail no cadastro e ainda não têm conta, então servem para testar a criação de conta pelo CNPJ (o da Farmácia 02 é `41.015.838/0001-36`).
 
 | Comando | O que faz |
 | --- | --- |

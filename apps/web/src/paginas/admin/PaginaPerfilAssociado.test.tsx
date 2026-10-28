@@ -31,6 +31,7 @@ function associado(dados: Partial<AssociadoDetalhe> = {}): AssociadoDetalhe {
     criadoEm: '2026-10-01T12:00:00.000Z',
     atualizadoEm: '2026-10-01T12:00:00.000Z',
     cancelamentos: [],
+    conta: null,
     ...dados,
   };
 }
@@ -85,6 +86,9 @@ describe('PaginaPerfilAssociado', () => {
     expect(dados).toHaveTextContent('contato@example.com');
     expect(dados).toHaveTextContent('TelefoneNão informado');
     expect(dados).toHaveTextContent('01/10/2026');
+    expect(secao('Conta de acesso')).toHaveTextContent(
+      'Ainda não criada pelo associado.',
+    );
     expect(secao('Solicitações de cancelamento')).toHaveTextContent(
       'Nenhuma solicitação.',
     );
@@ -94,6 +98,33 @@ describe('PaginaPerfilAssociado', () => {
     expect(
       screen.getByRole('link', { name: 'Voltar para a lista de associados' }),
     ).toHaveAttribute('href', '/admin/associados');
+  });
+
+  it.each([
+    [
+      'aguardando a senha',
+      { confirmadaEm: null },
+      'Pedida em 20/10/2026. Aguardando o associado criar a senha pelo link enviado para conta@example.com.',
+    ],
+    [
+      'criada',
+      { confirmadaEm: '2026-10-21T12:00:00.000Z' },
+      'Criada em 21/10/2026. O associado entra com o e-mail conta@example.com.',
+    ],
+  ])('mostra a conta de acesso %s', async (_caso, conta, texto) => {
+    vi.mocked(api.buscarAssociado).mockResolvedValue(
+      associado({
+        conta: {
+          email: 'conta@example.com',
+          criadaEm: '2026-10-20T12:00:00.000Z',
+          ...conta,
+        },
+      }),
+    );
+    abrir();
+
+    await screen.findByRole('heading', { level: 1 });
+    expect(secao('Conta de acesso')).toHaveTextContent(texto);
   });
 
   it('mostra as marcas da situação e as solicitações de cancelamento', async () => {

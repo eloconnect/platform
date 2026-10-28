@@ -213,6 +213,26 @@ describe('Associados (e2e)', () => {
     ]);
   });
 
+  it('o perfil mostra se a conta de acesso existe e foi confirmada (RF07)', async () => {
+    const { id } = await criar();
+    const perfil = async () =>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      (await comoAdmin(http().get(`/associados/${id}`)).expect(200))
+        .body as AssociadoDetalhe;
+
+    expect((await perfil()).conta).toBeNull();
+
+    const email = `conta-${crypto.randomUUID()}@example.com`;
+    await prisma.usuario.create({
+      data: { email, nome: 'Conta', perfil: 'ASSOCIADO', associadoId: id },
+    });
+    expect((await perfil()).conta).toEqual({
+      email,
+      criadaEm: expect.any(String),
+      confirmadaEm: null,
+    });
+  });
+
   it('edita e grava só o que mudou; a contribuição tem ação própria', async () => {
     const { id } = await criar({ telefone: '(65) 90000-0000' });
 

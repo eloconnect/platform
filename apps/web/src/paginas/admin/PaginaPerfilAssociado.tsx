@@ -183,6 +183,11 @@ function Perfil({
       </section>
 
       <section className="mt-4">
+        <h2>Conta de acesso</h2>
+        <p>{textoConta(associado.conta)}</p>
+      </section>
+
+      <section className="mt-4">
         <h2>Solicitações de cancelamento</h2>
         {associado.cancelamentos.length === 0 ? (
           <p>Nenhuma solicitação.</p>
@@ -316,6 +321,15 @@ function lerAviso(estado: unknown): string | null {
     typeof estado.aviso === 'string'
     ? estado.aviso
     : null;
+}
+
+/** A conta é criada pelo próprio associado, pelo CNPJ (RF05). */
+function textoConta(conta: AssociadoDetalhe['conta']): string {
+  if (!conta) return 'Ainda não criada pelo associado.';
+  if (!conta.confirmadaEm) {
+    return `Pedida em ${formatarData(conta.criadaEm)}. Aguardando o associado criar a senha pelo link enviado para ${conta.email}.`;
+  }
+  return `Criada em ${formatarData(conta.confirmadaEm)}. O associado entra com o e-mail ${conta.email}.`;
 }
 
 function formatarData(iso: string): string {

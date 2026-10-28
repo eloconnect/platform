@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   OnModuleDestroy,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -16,11 +17,21 @@ export interface EmailMessage {
 
 @Injectable()
 export class EmailService implements OnModuleDestroy {
+  private readonly logger = new Logger(EmailService.name);
   private transporter?: Transporter;
 
   constructor(private readonly config: ConfigService) {}
 
   async send(message: EmailMessage): Promise<void> {
+    // Só na demonstração, que não tem SMTP (docs/deploy.md): o e-mail vai para
+    // o log, com os links. Nunca ligar no sistema do cliente.
+    if (this.config.get<string>('EMAIL_SO_NO_LOG') === 'true') {
+      this.logger.log(
+        `E-mail não enviado (EMAIL_SO_NO_LOG=true). Para: ${message.to}. Assunto: ${message.subject}.\n${message.text}`,
+      );
+      return;
+    }
+
     const transporter = this.getTransporter();
     const from = this.config.get<string>('SMTP_FROM');
 

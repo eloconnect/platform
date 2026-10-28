@@ -26,7 +26,8 @@ enum Perfil {
 model Usuario {
   id                String    @id @default(uuid(7)) @db.Uuid
   email             String    @unique
-  senhaHash         String
+  /// Nulo enquanto o associado não cria a senha pelo link do e-mail (RF05).
+  senhaHash         String?
   nome              String
   perfil            Perfil
   ativo             Boolean   @default(true)
@@ -88,8 +89,8 @@ model Associado {
   id                String            @id @default(uuid(7)) @db.Uuid
   /// Só dígitos, sem máscara.
   cnpj              String            @unique @db.Char(14)
-  // Campos cadastrais provisórios: dependem da resposta do cliente sobre os
-  // dados que a sede usa hoje (P02, P09). Novos campos entram por migration.
+  // Campos cadastrais provisórios: dependem do arquivo da JUCEMAT (P02) e da
+  // planilha da carga inicial (RF42). Novos campos entram por migration.
   razaoSocial       String
   nomeFantasia      String?
   email             String?
