@@ -7,7 +7,10 @@ import { api } from '../../api';
 import { PaginaRedefinirSenha } from './PaginaRedefinirSenha';
 
 vi.mock('../../api', () => ({
-  api: { redefinirSenha: vi.fn<ApiClient['redefinirSenha']>() },
+  api: {
+    redefinirSenha: vi.fn<ApiClient['redefinirSenha']>(),
+    confirmarConta: vi.fn<ApiClient['confirmarConta']>(),
+  },
 }));
 
 const MENSAGEM_GENERICA =
@@ -34,6 +37,7 @@ function preencherEEnviar(senha = 'senha-nova-segura', confirmacao = senha) {
 describe('PaginaRedefinirSenha', () => {
   beforeEach(() => {
     vi.mocked(api.redefinirSenha).mockReset();
+    vi.mocked(api.confirmarConta).mockReset();
   });
 
   it('com sucesso mostra o aviso e o link para entrar', async () => {
@@ -107,5 +111,60 @@ describe('PaginaRedefinirSenha', () => {
     expect(
       screen.getByRole('link', { name: 'Pedir um novo link' }),
     ).toHaveAttribute('href', '/esqueci-senha');
+  });
+
+  describe('criar a senha da conta nova', () => {
+    function abrirCriar(endereco = '/criar-senha?token=token-de-teste') {
+      render(
+        <MemoryRouter initialEntries={[endereco]}>
+          <PaginaRedefinirSenha variante="criar" />
+        </MemoryRouter>,
+      );
+    }
+
+    function preencherECriar(senha = 'senha-nova-segura') {
+      fireEvent.change(screen.getByLabelText(/^Senha/), {
+        target: { value: senha },
+      });
+      fireEvent.change(screen.getByLabelText(/^Repita a senha/), {
+        target: { value: senha },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Criar senha' }));
+    }
+
+    it('com sucesso avisa que a conta foi criada', async () => {
+      vi.mocked(api.confirmarConta).mockResolvedValue({
+        mensagem: 'Conta criada. Já pode entrar com o e-mail e a senha.',
+      });
+      abrirCriar();
+      expect(
+        screen.getByRole('heading', { name: 'Crie sua senha' }),
+      ).toBeInTheDocument();
+      preencherECriar();
+
+      expect(await screen.findByRole('status')).toHaveTextContent(
+        'Conta criada',
+      );
+      expect(api.confirmarConta).toHaveBeenCalledWith({
+        token: 'token-de-teste',
+        senha: 'senha-nova-segura',
+      });
+      expect(api.redefinirSenha).not.toHaveBeenCalled();
+    });
+
+    it('com 400 oferece pedir outro link em Criar conta', async () => {
+      vi.mocked(api.confirmarConta).mockRejectedValue(
+        new ApiError(400, 'erro'),
+      );
+      abrirCriar();
+      preencherECriar();
+
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        'Este link expirou ou já foi usado. Peça um novo link.',
+      );
+      expect(
+        screen.getByRole('link', { name: 'Pedir um novo link' }),
+      ).toHaveAttribute('href', '/cadastro');
+    });
   });
 });

@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { hash, verify } from '@node-rs/argon2';
+import { Prisma } from '../generated/prisma/client.js';
 import { EmailService } from '../email/email.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AuthService } from './auth.service.js';
@@ -24,7 +25,10 @@ describe('AuthService', () => {
     emailConfirmadoEm: new Date(),
   };
   const findUnique = jest.fn();
+  const usuarioCreate = jest.fn();
+  const associadoFindUnique = jest.fn();
   const tokenFindUnique = jest.fn();
+  const tokenFindFirst = jest.fn();
   const tokenCreate = jest.fn();
   const tokenUpdateMany = jest.fn();
   const usuarioUpdate = jest.fn();
@@ -34,9 +38,11 @@ describe('AuthService', () => {
   const send = jest.fn();
 
   const prisma = {
-    usuario: { findUnique, update: usuarioUpdate },
+    usuario: { findUnique, create: usuarioCreate, update: usuarioUpdate },
+    associado: { findUnique: associadoFindUnique },
     tokenUsuario: {
       findUnique: tokenFindUnique,
+      findFirst: tokenFindFirst,
       create: tokenCreate,
       updateMany: tokenUpdateMany,
     },
@@ -105,6 +111,7 @@ describe('AuthService', () => {
     ['senha incorreta', 'ativo', 'senha-incorreta'],
     ['conta inativa', 'inativo', senha],
     ['e-mail não confirmado', 'nao-confirmado', senha],
+    ['conta sem senha', 'sem-senha', senha],
   ])('recusa login com %s', async (_caso, situacao, senhaTentada) => {
     const registro =
       situacao === 'inexistente'
@@ -115,6 +122,7 @@ describe('AuthService', () => {
             ...(situacao === 'nao-confirmado'
               ? { emailConfirmadoEm: null }
               : {}),
+            ...(situacao === 'sem-senha' ? { senhaHash: null } : {}),
           };
     findUnique.mockResolvedValue(registro);
 
@@ -167,6 +175,7 @@ describe('AuthService', () => {
     it.each([
       ['conta inexistente', null],
       ['conta inativa', { ...usuario, ativo: false }],
+      ['conta ainda sem senha', { ...usuario, emailConfirmadoEm: null }],
     ])('responde igual e não envia e-mail para %s', async (_caso, registro) => {
       findUnique.mockResolvedValue(registro);
 
@@ -258,6 +267,207 @@ describe('AuthService', () => {
         ).rejects.toBeInstanceOf(BadRequestException);
         expect(usuarioUpdate).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('criação de conta pelo CNPJ', () => {
+    const cnpj = '11222333000181';
+    const associado = {
+      id: 'associado-id',
+      razaoSocial: 'Farmácia Exemplo Ltda',
+      nomeFantasia: 'Drogaria Exemplo',
+      email: 'Contato@Farmacia.example.com',
+      inativadoEm: null,
+      usuario: null,
+    };
+    const contaPendente = {
+      id: 'conta-id',
+      email: 'contato@farmacia.example.com',
+      ativo: true,
+      emailConfirmadoEm: null,
+    };
+    const MENSAGEM =
+      'Se o CNPJ estiver no cadastro do sindicato, enviamos um link para o e-mail da farmácia que está no cadastro.';
+
+    const emailEnviado = () =>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      (send.mock.calls[0] as Array<{ to: string; text: string }>)[0];
+    const tokenCriado = () =>
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      (
+        tokenCreate.mock.calls[0] as Array<{
+          data: { usuarioId: string; tipo: string; expiraEm: Date };
+        }>
+      )[0].data;
+
+    beforeEach(() => {
+      associadoFindUnique.mockResolvedValue({ ...associado });
+      usuarioCreate.mockResolvedValue({ id: 'nova-conta-id' });
+      tokenFindFirst.mockResolvedValue(null);
+    });
+
+    it('cria a conta sem senha e manda o link para o e-mail do cadastro', async () => {
+      const resposta = await service.solicitarCriacaoConta({ cnpj });
+
+      expect(resposta.mensagem).toBe(MENSAGEM);
+      expect(associadoFindUnique).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { cnpj } }),
+      );
+      expect(usuarioCreate).toHaveBeenCalledWith({
+        data: {
+          email: 'contato@farmacia.example.com',
+          nome: 'Drogaria Exemplo',
+          perfil: 'ASSOCIADO',
+          associadoId: 'associado-id',
+        },
+        select: { id: true },
+      });
+      const token = tokenCriado();
+      expect(token.usuarioId).toBe('nova-conta-id');
+      expect(token.tipo).toBe('CONFIRMACAO_EMAIL');
+      expect(token.expiraEm.getTime()).toBeGreaterThan(
+        Date.now() + 23 * 60 * 60 * 1000,
+      );
+      const mensagem = emailEnviado();
+      expect(mensagem.to).toBe('contato@farmacia.example.com');
+      expect(mensagem.text).toContain(
+        'https://app.example.com/criar-senha?token=',
+      );
+    });
+
+    it.each([
+      ['fora do cadastro', null],
+      ['sem e-mail no cadastro', { ...associado, email: null }],
+      ['inativado', { ...associado, inativadoEm: new Date() }],
+    ])(
+      'responde igual e não envia e-mail para associado %s',
+      async (_caso, registro) => {
+        associadoFindUnique.mockResolvedValue(registro);
+
+        const resposta = await service.solicitarCriacaoConta({ cnpj });
+
+        expect(resposta.mensagem).toBe(MENSAGEM);
+        expect(usuarioCreate).not.toHaveBeenCalled();
+        expect(tokenCreate).not.toHaveBeenCalled();
+        expect(send).not.toHaveBeenCalled();
+      },
+    );
+
+    it('não manda outro e-mail antes de 2 minutos', async () => {
+      associadoFindUnique.mockResolvedValue({
+        ...associado,
+        usuario: contaPendente,
+      });
+      tokenFindFirst.mockResolvedValue({ criadoEm: new Date() });
+
+      const resposta = await service.solicitarCriacaoConta({ cnpj });
+
+      expect(resposta.mensagem).toBe(MENSAGEM);
+      expect(tokenCreate).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('com a conta pendente, troca o e-mail se a sede mudou o cadastro', async () => {
+      associadoFindUnique.mockResolvedValue({
+        ...associado,
+        usuario: { ...contaPendente, email: 'antigo@farmacia.example.com' },
+      });
+      tokenFindFirst.mockResolvedValue({
+        criadoEm: new Date(Date.now() - 3 * 60 * 1000),
+      });
+
+      await service.solicitarCriacaoConta({ cnpj });
+
+      expect(usuarioCreate).not.toHaveBeenCalled();
+      expect(usuarioUpdate).toHaveBeenCalledWith({
+        where: { id: 'conta-id' },
+        data: { email: 'contato@farmacia.example.com' },
+      });
+      expect(tokenCriado().tipo).toBe('CONFIRMACAO_EMAIL');
+      expect(emailEnviado().to).toBe('contato@farmacia.example.com');
+    });
+
+    it('com a conta já criada, manda o link de redefinir senha', async () => {
+      associadoFindUnique.mockResolvedValue({
+        ...associado,
+        usuario: {
+          ...contaPendente,
+          email: 'dono@farmacia.example.com',
+          emailConfirmadoEm: new Date(),
+        },
+      });
+
+      await service.solicitarCriacaoConta({ cnpj });
+
+      expect(usuarioCreate).not.toHaveBeenCalled();
+      expect(tokenCriado().tipo).toBe('RECUPERACAO_SENHA');
+      const mensagem = emailEnviado();
+      expect(mensagem.to).toBe('dono@farmacia.example.com');
+      expect(mensagem.text).toContain(
+        'https://app.example.com/redefinir-senha?token=',
+      );
+    });
+
+    it('não envia quando o e-mail já é de outra conta', async () => {
+      const aviso = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      usuarioCreate.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('e-mail repetido', {
+          code: 'P2002',
+          clientVersion: 'teste',
+        }),
+      );
+
+      const resposta = await service.solicitarCriacaoConta({ cnpj });
+
+      expect(resposta.mensagem).toBe(MENSAGEM);
+      expect(tokenCreate).not.toHaveBeenCalled();
+      expect(send).not.toHaveBeenCalled();
+      expect(aviso).toHaveBeenCalled();
+      aviso.mockRestore();
+    });
+  });
+
+  describe('confirmar conta', () => {
+    const token = 'token-de-teste-com-mais-de-20-caracteres';
+    const registro = {
+      id: 'token-id',
+      usuarioId: usuario.id,
+      tipo: 'CONFIRMACAO_EMAIL',
+      usadoEm: null,
+      expiraEm: new Date(Date.now() + 60_000),
+      usuario: { ativo: true },
+    };
+
+    beforeEach(() => {
+      tokenFindUnique.mockResolvedValue({ ...registro });
+      tokenUpdateMany.mockResolvedValue({ count: 1 });
+    });
+
+    it('grava a senha e confirma o e-mail', async () => {
+      await service.confirmarConta({ token, senha: 'senha-nova-forte' });
+
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      const { data } = (
+        usuarioUpdate.mock.calls[0] as Array<{
+          data: { senhaHash: string; emailConfirmadoEm: Date };
+        }>
+      )[0];
+      expect(await verify(data.senhaHash, 'senha-nova-forte')).toBe(true);
+      expect(data.emailConfirmadoEm).toBeInstanceOf(Date);
+    });
+
+    it('recusa o link de redefinir senha', async () => {
+      tokenFindUnique.mockResolvedValue({
+        ...registro,
+        tipo: 'RECUPERACAO_SENHA',
+      });
+
+      await expect(
+        service.confirmarConta({ token, senha: 'senha-nova-forte' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(usuarioUpdate).not.toHaveBeenCalled();
     });
   });
 });

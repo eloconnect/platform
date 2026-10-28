@@ -121,12 +121,18 @@ export class AssociadosService {
     };
   }
 
-  /** Perfil do associado, com as solicitações de cancelamento (RF07). */
+  /**
+   * Perfil do associado, com as solicitações de cancelamento e a conta de
+   * acesso (RF07).
+   */
   async buscar(id: string) {
     const associado = await this.prisma.associado.findUnique({
       where: { id },
       select: {
         ...CAMPOS,
+        usuario: {
+          select: { email: true, criadoEm: true, emailConfirmadoEm: true },
+        },
         cancelamentos: {
           orderBy: { solicitadaEm: 'desc' },
           select: {
@@ -144,7 +150,15 @@ export class AssociadosService {
     if (!associado) {
       throw new NotFoundException('Associado não encontrado.');
     }
-    return associado;
+    const { usuario, ...dados } = associado;
+    return {
+      ...dados,
+      conta: usuario && {
+        email: usuario.email,
+        criadaEm: usuario.criadoEm,
+        confirmadaEm: usuario.emailConfirmadoEm,
+      },
+    };
   }
 
   async criar(usuarioId: string, dados: CriarAssociadoDto) {
