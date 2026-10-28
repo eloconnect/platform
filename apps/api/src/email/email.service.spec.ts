@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
@@ -64,5 +64,25 @@ describe('EmailService', () => {
       }),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
     expect(createTransport).not.toHaveBeenCalled();
+  });
+
+  it('com EMAIL_SO_NO_LOG=true, escreve no log e não usa o SMTP', async () => {
+    const log = jest
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    values = { EMAIL_SO_NO_LOG: 'true' };
+
+    await service.send({
+      to: 'associado@example.com',
+      subject: 'Aviso',
+      text: 'Link: https://app.example.com/criar-senha?token=abc',
+    });
+
+    expect(createTransport).not.toHaveBeenCalled();
+    expect(sendMail).not.toHaveBeenCalled();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('https://app.example.com/criar-senha?token=abc'),
+    );
+    log.mockRestore();
   });
 });

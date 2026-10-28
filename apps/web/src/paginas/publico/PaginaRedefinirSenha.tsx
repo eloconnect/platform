@@ -15,9 +15,46 @@ const TAMANHO_MINIMO_SENHA = 8;
 
 type Falha = 'link' | 'generica';
 
-/** Define a nova senha a partir do link recebido por e-mail (US04, issue #19). */
-export function PaginaRedefinirSenha() {
-  useTituloPagina('Redefinir senha');
+/** As duas telas abertas por um link do e-mail mudam só nos textos. */
+const TEXTOS = {
+  redefinir: {
+    tituloPagina: 'Redefinir senha',
+    titulo: 'Criar nova senha',
+    rotuloSenha: 'Nova senha',
+    rotuloRepetir: 'Repita a nova senha',
+    botao: 'Salvar nova senha',
+    tituloSucesso: 'Senha redefinida',
+    sucesso: 'Sua senha foi alterada. Já pode entrar com a nova senha.',
+    falhaGenerica:
+      'Não foi possível redefinir a senha agora. Tente de novo em alguns minutos.',
+    novoLink: '/esqueci-senha',
+  },
+  criar: {
+    tituloPagina: 'Criar senha',
+    titulo: 'Crie sua senha',
+    rotuloSenha: 'Senha',
+    rotuloRepetir: 'Repita a senha',
+    botao: 'Criar senha',
+    tituloSucesso: 'Conta criada',
+    sucesso:
+      'Sua conta está pronta. Entre com o e-mail que recebeu o link e a senha que você acabou de criar.',
+    falhaGenerica:
+      'Não foi possível criar a senha agora. Tente de novo em alguns minutos.',
+    novoLink: '/cadastro',
+  },
+} as const;
+
+/**
+ * Senha nova a partir do link recebido por e-mail: redefinir a senha (US04,
+ * issue #19) ou criar a senha da conta nova (US02 e US05, issues #61 e #62).
+ */
+export function PaginaRedefinirSenha({
+  variante = 'redefinir',
+}: {
+  variante?: keyof typeof TEXTOS;
+}) {
+  const textos = TEXTOS[variante];
+  useTituloPagina(textos.tituloPagina);
   const [parametros] = useSearchParams();
   const token = parametros.get('token');
   const [senha, setSenha] = useState('');
@@ -27,7 +64,7 @@ export function PaginaRedefinirSenha() {
   const [falha, setFalha] = useState<Falha | null>(null);
   const [erroConfirmacao, setErroConfirmacao] = useState<string | null>(null);
 
-  async function redefinir() {
+  async function salvar() {
     if (!token) return;
     setFalha(null);
     if (senha !== confirmacao) {
@@ -37,7 +74,11 @@ export function PaginaRedefinirSenha() {
     setErroConfirmacao(null);
     setEnviando(true);
     try {
-      await api.redefinirSenha({ token, senha });
+      if (variante === 'criar') {
+        await api.confirmarConta({ token, senha });
+      } else {
+        await api.redefinirSenha({ token, senha });
+      }
       setConcluido(true);
     } catch (e) {
       // A mensagem depende só do status, nunca do texto do erro (que pode vir
@@ -50,12 +91,12 @@ export function PaginaRedefinirSenha() {
 
   return (
     <section className="cartao-pagina cartao-autenticacao">
-      <h1 className="text-uppercase">Criar nova senha</h1>
+      <h1 className="text-uppercase">{textos.titulo}</h1>
 
       {concluido ? (
         <>
-          <AvisoSucesso titulo="Senha redefinida">
-            Sua senha foi alterada. Já pode entrar com a nova senha.
+          <AvisoSucesso titulo={textos.tituloSucesso}>
+            {textos.sucesso}
           </AvisoSucesso>
           <Link className="btn btn-primary btn-lg w-100" to="/entrar">
             Ir para o login
@@ -66,13 +107,13 @@ export function PaginaRedefinirSenha() {
           <MensagemErro>
             Este link não é válido. Peça um novo link.
           </MensagemErro>
-          <Link to="/esqueci-senha">Pedir um novo link</Link>
+          <Link to={textos.novoLink}>Pedir um novo link</Link>
         </>
       ) : (
         <Form
           onSubmit={(event) => {
             event.preventDefault();
-            void redefinir();
+            void salvar();
           }}
         >
           {falha === 'link' && (
@@ -81,19 +122,16 @@ export function PaginaRedefinirSenha() {
                 Este link expirou ou já foi usado. Peça um novo link.
               </MensagemErro>
               <p>
-                <Link to="/esqueci-senha">Pedir um novo link</Link>
+                <Link to={textos.novoLink}>Pedir um novo link</Link>
               </p>
             </>
           )}
           {falha === 'generica' && (
-            <MensagemErro>
-              Não foi possível redefinir a senha agora. Tente de novo em alguns
-              minutos.
-            </MensagemErro>
+            <MensagemErro>{textos.falhaGenerica}</MensagemErro>
           )}
 
           <CampoTexto
-            rotulo="Nova senha"
+            rotulo={textos.rotuloSenha}
             type="password"
             autoComplete="new-password"
             ajuda={`Use pelo menos ${TAMANHO_MINIMO_SENHA} caracteres.`}
@@ -105,7 +143,7 @@ export function PaginaRedefinirSenha() {
           />
 
           <CampoTexto
-            rotulo="Repita a nova senha"
+            rotulo={textos.rotuloRepetir}
             type="password"
             autoComplete="new-password"
             minLength={TAMANHO_MINIMO_SENHA}
@@ -117,7 +155,7 @@ export function PaginaRedefinirSenha() {
           />
 
           <Botao className="w-100" type="submit" disabled={enviando}>
-            {enviando ? 'Salvando...' : 'Salvar nova senha'}
+            {enviando ? 'Salvando...' : textos.botao}
           </Botao>
         </Form>
       )}

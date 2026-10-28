@@ -15,7 +15,7 @@ import {
 } from 'class-validator';
 
 /** Guarda o CNPJ só com letras e dígitos. */
-const NormalizarCnpj = () =>
+export const NormalizarCnpj = () =>
   Transform(({ value }) =>
     typeof value === 'string' ? normalizarCnpj(value) : value,
   );
@@ -28,7 +28,7 @@ const TextoOpcional = () =>
     return texto === '' ? null : texto;
   });
 
-function IsCnpj() {
+export function IsCnpj() {
   return (objeto: object, propriedade: string) =>
     registerDecorator({
       name: 'isCnpj',

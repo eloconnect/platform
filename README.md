@@ -96,7 +96,13 @@ Para testar a recuperação de senha de ponta a ponta:
 2. Abra <http://localhost:8025>, entre no e-mail "Redefinição de senha" e clique no link.
 3. Crie a nova senha e entre com ela em <http://localhost:5173/entrar>.
 
-Para voltar à senha `eloconnect123`, rode `pnpm --filter api db:reset`.
+Para testar a criação de conta pelo CNPJ (RF05):
+
+1. Abra <http://localhost:5173/cadastro> e informe o CNPJ da Farmácia Exemplo 02, `41.015.838/0001-36`, que está no cadastro e ainda não tem conta.
+2. Abra <http://localhost:8025>, entre no e-mail "Crie sua senha" e clique no link.
+3. Crie a senha e entre em <http://localhost:5173/entrar> com `farmacia02@example.com`.
+
+Para voltar à senha `eloconnect123` e apagar as contas criadas, rode `pnpm --filter api db:reset`.
 
 O banco e o Mailpit só aceitam conexões da própria máquina, porque as senhas de desenvolvimento estão no repositório.
 
@@ -105,7 +111,7 @@ O banco e o Mailpit só aceitam conexões da própria máquina, porque as senhas
 A demonstração do PI fica em <https://eloconnect.vercel.app>, com os mesmos usuários fictícios do seed (tabela acima). Ela é atualizada sozinha a cada merge no `main`.
 
 - Os dados são fictícios e podem ser recriados a qualquer momento.
-- A recuperação de senha não envia e-mail na demonstração, porque ainda não há provedor (P12).
+- A demonstração não envia e-mail, porque ainda não há provedor (P12). Os e-mails de recuperação de senha e de criação de conta, com os links, aparecem no log da API na Vercel, que só a equipe vê ([docs/deploy.md](docs/deploy.md)).
 - Depois de um tempo sem acesso, a primeira resposta pode demorar alguns segundos.
 
 Como ela está configurada: [docs/deploy.md](docs/deploy.md).
