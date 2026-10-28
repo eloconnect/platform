@@ -5,6 +5,7 @@ import type {
   StatusCancelamento,
 } from '@eloconnect/shared';
 import {
+  acessoManualEmVigor,
   ApiError,
   formatarCnpj,
   podeAcessarRecursoRestrito,
@@ -56,7 +57,7 @@ const DECISOES_ACESSO: {
     botao: 'Liberar acesso',
     titulo: 'Liberar o acesso?',
     explicacao:
-      'O associado tem acesso a benefícios e suporte, mesmo com o pagamento em atraso, até a sede mudar de novo.',
+      'O associado tem acesso a benefícios e suporte por 7 dias, mesmo com o pagamento em atraso, e vê um aviso com a data de fim. Depois, o acesso volta a seguir o pagamento.',
     aviso: 'Acesso liberado.',
   },
   {
@@ -230,7 +231,12 @@ function Perfil({
         {chaveMestre && (
           <div className="d-flex flex-wrap gap-3">
             {DECISOES_ACESSO.filter(
-              ({ valor }) => valor !== associado.acessoManual,
+              ({ valor }) =>
+                valor !==
+                acessoManualEmVigor(
+                  associado.acessoManual,
+                  associado.acessoManualAte,
+                ),
             ).map((decisao) => (
               <Botao
                 key={decisao.botao}
@@ -496,15 +502,21 @@ function JanelaAcesso({
 }
 
 /**
- * Como está o acesso a benefícios e suporte hoje (RN11). A decisão da sede
- * vale até ela mudar de novo. TODO(P17): até quando vale a liberação.
+ * Como está o acesso a benefícios e suporte hoje (RN11). A liberação vale 7
+ * dias; o bloqueio, até a sede mudar de novo.
  */
 function textoAcesso(associado: AssociadoDetalhe): string {
-  if (associado.acessoManual === 'BLOQUEADO') {
+  const emVigor = acessoManualEmVigor(
+    associado.acessoManual,
+    associado.acessoManualAte,
+  );
+  if (emVigor === 'BLOQUEADO') {
     return 'Bloqueado pela sede, mesmo que o pagamento esteja em dia.';
   }
-  if (associado.acessoManual === 'LIBERADO') {
-    return 'Liberado pela sede, mesmo que o pagamento esteja em atraso.';
+  if (emVigor === 'LIBERADO') {
+    return associado.acessoManualAte
+      ? `Liberado pela sede até ${formatarData(associado.acessoManualAte)}, mesmo que o pagamento esteja em atraso. Depois, volta a seguir o pagamento.`
+      : 'Liberado pela sede, mesmo que o pagamento esteja em atraso.';
   }
   return podeAcessarRecursoRestrito(associado.situacao, null)
     ? 'Segue o pagamento. Hoje está liberado.'

@@ -11,6 +11,8 @@ export {
   type OpcoesApiClient,
 } from './api-client.js';
 export {
+  acessoManualEmVigor,
+  DIAS_LIBERACAO_MANUAL,
   podeAcessarRecursoRestrito,
   type SituacaoAcesso,
   type AcessoManualStatus,

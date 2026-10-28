@@ -1,4 +1,5 @@
 import type { AcessoManualStatus, SituacaoAcesso } from './access-policy.js';
+import type { TextoSituacao } from './situacao.js';
 
 /** Associado como a API devolve para a sede. Datas em texto ISO. */
 export interface Associado {
@@ -14,6 +15,8 @@ export interface Associado {
   contribuicaoAtiva: boolean;
   situacao: SituacaoAcesso;
   acessoManual: AcessoManualStatus;
+  /** Fim da liberação manual (RN11). Use `acessoManualEmVigor` para saber se ainda vale. */
+  acessoManualAte: string | null;
   inativadoEm: string | null;
   criadoEm: string;
   atualizadoEm: string;
@@ -107,6 +110,7 @@ export interface AssociadoResumo {
   nomeFantasia: string | null;
   situacao: SituacaoAcesso;
   acessoManual: AcessoManualStatus;
+  acessoManualAte: string | null;
   contribuicaoAtiva: boolean;
   /** Tem pedido de cancelamento pendente. */
   cancelamentoSolicitado: boolean;
@@ -118,4 +122,12 @@ export interface ListaAssociados {
   total: number;
   pagina: number;
   porPagina: number;
+}
+
+/** O que o associado vê na área dele (RN22, RN11). */
+export interface MinhaConta {
+  nome: string;
+  situacao: TextoSituacao;
+  /** Data de fim da liberação manual em vigor; nulo sem liberação (RN11). */
+  acessoLiberadoAte: string | null;
 }

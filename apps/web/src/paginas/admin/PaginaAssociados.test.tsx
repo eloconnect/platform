@@ -25,6 +25,7 @@ function associado(dados: Partial<AssociadoResumo>): AssociadoResumo {
     nomeFantasia: null,
     situacao: 'ADIMPLENTE',
     acessoManual: null,
+    acessoManualAte: null,
     contribuicaoAtiva: false,
     cancelamentoSolicitado: false,
     inativadoEm: null,

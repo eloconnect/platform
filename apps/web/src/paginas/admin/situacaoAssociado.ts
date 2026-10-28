@@ -1,4 +1,8 @@
-import { textoSituacao, type AssociadoResumo } from '@eloconnect/shared';
+import {
+  acessoManualEmVigor,
+  textoSituacao,
+  type AssociadoResumo,
+} from '@eloconnect/shared';
 
 /** Situação em texto, com as marcas à parte (não só cor). */
 export function textosSituacao(
@@ -7,17 +11,27 @@ export function textosSituacao(
     | 'situacao'
     | 'contribuicaoAtiva'
     | 'acessoManual'
+    | 'acessoManualAte'
     | 'cancelamentoSolicitado'
     | 'inativadoEm'
   >,
 ): string[] {
   const textos: string[] = [textoSituacao(associado)];
   if (associado.cancelamentoSolicitado) textos.push('Cancelamento solicitado');
-  if (associado.acessoManual === 'BLOQUEADO') {
+  // A liberação vencida não aparece: o acesso voltou a seguir o pagamento (RN11).
+  const acessoManual = acessoManualEmVigor(
+    associado.acessoManual,
+    associado.acessoManualAte,
+  );
+  if (acessoManual === 'BLOQUEADO') {
     textos.push('Acesso bloqueado pela sede');
   }
-  if (associado.acessoManual === 'LIBERADO') {
-    textos.push('Acesso liberado pela sede');
+  if (acessoManual === 'LIBERADO') {
+    textos.push(
+      associado.acessoManualAte
+        ? `Acesso liberado pela sede até ${new Date(associado.acessoManualAte).toLocaleDateString('pt-BR')}`
+        : 'Acesso liberado pela sede',
+    );
   }
   if (associado.inativadoEm) textos.push('Inativado');
   return textos;

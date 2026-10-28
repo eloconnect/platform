@@ -11,6 +11,7 @@ vi.mock('./api', () => ({
   api: {
     getHealth: vi.fn<ApiClient['getHealth']>(),
     listarAssociados: vi.fn<ApiClient['listarAssociados']>(),
+    minhaConta: vi.fn<ApiClient['minhaConta']>(),
   },
 }));
 
@@ -100,6 +101,11 @@ function entrarComo(perfil: Perfil) {
 describe('Áreas logadas', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    vi.mocked(api.minhaConta).mockResolvedValue({
+      nome: 'Farmácia Teste',
+      situacao: 'Adimplente',
+      acessoLiberadoAte: null,
+    });
     vi.mocked(api.listarAssociados).mockResolvedValue({
       itens: [],
       total: 0,

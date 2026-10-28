@@ -161,4 +161,27 @@ describe('AccessStatusGuard', () => {
       ),
     ).rejects.toThrow(ForbiddenException);
   });
+
+  function comLiberacao(deslocamentoMs: number) {
+    prisma.usuario.findUnique.mockResolvedValue({
+      ativo: true,
+      associado: {
+        situacao: 'INADIMPLENTE',
+        acessoManual: 'LIBERADO',
+        acessoManualAte: new Date(Date.now() + deslocamentoMs),
+        inativadoEm: null,
+      },
+    });
+    return guard.canActivate(
+      criarContexto({ sub: 'associado-1', perfil: 'ASSOCIADO' }),
+    );
+  }
+
+  it('permite inadimplente com a liberação manual em vigor (RN11)', async () => {
+    await expect(comLiberacao(60_000)).resolves.toBe(true);
+  });
+
+  it('com a liberação manual vencida, volta a seguir o pagamento (RN11)', async () => {
+    await expect(comLiberacao(-60_000)).rejects.toThrow(ForbiddenException);
+  });
 });
