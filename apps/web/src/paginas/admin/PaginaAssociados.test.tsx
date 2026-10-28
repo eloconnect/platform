@@ -81,7 +81,9 @@ describe('PaginaAssociados', () => {
     expect(primeira).toHaveTextContent('Adimplente');
     expect(primeira).toHaveTextContent('Sim');
     expect(segunda).toHaveTextContent('12.ABC.345/01DE-35');
-    expect(segunda).toHaveTextContent('Inadimplente');
+    // Não contribui: "Sem contribuição ativa", e não "Inadimplente" (RN22).
+    expect(segunda).toHaveTextContent('Sem contribuição ativa');
+    expect(segunda).not.toHaveTextContent('Inadimplente');
     expect(segunda).toHaveTextContent('Cancelamento solicitado');
     expect(segunda).toHaveTextContent('Acesso bloqueado pela sede');
     expect(segunda).toHaveTextContent('Inativado');

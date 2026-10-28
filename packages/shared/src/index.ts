@@ -3,6 +3,7 @@ export type * from './auth.js';
 export { ACOES_AUDITORIA, type AcaoAuditoria } from './auditoria.js';
 export { cnpjValido, formatarCnpj, normalizarCnpj } from './cnpj.js';
 export type * from './associados.js';
+export { textoSituacao, type TextoSituacao } from './situacao.js';
 export {
   ApiError,
   createApiClient,

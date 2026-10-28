@@ -34,6 +34,14 @@ Ficam só no painel da Vercel, nunca no repositório.
 
 O SMTP fica sem configurar. A recuperação de senha responde normalmente, mas o e-mail não sai enquanto não houver provedor (P12). Quando houver, o envio depois da resposta precisa do `waitUntil` do `@vercel/functions`, para a função não ser suspensa antes de o e-mail sair. Ele ficou de fora por enquanto: sem e-mail não teria efeito, e hoje o pacote traz uma dependência com vulnerabilidade conhecida (`zod`, via `@vercel/oidc`).
 
+## Variáveis do projeto `eloconnect`
+
+| Variável | Valor |
+| --- | --- |
+| `VITE_EMAIL_PEDIDO_CADASTRO` | E-mail que o sindicato vai informar para as farmácias pedirem o cadastro (P19). Enquanto não houver, fica sem configurar, e a página inicial orienta a falar com a sede. |
+
+As variáveis `VITE_` entram no código das telas no build, então qualquer pessoa vê o valor: só use para dados públicos, como esse e-mail. Depois de mudar, faça um Redeploy do projeto.
+
 ## Dados fictícios (seed)
 
 Rode uma vez, da sua máquina, depois do primeiro deploy. Copie a `DATABASE_URL_UNPOOLED` do painel do Neon e use direto no comando, sem salvar em arquivo. Comece a linha com um espaço, para ela não ficar no histórico do terminal:

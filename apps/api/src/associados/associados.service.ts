@@ -7,7 +7,7 @@ import {
   AuditoriaService,
   diferencas,
 } from '../auditoria/auditoria.service.js';
-import { normalizarCnpj } from '@eloconnect/shared';
+import { normalizarCnpj, type StatusAssociado } from '@eloconnect/shared';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
@@ -37,6 +37,18 @@ const ENTIDADE = 'Associado';
 const POR_PAGINA = 20;
 
 /** Lista, cadastro, edição e inativação de associados pela sede (RF06, RF08). */
+/** Como cada opção do filtro de status vira condição no banco (RN22). */
+const FILTRO_STATUS: Record<
+  StatusAssociado | 'TODOS',
+  Prisma.AssociadoWhereInput
+> = {
+  TODOS: {},
+  ADIMPLENTE: { situacao: 'ADIMPLENTE' },
+  INADIMPLENTE: { situacao: 'INADIMPLENTE', contribuicaoAtiva: true },
+  SEM_CONTRIBUICAO: { situacao: 'INADIMPLENTE', contribuicaoAtiva: false },
+  CANCELAMENTO_SOLICITADO: { cancelamentos: { some: { status: 'PENDENTE' } } },
+};
+
 @Injectable()
 export class AssociadosService {
   constructor(
@@ -59,12 +71,11 @@ export class AssociadosService {
     const cnpj = texto ? normalizarCnpj(texto) : '';
     const where: Prisma.AssociadoWhereInput = {
       ...(incluirInativos ? {} : { inativadoEm: null }),
-      ...(contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva }),
-      ...(status === 'CANCELAMENTO_SOLICITADO'
-        ? { cancelamentos: { some: { status: 'PENDENTE' } } }
-        : status
-          ? { situacao: status }
-          : {}),
+      // AND, para o filtro de status não apagar o de "Recebe boleto mensal".
+      AND: [
+        contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva },
+        FILTRO_STATUS[status ?? 'TODOS'],
+      ],
       ...(texto
         ? {
             OR: [

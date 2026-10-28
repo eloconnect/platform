@@ -130,7 +130,7 @@ describe('PaginaPerfilAssociado', () => {
     await screen.findByRole('heading', { level: 1 });
     const situacao = secao('Situação');
     for (const texto of [
-      'Inadimplente',
+      'Sem contribuição ativa',
       'Cancelamento solicitado',
       'Acesso bloqueado pela sede',
       'Inativado',

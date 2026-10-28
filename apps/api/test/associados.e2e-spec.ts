@@ -314,7 +314,8 @@ describe('Associados (e2e)', () => {
         situacao: 'ADIMPLENTE',
         contribuicaoAtiva: true,
       });
-      await criarDireto('B');
+      // Em atraso, com contribuição ativa: "Inadimplente" (RN22).
+      await criarDireto('B', { contribuicaoAtiva: true });
       await criarDireto('C', {
         situacao: 'ADIMPLENTE',
         contribuicaoAtiva: true,
@@ -367,16 +368,25 @@ describe('Associados (e2e)', () => {
 
     it.each([
       ['ADIMPLENTE', ['A', 'C']],
-      ['INADIMPLENTE', ['B', 'E']],
+      ['INADIMPLENTE', ['B']],
+      ['SEM_CONTRIBUICAO', ['E']],
       ['CANCELAMENTO_SOLICITADO', ['C']],
     ])('filtra pelo status %s', async (status, letras) => {
       const lista = await listar({ status });
       expect(idsDe(lista)).toEqual(letras.map((letra) => ids[letra]));
     });
 
+    it('o filtro de status não apaga o de "Recebe boleto mensal"', async () => {
+      const lista = await listar({
+        status: 'SEM_CONTRIBUICAO',
+        contribuicaoAtiva: 'true',
+      });
+      expect(lista.total).toBe(0);
+    });
+
     it.each([
-      ['true', ['A', 'C']],
-      ['false', ['B', 'E']],
+      ['true', ['A', 'B', 'C']],
+      ['false', ['E']],
     ])('filtra por "Recebe boleto mensal" = %s', async (valor, letras) => {
       const lista = await listar({ contribuicaoAtiva: valor });
       expect(idsDe(lista)).toEqual(letras.map((letra) => ids[letra]));
