@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 27/10/2026.
+Última atualização: 28/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -31,7 +31,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - Princípio do projeto: automatizar processos sem criar novos processos manuais.
 
-- Perfis: **administrador** (equipe da sede, 3 pessoas), **associado** (perfil único, com acesso conforme o status adimplente ou inadimplente) e visitante (landing page).
+- Perfis: **administrador** (equipe da sede, 3 pessoas, em dois perfis: **chave mestre**, com todas as funções, e **básico**, para publicar conteúdo e consultar associados), **associado** (perfil único, com acesso conforme o status adimplente ou inadimplente) e visitante (landing page).
 
 - Funcionalidades do MVP [validadas]:
 
@@ -41,19 +41,19 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Criação de conta pelo próprio associado a partir do CNPJ, com link enviado ao e-mail que já está no cadastro (ver Acesso).
 
-  - **Cobrança mensal via Sicredi**: o sistema gera o lote de boletos (com Pix QR Code), um administrador revisa/edita e envia com um único botão, **só para associados com contribuição ativa**.
+  - **Cobrança mensal via Sicredi**: o sistema gera o lote de boletos (com Pix QR Code) e envia no primeiro dia útil do mês, **só para associados com contribuição ativa**. A revisão do lote por um administrador antes do envio ficou em dúvida: o cliente disse que não precisa e vai conversar sobre isso em reunião (P20).
 
-  - Adesão à cobrança recorrente pelo próprio associado no app, ativada automaticamente (sem aprovação da sede), com o boleto do mês gerado na hora e com o valor cheio; o associado também pode pagar apenas um mês (boleto avulso).
+  - Adesão à cobrança recorrente pelo próprio associado no app, ativada automaticamente (sem aprovação da sede), com o boleto do mês gerado na hora e com o valor cheio, depois de aceitar um termo de adesão (texto dos advogados do sindicato, P21); o associado também pode pagar apenas um mês (boleto avulso, um por mês sem passar pela sede quando está em dia).
 
-  - A sede pode interromper a cobrança recorrente de qualquer associado.
+  - A sede pode interromper a cobrança recorrente de qualquer associado; ele recebe um aviso e mantém o acesso por mais 30 dias.
 
   - Vencimento fixo (dia 10 de todo mês), validade do boleto de 30 dias contados do vencimento.
 
-  - Lembretes automáticos: 48h antes do vencimento e a cada 48h após o vencimento.
+  - Lembretes automáticos: 48h antes do vencimento e uma vez por semana depois do vencimento, até o boleto expirar.
 
-  - Sem juros e sem multa por atraso (decisão do cliente). Para voltar a ficar em dia, os meses em aberto são pagos num boleto só.
+  - Sem juros e sem multa por atraso (decisão do cliente). Para voltar a ficar em dia, os meses em aberto são pagos num boleto só, que passa pela sede antes da emissão.
 
-  - Bloqueio automático de benefícios/suporte quando o boleto expira sem pagamento (30 dias após o vencimento); desbloqueio automático após o pagamento; controle manual pelo admin.
+  - Bloqueio automático de benefícios/suporte quando o boleto expira sem pagamento (30 dias após o vencimento); desbloqueio automático após o pagamento; controle manual pelo admin, com a liberação manual valendo 7 dias e aparecendo como aviso para o associado.
 
   - Painel de valores (só admin): valor único para todos, plano anual à vista com 20% de desconto, reajuste a cada 5 anos para todos; toda alteração gera e-mail de aviso, vale para o próximo boleto e fica em histórico.
 
@@ -188,6 +188,10 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Recuperação de senha por link enviado ao e-mail [validado].
 
+- Perfis da sede [validado, 28/10/2026]: **chave mestre** (todas as funções) e **básico** (publicar notícias, convenções e benefícios e consultar associados). Cadastro, acesso manual, cobrança, valores, cancelamentos e o log de auditoria ficam só com o chave mestre (RN33).
+
+- E-mail da conta [validado, 28/10/2026]: a sede pode trocar. O e-mail do cadastro é o mesmo da conta, e o associado é avisado no e-mail antigo e no novo (RN34).
+
 - Cadastro da farmácia: feito pela sede, a pedido da farmácia, ou pela importação da JUCEMAT [validado]. Quem não está no cadastro pede pelo e-mail informado na página inicial (o endereço depende da P19).
 
 - Criação de conta pelo associado [validado, decisão do grupo de 27/10/2026]: ele informa o CNPJ, o sistema confere se a farmácia está no cadastro e manda para o e-mail desse cadastro um link para criar a senha. A sede não aprova a conta; no perfil do associado, ela vê se a conta existe. Os 5 dígitos do CNPJ saíram: o CNPJ é público, e quem abre o link prova que lê o e-mail da farmácia. O cliente preferia o login pelo CNPJ com código temporário e aceitou esta forma como alternativa; comunicar a decisão a ele (P08).
@@ -204,9 +208,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 ### Com o cliente
 
-Respondidas em 27/10/2026: P03 (criação de conta e primeiro boleto) e P09 (não existe lista dos associados que já pagam). Detalhes em [Requisitos](requisitos.md), seção 8.
-
-- P01: depois que o boleto expira, os lembretes param? (A validade conta do vencimento, e a expiração bloqueia os benefícios.)
+Respondidas: P03 e P09 (27/10/2026), P01, P17 e P18 (28/10/2026). Detalhes em [Requisitos](requisitos.md), seção 8.
 
 - P02: formato, frequência e forma de recebimento do arquivo da JUCEMAT (ele traz o e-mail das farmácias).
 
@@ -218,7 +220,7 @@ Respondidas em 27/10/2026: P03 (criação de conta e primeiro boleto) e P09 (nã
 
 - P08: comunicar ao cliente a decisão sobre a criação de conta.
 
-- P10: regras do boleto avulso e do boleto único dos meses em aberto (geração, vencimento, lembretes e período de acesso aos benefícios).
+- P10: o que falta das regras do boleto avulso (vencimento do pedido feito depois do dia 10 e período de acesso de quem paga só um mês).
 
 - P12: quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção.
 
@@ -230,16 +232,18 @@ Respondidas em 27/10/2026: P03 (criação de conta e primeiro boleto) e P09 (nã
 
 - P16: vencimento do primeiro boleto, gerado na hora da adesão.
 
-- P17: até quando vale a liberação manual feita pela sede.
-
-- P18: troca do e-mail da conta e e-mail repetido em mais de uma farmácia.
-
 - P19: e-mail para os pedidos de cadastro e endereço de envio dos e-mails do sistema.
+
+- P20: a revisão do lote mensal antes do envio fica ou sai (reunião do cliente).
+
+- P21: texto do termo de adesão (advogados do sindicato).
 
 ### Com os professores
 
 - P07: LGPD e tratamento de dados cadastrais e financeiros.
 
 - P11: como registrar a responsabilidade do titular pelo compartilhamento do acesso com o contador (aviso com aceite no cadastro ou termo de uso formal).
+
+- P22: o sindicato pediu um exemplo de termo de adesão para os advogados usarem de base. O grupo pode indicar um modelo? O aceite do compartilhamento com o contador (P11) pode entrar no mesmo termo?
 
 - Orientação sobre os aspectos jurídicos/trabalhistas do projeto se necessário
