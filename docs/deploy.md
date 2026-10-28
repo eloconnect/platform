@@ -33,7 +33,9 @@ Ficam só no painel da Vercel, nunca no repositório.
 | `WEB_URL` | `https://eloconnect.vercel.app` |
 | `EMAIL_SO_NO_LOG` | `true` |
 
-O SMTP fica sem configurar, e o e-mail não sai enquanto não houver provedor (P12). Com `EMAIL_SO_NO_LOG=true`, a API escreve cada e-mail no log, com os links, em vez de enviar. É assim que a equipe testa a criação de conta e a recuperação de senha na demonstração: faça o pedido nas telas e abra o log da função em Logs, no projeto `eloconnect-api`. Os e-mails do seed são fictícios (`@example.com`), e o log só a equipe vê. **Nunca ligue essa variável no sistema do cliente**: os links dão acesso às contas. Quando houver, o envio depois da resposta precisa do `waitUntil` do `@vercel/functions`, para a função não ser suspensa antes de o e-mail sair. Ele ficou de fora por enquanto: sem e-mail não teria efeito, e hoje o pacote traz uma dependência com vulnerabilidade conhecida (`zod`, via `@vercel/oidc`).
+O SMTP fica sem configurar, e o e-mail não sai enquanto não houver provedor (P12). Com `EMAIL_SO_NO_LOG=true`, a API escreve cada e-mail no log, com os links, em vez de enviar. É assim que a equipe testa a criação de conta e a recuperação de senha na demonstração: faça o pedido nas telas e abra o log da função em Logs, no projeto `eloconnect-api`. Os e-mails do seed são fictícios (`@example.com`), e o log só a equipe vê. **Nunca ligue essa variável no sistema do cliente**: os links dão acesso às contas.
+
+Quando houver provedor, o envio depois da resposta precisa do `waitUntil` do `@vercel/functions`, para a função não ser suspensa antes de o e-mail sair. Ele ficou de fora por enquanto: sem e-mail não teria efeito, e hoje o pacote traz uma dependência com vulnerabilidade conhecida (`zod`, via `@vercel/oidc`).
 
 ## Variáveis do projeto `eloconnect`
 
