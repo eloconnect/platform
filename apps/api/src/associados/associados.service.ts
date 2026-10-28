@@ -7,11 +7,16 @@ import {
   AuditoriaService,
   diferencas,
 } from '../auditoria/auditoria.service.js';
-import { normalizarCnpj, type StatusAssociado } from '@eloconnect/shared';
+import {
+  normalizarCnpj,
+  type AcaoAuditoria,
+  type StatusAssociado,
+} from '@eloconnect/shared';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
   CriarAssociadoDto,
+  DefinirAcessoDto,
   EditarAssociadoDto,
 } from './dto/associado.dto.js';
 import type { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
@@ -44,7 +49,17 @@ const FILTRO_STATUS: Record<StatusAssociado, Prisma.AssociadoWhereInput> = {
   CANCELAMENTO_SOLICITADO: { cancelamentos: { some: { status: 'PENDENTE' } } },
 };
 
-/** Lista, cadastro, edição e inativação de associados pela sede (RF06, RF08). */
+/** Ação do log para cada decisão sobre o acesso (RN11). */
+const ACAO_ACESSO = {
+  BLOQUEADO: 'ACESSO_BLOQUEADO',
+  LIBERADO: 'ACESSO_LIBERADO',
+  AUTOMATICO: 'ACESSO_AUTOMATICO',
+} satisfies Record<string, AcaoAuditoria>;
+
+/**
+ * Lista, cadastro, edição, inativação e acesso manual dos associados pela
+ * sede (RF06, RF08, RF09).
+ */
 @Injectable()
 export class AssociadosService {
   constructor(
@@ -233,6 +248,48 @@ export class AssociadosService {
    */
   async inativar(usuarioId: string, id: string) {
     return this.definirInativacao(usuarioId, id, new Date());
+  }
+
+  /**
+   * Bloqueia, libera ou devolve ao automático o acesso a benefícios e suporte
+   * (RF09, RN11). A decisão da sede prevalece sobre a situação automática, e
+   * os jobs de cobrança não a mudam. O motivo fica só no log de auditoria.
+   * TODO(P17): até quando vale a liberação. Por enquanto, até a sede mudar.
+   */
+  async definirAcesso(
+    usuarioId: string,
+    id: string,
+    { acessoManual, motivo }: DefinirAcessoDto,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const antes = await tx.associado.findUnique({ where: { id } });
+      if (!antes) {
+        throw new NotFoundException('Associado não encontrado.');
+      }
+      const mudanca = diferencas(antes, { acessoManual });
+      // Já está como pedido: nada muda e nada vai para o log.
+      if (!mudanca) {
+        return tx.associado.findUniqueOrThrow({
+          where: { id },
+          select: CAMPOS,
+        });
+      }
+      const associado = await tx.associado.update({
+        where: { id },
+        data: { acessoManual },
+        select: CAMPOS,
+      });
+      await this.auditoria.registrar(tx, {
+        usuarioId,
+        acao: ACAO_ACESSO[acessoManual ?? 'AUTOMATICO'],
+        entidade: ENTIDADE,
+        entidadeId: id,
+        associadoId: id,
+        valorAnterior: mudanca.valorAnterior,
+        valorNovo: { ...mudanca.valorNovo, motivo },
+      });
+      return associado;
+    });
   }
 
   /** Desfaz a inativação. [A confirmar] com o cliente (P13). */

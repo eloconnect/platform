@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -14,10 +15,14 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { AssociadosService } from './associados.service.js';
-import { CriarAssociadoDto, EditarAssociadoDto } from './dto/associado.dto.js';
+import {
+  CriarAssociadoDto,
+  DefinirAcessoDto,
+  EditarAssociadoDto,
+} from './dto/associado.dto.js';
 import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
-/** Gestão de associados pela sede (US06, US08: RF06, RF08). Só admin. */
+/** Gestão de associados pela sede (US06, US08, US09: RF06, RF08, RF09). Só admin. */
 @Controller('associados')
 @UseGuards(RolesGuard)
 @Roles('ADMIN')
@@ -64,5 +69,14 @@ export class AssociadosController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.associados.reativar(usuarioId, id);
+  }
+
+  @Put(':id/acesso')
+  definirAcesso(
+    @UsuarioAtual() usuarioId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dados: DefinirAcessoDto,
+  ) {
+    return this.associados.definirAcesso(usuarioId, id, dados);
   }
 }

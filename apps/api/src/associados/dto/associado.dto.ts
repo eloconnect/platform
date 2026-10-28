@@ -1,15 +1,19 @@
 import { cnpjValido, normalizarCnpj } from '@eloconnect/shared';
 import type {
+  AcessoManualStatus,
   CriarAssociadoRequest,
+  DefinirAcessoRequest,
   EditarAssociadoRequest,
 } from '@eloconnect/shared';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
+  MaxLength,
   ValidateIf,
   registerDecorator,
 } from 'class-validator';
@@ -113,4 +117,16 @@ export class EditarAssociadoDto implements EditarAssociadoRequest {
   @IsOptional()
   @IsBoolean()
   contribuicaoAtiva?: boolean;
+}
+
+/** Bloquear, liberar ou devolver ao automático o acesso (RF09, RN11). */
+export class DefinirAcessoDto implements DefinirAcessoRequest {
+  @IsIn(['LIBERADO', 'BLOQUEADO', null])
+  acessoManual!: AcessoManualStatus;
+
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
+  motivo!: string;
 }

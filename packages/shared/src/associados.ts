@@ -64,6 +64,17 @@ export interface CriarAssociadoRequest {
 export type EditarAssociadoRequest = Partial<CriarAssociadoRequest>;
 
 /**
+ * Decisão manual da sede sobre o acesso a benefícios e suporte (RF09, RN11).
+ * Prevalece sobre a situação automática até a sede mudar de novo.
+ */
+export interface DefinirAcessoRequest {
+  /** null: o acesso volta a seguir o pagamento. */
+  acessoManual: AcessoManualStatus;
+  /** Por que a sede mudou o acesso. Fica só no log de auditoria. */
+  motivo: string;
+}
+
+/**
  * Filtro de status da lista (RF06). INADIMPLENTE é quem tem contribuição
  * ativa e está em atraso; SEM_CONTRIBUICAO é quem não está em dia e não
  * contribui (RN22). "Cancelamento solicitado" não é uma situação: é ter um

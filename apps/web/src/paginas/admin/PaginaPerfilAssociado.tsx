@@ -1,16 +1,23 @@
 import type {
+  AcessoManualStatus,
   Associado,
   AssociadoDetalhe,
   StatusCancelamento,
 } from '@eloconnect/shared';
-import { ApiError, formatarCnpj } from '@eloconnect/shared';
+import {
+  ApiError,
+  formatarCnpj,
+  podeAcessarRecursoRestrito,
+} from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
+import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { Link, useLocation, useParams } from 'react-router';
 import { api } from '../../api';
 import {
   AvisoSucesso,
   Botao,
+  CampoTexto,
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
@@ -27,10 +34,45 @@ const STATUS_CANCELAMENTO: Record<StatusCancelamento, string> = {
   RECUSADA: 'Recusada',
 };
 
+/** Textos de cada decisão da sede sobre o acesso (RF09, RN11). */
+const DECISOES_ACESSO: {
+  valor: AcessoManualStatus;
+  botao: string;
+  titulo: string;
+  explicacao: string;
+  aviso: string;
+}[] = [
+  {
+    valor: 'BLOQUEADO',
+    botao: 'Bloquear acesso',
+    titulo: 'Bloquear o acesso?',
+    explicacao:
+      'O associado perde o acesso a benefícios e suporte, mesmo com o pagamento em dia, até a sede mudar de novo.',
+    aviso: 'Acesso bloqueado.',
+  },
+  {
+    valor: 'LIBERADO',
+    botao: 'Liberar acesso',
+    titulo: 'Liberar o acesso?',
+    explicacao:
+      'O associado tem acesso a benefícios e suporte, mesmo com o pagamento em atraso, até a sede mudar de novo.',
+    aviso: 'Acesso liberado.',
+  },
+  {
+    valor: null,
+    botao: 'Voltar a seguir o pagamento',
+    titulo: 'Voltar a seguir o pagamento?',
+    explicacao:
+      'O acesso a benefícios e suporte volta a depender só do pagamento.',
+    aviso: 'O acesso voltou a seguir o pagamento.',
+  },
+];
+
 /**
  * Perfil do associado para a sede (US07, RF07): situação, dados cadastrais e
  * solicitações de cancelamento. O histórico de boletos entra com a cobrança.
- * Daqui a sede edita, inativa e reativa o associado (US08, RF08).
+ * Daqui a sede edita, inativa e reativa o associado (US08, RF08) e bloqueia ou
+ * libera o acesso a benefícios e suporte (US09, RF09).
  */
 export function PaginaPerfilAssociado() {
   const { id = '' } = useParams();
@@ -114,6 +156,9 @@ function Perfil({
   aoAtualizar: (atualizado: Associado, aviso: string) => void;
 }) {
   const [confirmando, setConfirmando] = useState(false);
+  const [decisaoAcesso, setDecisaoAcesso] = useState<
+    (typeof DECISOES_ACESSO)[number] | null
+  >(null);
   const cancelamentoSolicitado = associado.cancelamentos.some(
     (solicitacao) => solicitacao.status === 'PENDENTE',
   );
@@ -168,6 +213,33 @@ function Perfil({
             Recebe boleto mensal: {associado.contribuicaoAtiva ? 'Sim' : 'Não'}
           </li>
         </ul>
+      </section>
+
+      <section className="mt-4">
+        <h2>Acesso a benefícios e suporte</h2>
+        <p>{textoAcesso(associado)}</p>
+        <div className="d-flex flex-wrap gap-3">
+          {DECISOES_ACESSO.filter(
+            ({ valor }) => valor !== associado.acessoManual,
+          ).map((decisao) => (
+            <Botao
+              key={decisao.botao}
+              variant="outline-primary"
+              onClick={() => setDecisaoAcesso(decisao)}
+            >
+              {decisao.botao}
+            </Botao>
+          ))}
+        </div>
+        <JanelaAcesso
+          associado={associado}
+          decisao={decisaoAcesso}
+          aoFechar={() => setDecisaoAcesso(null)}
+          aoConcluir={(atualizado, mensagem) => {
+            setDecisaoAcesso(null);
+            aoAtualizar(atualizado, mensagem);
+          }}
+        />
       </section>
 
       <section className="mt-4">
@@ -311,6 +383,121 @@ function JanelaInativacao({
       </Modal.Footer>
     </Modal>
   );
+}
+
+/**
+ * Confirmação da decisão sobre o acesso, com o motivo, que fica só no log de
+ * auditoria (RN26).
+ */
+function JanelaAcesso({
+  associado,
+  decisao,
+  aoFechar,
+  aoConcluir,
+}: {
+  associado: AssociadoDetalhe;
+  decisao: (typeof DECISOES_ACESSO)[number] | null;
+  aoFechar: () => void;
+  aoConcluir: (atualizado: Associado, aviso: string) => void;
+}) {
+  const [motivo, setMotivo] = useState('');
+  const [erroMotivo, setErroMotivo] = useState<string>();
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState(false);
+
+  function fechar() {
+    setMotivo('');
+    setErroMotivo(undefined);
+    setErro(false);
+    aoFechar();
+  }
+
+  async function confirmar() {
+    if (!decisao) return;
+    if (!motivo.trim()) {
+      setErroMotivo('Escreva o motivo.');
+      return;
+    }
+    setErroMotivo(undefined);
+    setEnviando(true);
+    setErro(false);
+    try {
+      const atualizado = await api.definirAcesso(associado.id, {
+        acessoManual: decisao.valor,
+        motivo: motivo.trim(),
+      });
+      setMotivo('');
+      aoConcluir(atualizado, decisao.aviso);
+    } catch {
+      setErro(true);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <Modal
+      show={decisao !== null}
+      onHide={fechar}
+      centered
+      aria-labelledby="titulo-janela-acesso"
+    >
+      <Form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void confirmar();
+        }}
+      >
+        <Modal.Header closeButton closeLabel="Fechar">
+          <Modal.Title as="h2" className="h4" id="titulo-janela-acesso">
+            {decisao?.titulo}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {erro && (
+            <MensagemErro>
+              Não foi possível mudar o acesso agora. Tente de novo em alguns
+              minutos.
+            </MensagemErro>
+          )}
+          <p>{decisao?.explicacao}</p>
+          <CampoTexto
+            rotulo="Motivo"
+            ajuda="Fica registrado no histórico de ações da sede."
+            maxLength={500}
+            obrigatorio
+            erro={erroMotivo}
+            value={motivo}
+            onChange={(event) => setMotivo(event.target.value)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Botao variant="outline-secondary" onClick={fechar}>
+            Cancelar
+          </Botao>
+          <Botao type="submit" disabled={enviando}>
+            Confirmar
+          </Botao>
+        </Modal.Footer>
+      </Form>
+    </Modal>
+  );
+}
+
+/**
+ * Como está o acesso a benefícios e suporte hoje (RN11). A decisão da sede
+ * vale até ela mudar de novo. TODO(P17): até quando vale a liberação.
+ */
+function textoAcesso(associado: AssociadoDetalhe): string {
+  if (associado.acessoManual === 'BLOQUEADO') {
+    return 'Bloqueado pela sede, mesmo que o pagamento esteja em dia.';
+  }
+  if (associado.acessoManual === 'LIBERADO') {
+    return 'Liberado pela sede, mesmo que o pagamento esteja em atraso.';
+  }
+  return podeAcessarRecursoRestrito(associado.situacao, null)
+    ? 'Segue o pagamento. Hoje está liberado.'
+    : 'Segue o pagamento. Hoje está bloqueado.';
 }
 
 /** Aviso deixado pela página anterior (ex.: "Dados salvos." depois de editar). */
