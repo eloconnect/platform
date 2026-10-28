@@ -36,19 +36,15 @@ const CAMPOS = {
 const ENTIDADE = 'Associado';
 const POR_PAGINA = 20;
 
-/** Lista, cadastro, edição e inativação de associados pela sede (RF06, RF08). */
 /** Como cada opção do filtro de status vira condição no banco (RN22). */
-const FILTRO_STATUS: Record<
-  StatusAssociado | 'TODOS',
-  Prisma.AssociadoWhereInput
-> = {
-  TODOS: {},
+const FILTRO_STATUS: Record<StatusAssociado, Prisma.AssociadoWhereInput> = {
   ADIMPLENTE: { situacao: 'ADIMPLENTE' },
   INADIMPLENTE: { situacao: 'INADIMPLENTE', contribuicaoAtiva: true },
   SEM_CONTRIBUICAO: { situacao: 'INADIMPLENTE', contribuicaoAtiva: false },
   CANCELAMENTO_SOLICITADO: { cancelamentos: { some: { status: 'PENDENTE' } } },
 };
 
+/** Lista, cadastro, edição e inativação de associados pela sede (RF06, RF08). */
 @Injectable()
 export class AssociadosService {
   constructor(
@@ -74,7 +70,7 @@ export class AssociadosService {
       // AND, para o filtro de status não apagar o de "Recebe boleto mensal".
       AND: [
         contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva },
-        FILTRO_STATUS[status ?? 'TODOS'],
+        status ? FILTRO_STATUS[status] : {},
       ],
       ...(texto
         ? {
