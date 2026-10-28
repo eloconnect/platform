@@ -26,13 +26,19 @@ describe('Rotas', () => {
   beforeEach(() => {
     vi.mocked(api.getHealth).mockReset();
   });
-  it('abre a página de cadastro em construção', () => {
+  it('abre a página de criar conta', () => {
     abrir('/cadastro');
 
     expect(
-      screen.getByRole('heading', {
-        name: /cadastro em construção/i,
-      }),
+      screen.getByRole('heading', { name: /criar conta/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('abre a página de criar a senha da conta nova', () => {
+    abrir('/criar-senha?token=token-de-teste');
+
+    expect(
+      screen.getByRole('heading', { name: /crie sua senha/i }),
     ).toBeInTheDocument();
   });
 

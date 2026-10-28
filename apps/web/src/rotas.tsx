@@ -29,6 +29,10 @@ export const rotas: RouteObject[] = [
       { path: 'entrar', element: <PaginaEntrar /> },
       { path: 'esqueci-senha', element: <PaginaEsqueciSenha /> },
       { path: 'redefinir-senha', element: <PaginaRedefinirSenha /> },
+      {
+        path: 'criar-senha',
+        element: <PaginaRedefinirSenha variante="criar" />,
+      },
       { path: 'status', element: <PaginaStatus /> },
       { path: '*', element: <PaginaNaoEncontrada /> },
       { path: 'cadastro', element: <PaginaCadastro /> },

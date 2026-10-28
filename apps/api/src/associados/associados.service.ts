@@ -7,7 +7,11 @@ import {
   AuditoriaService,
   diferencas,
 } from '../auditoria/auditoria.service.js';
-import { normalizarCnpj, type AcaoAuditoria } from '@eloconnect/shared';
+import {
+  normalizarCnpj,
+  type AcaoAuditoria,
+  type StatusAssociado,
+} from '@eloconnect/shared';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
@@ -37,7 +41,14 @@ const CAMPOS = {
 const ENTIDADE = 'Associado';
 const POR_PAGINA = 20;
 
-/** Lista, cadastro, edição e inativação de associados pela sede (RF06, RF08). */
+/** Como cada opção do filtro de status vira condição no banco (RN22). */
+const FILTRO_STATUS: Record<StatusAssociado, Prisma.AssociadoWhereInput> = {
+  ADIMPLENTE: { situacao: 'ADIMPLENTE' },
+  INADIMPLENTE: { situacao: 'INADIMPLENTE', contribuicaoAtiva: true },
+  SEM_CONTRIBUICAO: { situacao: 'INADIMPLENTE', contribuicaoAtiva: false },
+  CANCELAMENTO_SOLICITADO: { cancelamentos: { some: { status: 'PENDENTE' } } },
+};
+
 /** Ação do log para cada decisão sobre o acesso (RN11). */
 const ACAO_ACESSO = {
   BLOQUEADO: 'ACESSO_BLOQUEADO',
@@ -45,6 +56,10 @@ const ACAO_ACESSO = {
   AUTOMATICO: 'ACESSO_AUTOMATICO',
 } satisfies Record<string, AcaoAuditoria>;
 
+/**
+ * Lista, cadastro, edição, inativação e acesso manual dos associados pela
+ * sede (RF06, RF08, RF09).
+ */
 @Injectable()
 export class AssociadosService {
   constructor(
@@ -67,12 +82,11 @@ export class AssociadosService {
     const cnpj = texto ? normalizarCnpj(texto) : '';
     const where: Prisma.AssociadoWhereInput = {
       ...(incluirInativos ? {} : { inativadoEm: null }),
-      ...(contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva }),
-      ...(status === 'CANCELAMENTO_SOLICITADO'
-        ? { cancelamentos: { some: { status: 'PENDENTE' } } }
-        : status
-          ? { situacao: status }
-          : {}),
+      // AND, para o filtro de status não apagar o de "Recebe boleto mensal".
+      AND: [
+        contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva },
+        status ? FILTRO_STATUS[status] : {},
+      ],
       ...(texto
         ? {
             OR: [
@@ -118,12 +132,18 @@ export class AssociadosService {
     };
   }
 
-  /** Perfil do associado, com as solicitações de cancelamento (RF07). */
+  /**
+   * Perfil do associado, com as solicitações de cancelamento e a conta de
+   * acesso (RF07).
+   */
   async buscar(id: string) {
     const associado = await this.prisma.associado.findUnique({
       where: { id },
       select: {
         ...CAMPOS,
+        usuario: {
+          select: { email: true, criadoEm: true, emailConfirmadoEm: true },
+        },
         cancelamentos: {
           orderBy: { solicitadaEm: 'desc' },
           select: {
@@ -141,7 +161,15 @@ export class AssociadosService {
     if (!associado) {
       throw new NotFoundException('Associado não encontrado.');
     }
-    return associado;
+    const { usuario, ...dados } = associado;
+    return {
+      ...dados,
+      conta: usuario && {
+        email: usuario.email,
+        criadaEm: usuario.criadoEm,
+        confirmadaEm: usuario.emailConfirmadoEm,
+      },
+    };
   }
 
   async criar(usuarioId: string, dados: CriarAssociadoDto) {

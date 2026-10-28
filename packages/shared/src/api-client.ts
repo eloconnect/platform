@@ -8,6 +8,8 @@ import type {
   ListaAssociados,
 } from './associados.js';
 import type {
+  ConfirmarContaRequest,
+  CriarContaRequest,
   EsqueciSenhaRequest,
   LoginRequest,
   LoginResponse,
@@ -89,6 +91,10 @@ export function createApiClient(
       requisitar<MensagemResponse>('POST', '/auth/esqueci-senha', dados),
     redefinirSenha: (dados: RedefinirSenhaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/redefinir-senha', dados),
+    criarConta: (dados: CriarContaRequest) =>
+      requisitar<MensagemResponse>('POST', '/auth/criar-conta', dados),
+    confirmarConta: (dados: ConfirmarContaRequest) =>
+      requisitar<MensagemResponse>('POST', '/auth/confirmar-conta', dados),
     listarAssociados: (filtros: FiltrosAssociados = {}) =>
       requisitar<ListaAssociados>(
         'GET',

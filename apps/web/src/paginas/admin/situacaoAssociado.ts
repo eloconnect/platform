@@ -1,15 +1,17 @@
-import type { AssociadoResumo } from '@eloconnect/shared';
+import { textoSituacao, type AssociadoResumo } from '@eloconnect/shared';
 
 /** Situação em texto, com as marcas à parte (não só cor). */
 export function textosSituacao(
   associado: Pick<
     AssociadoResumo,
-    'situacao' | 'acessoManual' | 'cancelamentoSolicitado' | 'inativadoEm'
+    | 'situacao'
+    | 'contribuicaoAtiva'
+    | 'acessoManual'
+    | 'cancelamentoSolicitado'
+    | 'inativadoEm'
   >,
 ): string[] {
-  const textos = [
-    associado.situacao === 'ADIMPLENTE' ? 'Adimplente' : 'Inadimplente',
-  ];
+  const textos: string[] = [textoSituacao(associado)];
   if (associado.cancelamentoSolicitado) textos.push('Cancelamento solicitado');
   if (associado.acessoManual === 'BLOQUEADO') {
     textos.push('Acesso bloqueado pela sede');

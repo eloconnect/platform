@@ -1,5 +1,7 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
+import { ConfirmarContaDto } from './dto/confirmar-conta.dto.js';
+import { CriarContaDto } from './dto/criar-conta.dto.js';
 import { EsqueciSenhaDto } from './dto/esqueci-senha.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RedefinirSenhaDto } from './dto/redefinir-senha.dto.js';
@@ -24,5 +26,17 @@ export class AuthController {
   @HttpCode(200)
   redefinirSenha(@Body() dto: RedefinirSenhaDto) {
     return this.authService.redefinirSenha(dto);
+  }
+
+  @Post('criar-conta')
+  @HttpCode(200)
+  criarConta(@Body() dto: CriarContaDto) {
+    return this.authService.solicitarCriacaoConta(dto);
+  }
+
+  @Post('confirmar-conta')
+  @HttpCode(200)
+  confirmarConta(@Body() dto: ConfirmarContaDto) {
+    return this.authService.confirmarConta(dto);
   }
 }

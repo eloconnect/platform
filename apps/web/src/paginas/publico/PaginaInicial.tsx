@@ -21,6 +21,9 @@ const beneficiosProvisorios = [
 
 export function PaginaInicial() {
   useTituloPagina('Início');
+  // TODO(P19): o sindicato vai informar o e-mail. Ele fica na configuração da
+  // hospedagem, nunca no repositório (RNF10).
+  const emailPedidoCadastro = import.meta.env.VITE_EMAIL_PEDIDO_CADASTRO;
 
   return (
     <>
@@ -45,6 +48,29 @@ export function PaginaInicial() {
             Criar conta
           </Link>
         </div>
+
+        <aside
+          className="border rounded p-4 mt-5"
+          aria-labelledby="titulo-pedido-cadastro"
+        >
+          <h2 id="titulo-pedido-cadastro" className="h4">
+            Sua farmácia ainda não está no cadastro do sindicato?
+          </h2>
+          <p className="mb-0">
+            {emailPedidoCadastro ? (
+              <>
+                Peça o cadastro pelo e-mail{' '}
+                <a href={`mailto:${emailPedidoCadastro}`}>
+                  {emailPedidoCadastro}
+                </a>
+                .
+              </>
+            ) : (
+              'Peça o cadastro à sede do sindicato.'
+            )}{' '}
+            Depois do cadastro, é só criar a conta com o CNPJ da farmácia.
+          </p>
+        </aside>
       </section>
 
       <section className="container mb-5" aria-labelledby="titulo-beneficios">

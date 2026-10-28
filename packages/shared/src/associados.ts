@@ -33,10 +33,20 @@ export interface SolicitacaoCancelamento {
   decididaPor: { nome: string } | null;
 }
 
+/** Conta de acesso criada pelo associado (RF05). Datas em texto ISO. */
+export interface ContaAcesso {
+  email: string;
+  criadaEm: string;
+  /** Nulo enquanto a senha não foi criada pelo link do e-mail. */
+  confirmadaEm: string | null;
+}
+
 /** Perfil do associado para a sede (RF07). */
 export interface AssociadoDetalhe extends Associado {
   /** Da mais recente para a mais antiga. */
   cancelamentos: SolicitacaoCancelamento[];
+  /** Nulo enquanto o associado não pediu a criação da conta. */
+  conta: ContaAcesso | null;
 }
 
 /** Cadastro pela sede (RF08). O CNPJ pode vir com ou sem pontuação. */
@@ -65,11 +75,16 @@ export interface DefinirAcessoRequest {
 }
 
 /**
- * Filtro de status da lista (RF06). "Cancelamento solicitado" não é uma
- * situação: é ter um pedido de cancelamento pendente.
+ * Filtro de status da lista (RF06). INADIMPLENTE é quem tem contribuição
+ * ativa e está em atraso; SEM_CONTRIBUICAO é quem não está em dia e não
+ * contribui (RN22). "Cancelamento solicitado" não é uma situação: é ter um
+ * pedido de cancelamento pendente.
  */
 export type StatusAssociado =
-  'ADIMPLENTE' | 'INADIMPLENTE' | 'CANCELAMENTO_SOLICITADO';
+  | 'ADIMPLENTE'
+  | 'INADIMPLENTE'
+  | 'SEM_CONTRIBUICAO'
+  | 'CANCELAMENTO_SOLICITADO';
 
 /** Busca e filtros da lista de associados (RF06). */
 export interface FiltrosAssociados {
