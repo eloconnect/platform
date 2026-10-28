@@ -1,6 +1,6 @@
-# Elo Connect — Requisitos (v4)
+# Elo Connect — Requisitos (v5)
 
-Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, devolvido em 27/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seção 8). Última atualização: 27/10/2026.
+Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seção 8). Última atualização: 28/10/2026.
 
 **Legenda de status**
 
@@ -39,7 +39,7 @@ Documentos relacionados: [Decisões Técnicas](decisoes-tecnicas.md), [Registro 
 
 | **Perfil** | **Descrição** | **Status** |
 | --- | --- | --- |
-| Administrador (sede) | 3 funcionários. Gerencia associados, cobrança, valores, conteúdo e cancelamentos. | [Validado] |
+| Administrador (sede) | 3 funcionários, em dois perfis (RN33): **chave mestre**, com todas as funções, e **básico**, para o dia a dia (publicar conteúdo e consultar associados). | [Validado] |
 | Associado | Dono/representante de farmácia. Perfil único; o acesso depende do status. Adimplente: boletos, histórico, notícias, benefícios, suporte e o PDF completo das convenções. Inadimplente ou sem contribuição ativa: seus boletos e histórico, as notícias e o PDF resumido das convenções, sem benefícios, suporte ou inscrição. O contador da farmácia usa esta mesma conta, com o mesmo acesso (RN29). | [Validado] |
 | Visitante | Acessa a landing page pública com o que o sindicato oferece, o login, a criação de conta e o aviso com o e-mail para pedir o cadastro da farmácia. Não acessa o feed de notícias. | [Validado] |
 
@@ -50,16 +50,16 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | **ID** | **Regra** | **Status** |
 | --- | --- | --- |
 | RN01 | O valor da contribuição é o mesmo para todos os associados. | [Validado] |
-| RN02 | Vencimento fixo, até o dia 10 de cada mês. | [Validado] |
+| RN02 | Vencimento fixo, até o dia 10 de cada mês. Os boletos mensais são enviados no primeiro dia útil do mês. | [Validado] — dia do envio: resposta 16 |
 | RN03 | Boleto com validade de 30 dias, contados a partir do vencimento. Depois disso, o boleto expira. | [Validado] — lembretes depois da expiração em P01 |
-| RN04 | Todo mês, antes do envio, um administrador revisa o lote de boletos (podendo editar) e confirma o envio com um único botão. | [Validado] |
+| RN04 | Todo mês, antes do envio, um administrador revisa o lote de boletos (podendo editar) e confirma o envio com um único botão. | [A confirmar] — o cliente disse que não precisa de revisão e vai conversar sobre isso em reunião (respostas 16 e 17, P20) |
 | RN05 | Boletos são enviados **somente a associados com contribuição ativa**, nunca a todos os cadastrados. | [Validado] |
 | RN06 | Pagamento por boleto ou Pix (QR Code). | [Validado] |
-| RN07 | Lembretes: um 48h antes do vencimento; após o vencimento, a cada 48h enquanto não pago. | [Validado] |
+| RN07 | Lembretes: um 48h antes do vencimento; depois do vencimento, um por semana, até o boleto expirar e o acesso ser bloqueado (RN09). | [Validado] — mudou em 28/10/2026 (resposta 15); antes, a cada 48h |
 | RN08 | Não há juros nem multa por atraso. | [Validado] |
 | RN09 | O bloqueio do acesso a benefícios e suporte é automático e acontece quando o boleto expira sem pagamento, 30 dias após o vencimento (perto do vencimento do boleto seguinte). Até lá, o acesso continua. | [Validado] — mudou em 27/10/2026; antes, o bloqueio era imediato |
 | RN10 | O desbloqueio é automático após a confirmação do pagamento. | [Validado] |
-| RN11 | O administrador pode bloquear/desbloquear manualmente, além do automático. | [Validado] |
+| RN11 | O administrador pode bloquear/desbloquear manualmente, além do automático. A liberação manual vale 7 dias, com um aviso na área do associado; depois disso, o acesso volta a seguir o pagamento. O bloqueio manual vale até a sede mudar. | [Validado] — prazo e aviso: resposta 11 |
 | RN12 | Cada convenção tem dois PDFs. Quem está em dia vê o completo. Quem não está (inadimplente ou sem contribuição ativa) vê o resumido e não pode se inscrever nem acessar benefícios e suporte. | [Validado] |
 | RN13 | Plano anual pago à vista tem 20% de desconto. | [Validado] |
 | RN14 | Reajuste a cada 5 anos, aplicado a todos os associados com contribuição ativa ao mesmo tempo. | [Validado] |
@@ -71,16 +71,18 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN20 | Alteração de valor e painel de valores são exclusivos do perfil administrador. | [Validado] |
 | RN21 | A farmácia entra no cadastro pela sede, a pedido dela, ou pela importação da JUCEMAT (RF28). A conta de acesso é criada pelo próprio associado a partir do CNPJ: o sistema confere se a farmácia está no cadastro e manda para o e-mail desse cadastro um link para criar a senha. Não há confirmação de dígitos do CNPJ, nem na criação da conta nem no login. | [Validado] — decisão do grupo a partir da resposta 3 (O1); comunicar ao cliente (P08) |
 | RN22 | Adimplente e inadimplente são status do associado, não tipos de usuário. O sistema usa o atributo interno "contribuição ativa" para definir quem recebe boleto e lembretes; no painel da sede, ele aparece com o rótulo "Recebe boleto mensal: sim/não". O associado vê "Adimplente", "Inadimplente" (tem contribuição ativa e está em atraso) ou "Sem contribuição ativa" (não contribui). | [Validado] |
-| RN23 | O associado pode pedir pelo app que os boletos sejam enviados todo mês (cobrança recorrente). A adesão é automática, sem aprovação da sede, ativa a contribuição ativa e gera na hora o boleto do mês, com o valor cheio (sem valor proporcional). | [Validado] — vencimento desse primeiro boleto em P16 |
-| RN24 | O associado pode pagar apenas um mês, pedindo um boleto avulso pelo app, sem aderir à cobrança recorrente. | [Validado] — detalhes em P10 |
-| RN25 | A sede pode interromper a cobrança recorrente de um associado a qualquer momento, além do cancelamento solicitado por ele. | [Validado] |
+| RN23 | O associado pode pedir pelo app que os boletos sejam enviados todo mês (cobrança recorrente). A adesão é automática, sem aprovação da sede, ativa a contribuição ativa e gera na hora o boleto do mês, com o valor cheio (sem valor proporcional). Para aderir, o associado aceita um termo, escrito pelos advogados do sindicato (resposta 19). | [Validado] — vencimento desse primeiro boleto em P16; texto do termo em P21 |
+| RN24 | O associado pode pagar apenas um mês, pedindo um boleto avulso pelo app, sem aderir à cobrança recorrente. Em dia, ele gera o boleto na hora, um por mês; um segundo pedido no mesmo mês passa pela sede, para evitar custo. O boleto vence no dia 10, com lembrete semanal (resposta 20). | [Validado] — o que falta em P10 |
+| RN25 | A sede pode interromper a cobrança recorrente de um associado a qualquer momento, além do cancelamento solicitado por ele. O associado recebe um aviso e mantém o acesso por mais 30 dias (resposta 12). | [Validado] |
 | RN26 | Toda ação dos usuários da sede fica registrada em log de auditoria imutável: cadastro e edição de associados, bloqueio/desbloqueio, ativação ou interrupção da cobrança recorrente, edição e envio do lote, alteração de valores, aprovação de cancelamentos e publicação de notícias e conteúdo. | [Validado] |
 | RN27 | Princípio do projeto: automatizar processos sem criar novos processos manuais. A entrada na cobrança recorrente é automática; só o cancelamento passa por aprovação da sede. | [Validado] |
 | RN28 | O feed de notícias é visível a qualquer associado logado, adimplente ou inadimplente. Visitantes não têm acesso. | [Validado] |
-| RN29 | Não existe conta para contador. O contador acessa com o e-mail e a senha da conta do associado, vinculada ao CNPJ da farmácia, e tem exatamente o mesmo acesso dela. O compartilhamento do acesso é responsabilidade exclusiva do titular da conta, e toda ação feita com esse login é considerada ação do associado. | [Validado] — forma de deixar explícito em P11 |
-| RN30 | Para voltar a ficar em dia, o associado paga todos os meses em aberto, sem juros, num boleto só, que junta os valores (como o DAS do MEI). | [Validado] — quem gera e quando em P10 |
+| RN29 | Não existe conta para contador. O contador acessa com o e-mail e a senha da conta do associado, vinculada ao CNPJ da farmácia, e tem exatamente o mesmo acesso dela. O compartilhamento do acesso é responsabilidade exclusiva do titular da conta, e toda ação feita com esse login é considerada ação do associado. O contador que atende várias farmácias entra em cada uma separadamente (resposta 5). | [Validado] — forma de deixar explícito em P11 |
+| RN30 | Para voltar a ficar em dia, o associado paga todos os meses em aberto, sem juros, num boleto só, que junta os valores (como o DAS do MEI). Ele pede esse boleto pelo app, e o pedido passa pela sede antes da emissão (resposta 20). | [Validado] — o que falta em P10 |
 | RN31 | A contribuição é por CNPJ: a matriz e cada filial pagam a sua. O dono só precisa entrar na conta da matriz. | [Validado] — como a conta da matriz acompanha as filiais em P14 |
 | RN32 | Os benefícios têm dois grupos. A assessoria jurídica (atuação do advogado em tribunal) exige o ano inteiro pago antecipado. A consultoria (todos os outros benefícios) vale a partir do primeiro boleto. | [Validado] — interpretação em P15 |
+| RN33 | A sede tem dois perfis (resposta 7). O **chave mestre** faz tudo. O **básico** publica notícias, convenções e benefícios e consulta os associados, mas não altera cadastro, acesso, cobrança, valores nem cancelamentos, e não vê o log de auditoria. | [Validado] — as funções que o cliente não citou ficam com o chave mestre, e a consulta de associados fica com os dois (decisão do grupo) |
+| RN34 | A sede pode trocar o e-mail da conta do associado (resposta 6). O e-mail do cadastro é o mesmo da conta: trocar um troca o outro, e o associado é avisado no e-mail antigo e no novo. | [Validado] — e-mail único por farmácia: decisão do grupo a partir da resposta 5 |
 
 ## 4. Requisitos funcionais
 
@@ -100,8 +102,8 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | --- | --- | --- | --- |
 | RF06 | Listar associados com status (adimplente / inadimplente / cancelamento solicitado), com busca e filtro (inclusive por contribuição ativa). | Must | [Validado] |
 | RF07 | Visualizar perfil completo do associado: dados cadastrais, status, conta de acesso (criada ou não), histórico de boletos/pagamentos e solicitações. | Must | [Validado] |
-| RF08 | Cadastrar, editar e inativar associados manualmente, incluindo marcar ou desmarcar a contribuição ativa. | Must | [Validado] — reativar um associado inativado: [A confirmar] (P13) |
-| RF09 | Bloquear/desbloquear manualmente o acesso de um associado a benefícios. | Must | [Validado] — até quando vale a liberação manual em P17 |
+| RF08 | Cadastrar, editar e inativar associados manualmente, incluindo marcar ou desmarcar a contribuição ativa e trocar o e-mail, que também é o de acesso (RN34). | Must | [Validado] — reativar um associado inativado: [A confirmar] (P13) |
+| RF09 | Bloquear/desbloquear manualmente o acesso de um associado a benefícios. A liberação vale 7 dias e aparece como aviso na área do associado (RN11). | Must | [Validado] |
 | RF42 | Carga inicial dos associados que já pagam: planilha modelo, montada pelo grupo, que a sede preenche, e importação dessa planilha. | Must | [Validado] |
 | RF43 | A conta da matriz acompanha as filiais do mesmo dono (RN31). | Should | [A confirmar] — ver P14 |
 
@@ -109,17 +111,17 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF10 | Gerar mensalmente, em modo rascunho, o lote de boletos (com Pix QR Code) de todos os associados com contribuição ativa. | Must | [Validado] |
-| RF11 | Tela de aprovação do lote mensal: revisar, editar dados do boleto e enviar todos com um único botão. | Must | [Validado] |
+| RF10 | Gerar mensalmente, em modo rascunho, o lote de boletos (com Pix QR Code) de todos os associados com contribuição ativa, para envio no primeiro dia útil do mês. | Must | [Validado] — o rascunho depende da revisão (P20) |
+| RF11 | Tela de aprovação do lote mensal: revisar, editar dados do boleto e enviar todos com um único botão. | Must | [A confirmar] — ver P20 |
 | RF12 | Enviar o boleto por e-mail e disponibilizá-lo no app (boleto + Pix QR Code). | Must | [Validado] |
 | RF13 | Enviar lembrete automático 48h antes do vencimento. | Must | [Validado] |
-| RF14 | Enviar lembrete automático a cada 48h após o vencimento enquanto o boleto estiver em aberto. | Must | [Validado] — término a confirmar (P01) |
+| RF14 | Enviar lembrete automático uma vez por semana após o vencimento, até o boleto expirar (RN07). | Must | [Validado] |
 | RF15 | Registrar automaticamente o pagamento (baixa) e atualizar o status do associado. | Must | [Validado] — técnica a definir (O2) |
 | RF16 | Bloquear automaticamente o acesso a benefícios quando o boleto expira sem pagamento, 30 dias após o vencimento (RN09). | Must | [Validado] |
 | RF17 | Permitir ao associado optar pelo plano anual à vista com 20% de desconto. | Should | [Validado] — ver P04 e P15 |
-| RF36 | Tela de adesão: associado pede pelo app a cobrança recorrente; a contribuição ativa é ativada automaticamente, sem aprovação da sede, e o boleto do mês é gerado na hora, com o valor cheio. | Must | [Validado] — vencimento do primeiro boleto em P16 |
-| RF37 | Associado solicita pelo app um boleto avulso (pagamento de um único mês), sem aderir à cobrança recorrente, ou o boleto único dos meses em aberto (RN30). | Must | [Validado] — regras em P10 |
-| RF38 | Admin interrompe a cobrança recorrente de um associado (desativa a contribuição ativa), com registro no log de auditoria. | Must | [Validado] |
+| RF36 | Tela de adesão: associado pede pelo app a cobrança recorrente; a contribuição ativa é ativada automaticamente, sem aprovação da sede, e o boleto do mês é gerado na hora, com o valor cheio. Antes de confirmar, o associado aceita o termo de adesão, e o sistema guarda a data, a hora e a versão do termo aceito (RN23). | Must | [Validado] — vencimento do primeiro boleto em P16; texto do termo em P21 |
+| RF37 | Associado solicita pelo app um boleto avulso (pagamento de um único mês), sem aderir à cobrança recorrente, ou o boleto único dos meses em aberto (RN30). O avulso sai na hora para quem está em dia, um por mês; o boleto dos meses em aberto e o segundo avulso do mês passam pela sede, que aprova ou recusa (RN24, RN30). | Must | [Validado] — o que falta em P10 |
+| RF38 | Admin interrompe a cobrança recorrente de um associado (desativa a contribuição ativa), com registro no log de auditoria. O associado recebe um aviso por e-mail e mantém o acesso por mais 30 dias (RN25). | Must | [Validado] |
 
 ### 4.4 Painel de valores (admin)
 
@@ -224,7 +226,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 
 | **ID** | **Pergunta / ação** | **Com quem** | **Impacto** |
 | --- | --- | --- | --- |
-| P01 | Respondida em parte (27/10): a validade de 30 dias conta do vencimento; depois disso, o boleto expira e os benefícios são bloqueados (respostas 10 e 13), e os meses em aberto vão para um boleto só (resposta 14). Falta: os lembretes a cada 48h param quando o boleto expira, ou continuam (pergunta 15)? | Cliente | RF14, histórico |
+| P01 | Respondida (27 e 28/10): a validade de 30 dias conta do vencimento; depois disso, o boleto expira e os benefícios são bloqueados (respostas 10 e 13), e os meses em aberto vão para um boleto só (resposta 14). Depois do vencimento, o lembrete passa a ser semanal e para quando o boleto expira (resposta 15, RN07). | Cliente | RF14, histórico |
 | P02 | Respondida em parte (27/10): o arquivo da JUCEMAT traz o e-mail das farmácias (resposta 40). Falta: formato (provavelmente XML), frequência e forma de recebimento, que o sindicato vai levantar com a JUCEMAT. Um exemplo do layout, sem dados reais, já permite começar a importação. | Cliente | RF28, RF29 |
 | P03 | Respondida (27/10): a farmácia entra no cadastro pela sede, a pedido dela, e cria a conta pelo CNPJ (respostas 1 a 3, RN21); o primeiro boleto sai na hora, com o valor cheio (resposta 18, RN23). | Cliente | RF05, RF36 |
 | P04 | O associado do plano anual fica fora do lote mensal? Como é a renovação no fim do ano? Se o valor mudar no meio do ano, o que acontece com quem já pagou? (pergunta 21, em branco; relação com a assessoria jurídica em P15) | Cliente | RF17, RF10 |
@@ -233,13 +235,16 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P07 | LGPD e tratamento de dados cadastrais e financeiros. | Prof. Poli | RNF05 |
 | P08 | Comunicar ao cliente a decisão sobre a criação de conta: o login continua com e-mail e senha, e o CNPJ entra só na criação da conta, com um link enviado ao e-mail do cadastro (a alternativa que ele aceitou na resposta 3; O1). | Cliente | RF05, RN21 |
 | P09 | Respondida (27/10): não existe lista dos associados que já pagam; tudo é feito à mão (resposta 42). O grupo monta uma planilha modelo para a sede preencher (RF42). | Cliente | RF42, implantação |
-| P10 | Boleto avulso e boleto único dos meses em aberto (RN30): saem na hora ou passam pela sede? Qual o vencimento? Há lembretes? Quando a farmácia paga só um mês, os benefícios ficam liberados por quanto tempo? (pergunta 20, em branco) | Cliente | RN24, RN30, RF37, RF16 |
+| P10 | Respondida em parte (28/10, resposta 20; RN24 e RN30). Falta: (a) o boleto avulso pedido depois do dia 10 vence no dia 10 do mês seguinte? (b) a resposta diz que os benefícios ficam liberados até vencerem 2 boletos seguidos; quem paga só um mês, sem cobrança recorrente, não recebe boleto todo mês: ele fica liberado até quando? | Cliente | RN24, RN30, RF37, RF16 |
 | P11 | Responsabilidade pelo compartilhamento do acesso com o contador (RN29): um aviso com caixa de aceite no primeiro cadastro basta, ou é preciso um termo de uso formal? O sistema deve registrar data/hora do aceite? Permitir o compartilhamento de credenciais entra em conflito com a LGPD para os dados financeiros do associado? | Prof. Poli | RN29, RF04, RNF05 |
 | P12 | Quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção? A demonstração do PI usa o plano grátis da Vercel, que é só para uso não comercial e por isso não serve para o sistema em produção. | Cliente | Hospedagem e e-mail de produção (decisoes-tecnicas.md), RNF09 |
 | P13 | O que a inativação de um associado muda? A conta de acesso dele continua entrando? A cobrança recorrente para? A sede pode reativar um associado inativado (por exemplo, depois de uma inativação por engano)? | Cliente | RF08 |
 | P14 | Matriz e filiais (resposta 4): a conta da matriz vê e paga os boletos das filiais? O acesso a benefícios de cada filial depende do pagamento dela ou do da matriz? | Cliente | RN31, RF43 |
 | P15 | Benefícios (resposta 9): "ano inteiro antecipado" para a assessoria jurídica quer dizer o plano anual pago à vista ou 12 meses já pagos? A consultoria começa quando o primeiro boleto é emitido ou quando ele é pago? | Cliente | RN32, RF17, RF25 |
 | P16 | Primeiro boleto da adesão (resposta 18): ele sai na hora, mas qual é o vencimento dele? | Cliente | RN23, RF36 |
-| P17 | Quando a sede libera manualmente o acesso de uma farmácia em atraso, a liberação vale até quando? (pergunta 11, em branco) | Cliente | RF09 |
-| P18 | E-mail da conta (perguntas 5 e 6, em branco): a sede pode trocar o e-mail da conta de um associado? O que fazer quando o mesmo e-mail (por exemplo, o do contador) está no cadastro de mais de uma farmácia? | Cliente | RF05, RN29 |
+| P17 | Respondida (28/10): a liberação manual vale 1 semana, com um aviso na conta do associado (resposta 11, RN11). | Cliente | RF09 |
+| P18 | Respondida (28/10): a sede pode trocar o e-mail da conta (resposta 6, RN34), e o contador entra em cada farmácia separadamente (resposta 5). Quando o mesmo e-mail está no cadastro de mais de uma farmácia, a sede troca o de uma delas. | Cliente | RF05, RN29 |
 | P19 | Qual e-mail recebe os pedidos de cadastro (resposta 2) e de qual endereço o sistema envia os e-mails (pergunta 46, em branco)? | Cliente | RF01, envio de e-mail |
+| P20 | Revisão do lote mensal: o cliente disse que não precisa revisar os boletos e vai marcar uma reunião, porque não entendeu para que serve a revisão (respostas 16 e 17). A revisão antes do envio fica ou sai? Se sair, o lote é gerado e enviado sozinho no primeiro dia útil. | Cliente | RN04, RF10, RF11 |
+| P21 | Texto do termo de adesão à cobrança recorrente, que os advogados do sindicato vão escrever (resposta 19). | Cliente | RN23, RF36 |
+| P22 | O sindicato pediu um exemplo de termo de adesão para os advogados usarem de base (resposta 19). O grupo pode indicar um modelo? Que cuidados isso exige? O aceite do compartilhamento do acesso com o contador (P11) pode entrar no mesmo termo? | Professores | RN23, RN29, RF36 |

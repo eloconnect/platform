@@ -1,6 +1,6 @@
 # Elo Connect — Modelo de Dados (DER)
 
-Última atualização: 27/10/2026.
+Última atualização: 28/10/2026.
 
 Fonte da verdade do banco: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma). Este documento explica o modelo e as decisões; se os dois divergirem, vale o schema, e este documento deve ser corrigido no mesmo PR.
 
@@ -213,9 +213,11 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Ponto do modelo | Pendência | Situação atual |
 | --- | --- | --- |
 | Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, RF42 | Conjunto mínimo provisório. Não existe lista atual dos associados (P09, respondida), então a planilha modelo da carga inicial parte deste conjunto. Novos campos entram por migration. |
-| Boleto depois dos 30 dias de validade | RN03, RN09 e P01 (em parte) | O boleto expira 30 dias após o vencimento, e a expiração bloqueia o acesso. Deve entrar um status EXPIRADO junto com o bloqueio automático (#49). Se os lembretes param na expiração, fica na P01. |
+| Boleto depois dos 30 dias de validade | RN03, RN09 e P01 (em parte) | O boleto expira 30 dias após o vencimento, e a expiração bloqueia o acesso. Deve entrar um status EXPIRADO junto com o bloqueio automático (#49). Os lembretes param na expiração (resposta 15). |
 | Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
-| Boleto AVULSO e boleto único dos meses em aberto (RN30) | P10 | O tipo AVULSO existe; regras de geração ainda não. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita (tabela nova, desenhada junto com a P10). |
+| Boleto AVULSO e boleto único dos meses em aberto (RN24, RN30) | P10 (em parte) | O tipo AVULSO existe. O pedido que passa pela sede (boleto dos meses em aberto e segundo avulso do mês) precisa de um registro de pedido, com aprovação ou recusa. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita. Tabelas novas, desenhadas com a #63. |
+| Aceite do termo de adesão (RN23) | P21 | **Fora do modelo** até a #43: data, hora e versão do termo aceito. |
+| Revisão do lote (`LoteMensal` em RASCUNHO) | P20 | Se a revisão sair, o lote é gerado e enviado direto no primeiro dia útil. |
 | Dois PDFs por convenção, completo e resumido (RN12) | — | `ConvencaoAnexo` precisa de um campo que diga se o PDF é o completo ou o resumido (com a #30). |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
 | Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, ordem). Os dois grupos (assessoria jurídica e consultoria, RN32) entram como um campo de grupo; a regra de acesso de cada grupo depende da P15. |
