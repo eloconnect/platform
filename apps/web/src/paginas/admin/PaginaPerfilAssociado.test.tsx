@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../api';
+import { entrarComo } from '../../test/sessao';
 import { PaginaPerfilAssociado } from './PaginaPerfilAssociado';
 
 vi.mock('../../api', () => ({
@@ -62,6 +63,7 @@ function secao(titulo: string): HTMLElement {
 
 describe('PaginaPerfilAssociado', () => {
   beforeEach(() => {
+    entrarComo('ADMIN');
     vi.mocked(api.buscarAssociado).mockReset();
     vi.mocked(api.inativarAssociado).mockReset();
     vi.mocked(api.reativarAssociado).mockReset();
@@ -127,6 +129,21 @@ describe('PaginaPerfilAssociado', () => {
 
     await screen.findByRole('heading', { level: 1 });
     expect(secao('Conta de acesso')).toHaveTextContent(texto);
+  });
+
+  it('o perfil básico da sede vê o perfil sem os botões de alterar (RN33)', async () => {
+    entrarComo('ADMIN_BASICO');
+    vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+    abrir();
+
+    await screen.findByRole('heading', { level: 1 });
+    expect(secao('Acesso a benefícios e suporte')).toHaveTextContent(
+      'Segue o pagamento. Hoje está liberado.',
+    );
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Editar dados' }),
+    ).not.toBeInTheDocument();
   });
 
   it('mostra as marcas da situação e as solicitações de cancelamento', async () => {

@@ -30,5 +30,10 @@ export function limparSessao(): void {
 }
 
 export function destinoPorPerfil(perfil: LoginResponse['usuario']['perfil']) {
-  return perfil === 'ADMIN' ? '/admin' : '/associado';
+  return perfil === 'ASSOCIADO' ? '/associado' : '/admin';
+}
+
+/** Só o perfil chave mestre da sede altera cadastro, acesso e cobrança (RN33). */
+export function ehChaveMestre(): boolean {
+  return lerSessao()?.usuario.perfil === 'ADMIN';
 }

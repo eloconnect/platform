@@ -44,7 +44,7 @@ export class AccessStatusGuard implements CanActivate {
       throw new UnauthorizedException('Usuário não autenticado.');
     }
 
-    if (usuario.perfil === 'ADMIN') {
+    if (usuario.perfil === 'ADMIN' || usuario.perfil === 'ADMIN_BASICO') {
       return true;
     }
 

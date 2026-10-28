@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "Perfil" ADD VALUE 'ADMIN_BASICO';

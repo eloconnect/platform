@@ -81,8 +81,8 @@ O seed cria só dados fictícios. A senha de todos é `eloconnect123`.
 
 | E-mail | Perfil |
 | --- | --- |
-| `admin@example.com` | Administrador |
-| `sede@example.com` | Administrador |
+| `admin@example.com` | Administrador chave mestre (todas as funções) |
+| `sede@example.com` | Administrador básico (publica conteúdo e consulta associados) |
 | `associado@example.com` | Associado adimplente |
 | `inadimplente@example.com` | Associado inadimplente |
 

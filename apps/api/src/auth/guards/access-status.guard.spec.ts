@@ -49,13 +49,16 @@ describe('AccessStatusGuard', () => {
     );
   });
 
-  it('permite administrador sem consultar a situação financeira', async () => {
-    await expect(
-      guard.canActivate(criarContexto({ sub: 'admin-1', perfil: 'ADMIN' })),
-    ).resolves.toBe(true);
+  it.each(['ADMIN', 'ADMIN_BASICO'])(
+    'permite o perfil da sede %s sem consultar a situação financeira',
+    async (perfil) => {
+      await expect(
+        guard.canActivate(criarContexto({ sub: 'admin-1', perfil })),
+      ).resolves.toBe(true);
 
-    expect(prisma.usuario.findUnique).not.toHaveBeenCalled();
-  });
+      expect(prisma.usuario.findUnique).not.toHaveBeenCalled();
+    },
+  );
 
   it('permite associado adimplente sem bloqueio manual', async () => {
     prisma.usuario.findUnique.mockResolvedValue({
