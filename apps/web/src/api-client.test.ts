@@ -32,6 +32,25 @@ describe('createApiClient', () => {
     await expect(cliente.getHealth()).rejects.toBeInstanceOf(ApiError);
   });
 
+  it('guarda no ApiError o campo informado pela API', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValueOnce(
+        new Response('{"message":"x","campo":"email"}', { status: 409 }),
+      )
+      .mockResolvedValueOnce(new Response('não é JSON', { status: 500 }));
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await expect(cliente.getHealth()).rejects.toMatchObject({
+      status: 409,
+      campo: 'email',
+    });
+    await expect(cliente.getHealth()).rejects.toMatchObject({
+      status: 500,
+      campo: undefined,
+    });
+  });
+
   it('manda o token da sessão no cabeçalho Authorization', async () => {
     const fetchFalso = vi
       .fn<Fetch>()

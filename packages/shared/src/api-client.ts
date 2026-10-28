@@ -19,14 +19,33 @@ import type {
 } from './auth.js';
 import type { HealthResponse } from './health.js';
 
-/** Erro de uma chamada à API, com o status HTTP. */
+/**
+ * Erro de uma chamada à API, com o status HTTP e, quando a API informa, o
+ * campo do formulário que causou o erro (ex.: "email").
+ */
 export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    readonly campo?: string,
   ) {
     super(message);
     this.name = 'ApiError';
+  }
+}
+
+/** O campo do erro, se a resposta for JSON com `campo` em texto. */
+async function campoDoErro(resposta: Response): Promise<string | undefined> {
+  try {
+    const corpo: unknown = await resposta.json();
+    return typeof corpo === 'object' &&
+      corpo !== null &&
+      'campo' in corpo &&
+      typeof corpo.campo === 'string'
+      ? corpo.campo
+      : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -77,6 +96,7 @@ export function createApiClient(
       throw new ApiError(
         resposta.status,
         `A API respondeu ${resposta.status} em ${metodo} ${caminho}`,
+        await campoDoErro(resposta),
       );
     }
     // O formato da resposta é garantido pelo contrato da API (tipos deste pacote).

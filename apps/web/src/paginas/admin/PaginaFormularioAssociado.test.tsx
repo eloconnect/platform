@@ -175,6 +175,43 @@ describe('PaginaFormularioAssociado', () => {
     );
   });
 
+  describe('associado com conta de acesso (RN34)', () => {
+    const COM_CONTA: AssociadoDetalhe = {
+      ...ASSOCIADO,
+      conta: {
+        email: 'contato@example.com',
+        criadaEm: '2026-10-20T12:00:00.000Z',
+        confirmadaEm: '2026-10-20T12:00:00.000Z',
+      },
+    };
+
+    it('avisa que o e-mail também é o de acesso', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(COM_CONTA);
+      abrir('/admin/associados/id-01/editar');
+
+      expect(
+        await screen.findByLabelText(/^E-mail/),
+      ).toHaveAccessibleDescription(/É também o e-mail de acesso do associado/);
+      expect(campo(/^E-mail/)).toBeRequired();
+    });
+
+    it('com 409 no e-mail, avisa no campo do e-mail', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(COM_CONTA);
+      vi.mocked(api.editarAssociado).mockRejectedValue(
+        new ApiError(409, 'erro', 'email'),
+      );
+      abrir('/admin/associados/id-01/editar');
+      await screen.findByLabelText(/^CNPJ/);
+
+      await salvar();
+
+      expect(campo(/^E-mail/)).toHaveAccessibleDescription(
+        /Este e-mail já é usado na conta de outra farmácia./,
+      );
+      expect(campo(/^CNPJ/)).not.toHaveAccessibleDescription(/Já existe/);
+    });
+  });
+
   it('avisa quando o associado não existe', async () => {
     vi.mocked(api.buscarAssociado).mockRejectedValue(new ApiError(404, 'erro'));
     abrir('/admin/associados/id-99/editar');

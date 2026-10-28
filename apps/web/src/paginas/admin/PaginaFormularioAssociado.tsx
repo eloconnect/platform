@@ -1,4 +1,7 @@
-import type { Associado, CriarAssociadoRequest } from '@eloconnect/shared';
+import type {
+  AssociadoDetalhe,
+  CriarAssociadoRequest,
+} from '@eloconnect/shared';
 import { ApiError, cnpjValido, formatarCnpj } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
 import Col from 'react-bootstrap/Col';
@@ -30,7 +33,7 @@ const VAZIO: Campos = {
 };
 
 type Resultado =
-  | { tipo: 'ok'; associado: Associado }
+  | { tipo: 'ok'; associado: AssociadoDetalhe }
   | { tipo: 'nao-encontrado' }
   | { tipo: 'erro' };
 
@@ -99,6 +102,7 @@ function CarregarEEditar({ id }: { id: string }) {
   return (
     <Formulario
       id={id}
+      temConta={associado.conta !== null}
       inicial={{
         cnpj: formatarCnpj(associado.cnpj),
         razaoSocial: associado.razaoSocial,
@@ -112,10 +116,20 @@ function CarregarEEditar({ id }: { id: string }) {
   );
 }
 
-function Formulario({ id, inicial }: { id?: string; inicial: Campos }) {
+function Formulario({
+  id,
+  inicial,
+  temConta = false,
+}: {
+  id?: string;
+  inicial: Campos;
+  /** O associado já tem conta de acesso: o e-mail também é o login (RN34). */
+  temConta?: boolean;
+}) {
   const navegar = useNavigate();
   const [campos, setCampos] = useState(inicial);
   const [erroCnpj, setErroCnpj] = useState<string>();
+  const [erroEmail, setErroEmail] = useState<string>();
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const voltarPara = id ? `/admin/associados/${id}` : '/admin/associados';
@@ -133,6 +147,11 @@ function Formulario({ id, inicial }: { id?: string; inicial: Campos }) {
     document.getElementById('campo-cnpj')?.focus();
   }
 
+  function mostrarErroEmail(mensagem: string) {
+    setErroEmail(mensagem);
+    document.getElementById('campo-email')?.focus();
+  }
+
   async function salvar() {
     setErro(null);
     if (!cnpjValido(campos.cnpj)) {
@@ -140,6 +159,7 @@ function Formulario({ id, inicial }: { id?: string; inicial: Campos }) {
       return;
     }
     setErroCnpj(undefined);
+    setErroEmail(undefined);
     setEnviando(true);
     try {
       const associado = id
@@ -149,8 +169,14 @@ function Formulario({ id, inicial }: { id?: string; inicial: Campos }) {
         state: { aviso: id ? 'Dados salvos.' : 'Associado cadastrado.' },
       });
     } catch (e) {
-      // A mensagem depende só do status, nunca do texto do erro.
-      if (e instanceof ApiError && e.status === 409) {
+      // A mensagem depende só do status e do campo, nunca do texto do erro.
+      if (e instanceof ApiError && e.campo === 'email' && e.status === 409) {
+        mostrarErroEmail('Este e-mail já é usado na conta de outra farmácia.');
+      } else if (e instanceof ApiError && e.campo === 'email') {
+        mostrarErroEmail(
+          'O associado já tem conta de acesso, então o e-mail não pode ficar vazio.',
+        );
+      } else if (e instanceof ApiError && e.status === 409) {
         mostrarErroCnpj('Já existe um associado com este CNPJ.');
       } else {
         setErro(
@@ -195,9 +221,17 @@ function Formulario({ id, inicial }: { id?: string; inicial: Campos }) {
             {...texto('nomeFantasia')}
           />
           <CampoTexto
+            id="campo-email"
             rotulo="E-mail"
             type="email"
             autoComplete="off"
+            obrigatorio={temConta}
+            ajuda={
+              temConta
+                ? 'É também o e-mail de acesso do associado. Ao trocar, ele passa a entrar com o novo e-mail e recebe um aviso nos dois endereços.'
+                : undefined
+            }
+            erro={erroEmail}
             {...texto('email')}
           />
           <CampoTexto
