@@ -1,6 +1,6 @@
 # Elo Connect — Registro da Entrevista com o Cliente
 
-Sindicato patronal de farmácias e drogarias de Mato Grosso. Baseado nas anotações da entrevista e nas respostas complementares do cliente. Última atualização: 09/10/2026.
+Sindicato patronal de farmácias e drogarias de Mato Grosso. Baseado nas anotações da entrevista, nas respostas complementares do cliente e no questionário de 14/10/2026 (seção 8). Última atualização: 27/10/2026.
 
 > Este documento é o registro do que foi dito na entrevista. Requisitos formais e regras de negócio estão em [Requisitos](requisitos.md); o backlog está no GitHub Projects da organização.
 
@@ -103,7 +103,7 @@ Detalhes coletados na entrevista e nas respostas complementares:
 
 - Valor igual para todos, painel de edição de valor (só admin, com histórico), plano anual à vista com 20% de desconto, reajuste a cada 5 anos para todos, aviso por e-mail antes do próximo boleto.
 
-- Login com e-mail e senha; confirmação de 5 dígitos aleatórios do CNPJ para garantir que é o representante (no sistema, aplicada no primeiro cadastro — ver Requisitos, RN21).
+- Login com e-mail e senha; confirmação de 5 dígitos aleatórios do CNPJ para garantir que é o representante (no sistema, trocada pelo CNPJ na criação da conta, com link enviado ao e-mail do cadastro — ver seção 8 e Requisitos, RN21).
 
 - Histórico de todas as transações (data/hora, identificador do boleto), usado em caso de divergência.
 
@@ -141,20 +141,48 @@ Menor ênfase:
 
 - **Dados cadastrais obrigatórios para o termo de parceria** (09/10/2026): coletados à parte, e o contrato entre a faculdade e o cliente já foi firmado. Esses dados e o contrato não ficam no repositório nem nestes documentos.
 
+- **Criação de conta e primeiro boleto** (27/10/2026): respostas 1 a 3 e 18 do questionário (seção 8).
+
+- **Lista dos associados que já pagam** (27/10/2026): não existe (resposta 42).
+
 ### Em aberto
 
-- O que acontece após os 30 dias de validade do boleto?
+- Depois que o boleto expira, os lembretes param? (A validade e o bloqueio foram respondidos; ver seção 8.)
 
-- O XML da JUCEMAT traz e-mail das farmácias? Frequência e forma de recebimento.
+- Formato, frequência e forma de recebimento do arquivo da JUCEMAT (o arquivo traz o e-mail).
 
-- Criação de conta pelo associado e momento do primeiro boleto após o pedido de cobrança recorrente.
-
-- Formato da lista atual dos ~150 associados que já pagam (carga inicial).
-
-- Regras do boleto avulso (pagamento de um único mês).
+- Regras do boleto avulso e do boleto único dos meses em aberto.
 
 - Plano anual: fica fora do lote mensal? Renovação?
 
 - O que significa "se registrar em uma convenção".
 
-- Lista de benefícios (reunião futura do cliente).
+- Lista completa de benefícios (os dois grupos já foram definidos).
+
+- Matriz e filiais, regra de início da assessoria jurídica, vencimento do primeiro boleto, validade da liberação manual, e-mail da conta e e-mail para pedidos de cadastro (Requisitos, P14 a P19).
+
+## 8. Respostas ao questionário de 14/10/2026 (recebidas em 27/10/2026)
+
+O grupo enviou ao sindicato um questionário com 48 perguntas. O sindicato respondeu as 17 marcadas como importantes e deixou as outras em branco. O documento respondido fica fora do repositório, que é público. O que cada resposta mudou nos requisitos está em [Requisitos](requisitos.md) (O1, RN21, RN30 a RN32 e as pendências).
+
+| **Pergunta** | **Tema** | **Resposta (resumo)** |
+| --- | --- | --- |
+| 1 | Quem pode criar conta | O cadastro é feito internamente pela sede, a pedido das farmácias. |
+| 2 | Aprovação da conta pela sede | O sindicato vai informar um e-mail para a farmácia mandar o pedido de cadastro, provavelmente num aviso (banner) na página inicial. |
+| 3 | Dígitos do CNPJ (sugestão do grupo) | Preferem o login só pelo CNPJ, com um código enviado ao e-mail do cadastro como senha temporária. Se não for possível, preferem a sugestão do grupo (CNPJ na criação da conta, com confirmação por e-mail). |
+| 4 | Matriz e filiais | A contribuição é por CNPJ, mas o dono só precisa entrar na matriz. |
+| 8 | Texto para quem não contribui (sugestão do grupo) | Pode ser "Sem contribuição ativa". |
+| 9 | Início do acesso aos benefícios | Os benefícios são a assessoria jurídica (atuação do advogado em tribunal), com o ano inteiro antecipado, e a consultoria (todos os outros benefícios), a partir do primeiro boleto. |
+| 10 | Prazo até o bloqueio | Até vencer o próximo boleto. |
+| 13 | Validade de 30 dias | Conta a partir do vencimento. Passados 30 dias, o boleto expira e os benefícios são bloqueados, como na resposta 10. |
+| 14 | Pagamento dos meses em aberto | O ideal é juntar todos os valores num boleto só, como o DAS do MEI. |
+| 18 | Primeiro boleto da adesão | A farmácia paga o mês inteiro, na hora. |
+| 25 | Convênio de cobrança no Sicredi | Não há. O sindicato tem a conta, mas não o contrato de cobrança, que será feito se necessário. |
+| 26 | Acesso à API de Cobrança | Por enquanto, só a simulação de boletos. O pedido ao banco depende de uma reunião do sindicato. |
+| 28 | A sede pode recusar o cancelamento? | Prazo de 15 dias. Sem recusa nesse prazo, o cancelamento é confirmado automaticamente. |
+| 33 | O que quem está em atraso vê das convenções | Dois PDFs, um completo e um resumido, conforme a situação do usuário. |
+| 40 | O arquivo da JUCEMAT traz e-mail? | Sim. Frequência e forma de recebimento ficam em aberto: o sindicato vai levantar com a JUCEMAT. Provavelmente XML (antes vinha em CD). |
+| 42 | Lista dos associados que já pagam | Não existe; tudo é feito à mão. O grupo pode montar uma planilha que facilite o trabalho da sede; senão, o cadastro começa do zero. |
+| 45 | Os donos leem e-mail? | Nem sempre o dono, mas a parte da gestão normalmente lê. |
+
+Ficaram em branco: acesso de contadores e secretárias (5), troca do e-mail da conta (6), divisão de tarefas na sede (7), validade da liberação manual (11), interrupção da cobrança pela sede (12), fim dos lembretes (15), dia do envio e revisão do lote (16 e 17), termo de adesão (19), boleto avulso (20), plano anual (21), valor atual (22), antecedência do aviso de reajuste (23), condições diferentes em contrato (24), tarifas do Sicredi (27), cancelamento: boleto do mês, acesso ao histórico e volta (29 a 31), aviso de cancelamento para a sede (32), inscrição em convenção (34), lista de benefícios (35), suporte (36), aviso por e-mail de conteúdo novo (37), notícias (38), formato dos documentos da convenção (39), CNAE (41), boleto de quem já paga (43), comunicado obrigatório (44), endereço de envio dos e-mails (46), histórico de pagamentos (47) e conteúdo da página inicial (48).

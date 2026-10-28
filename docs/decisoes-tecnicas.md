@@ -12,11 +12,13 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - **Associado**: qualquer farmácia/drogaria do universo do sindicato em MT (~2.000), identificada pelo CNAE. Não é obrigada a pagar. É o único tipo de usuário do lado do cliente.
 
-- **Adimplente**: associado com a contribuição em dia. Acessa benefícios, suporte e inscrição em convenções.
+- **Adimplente**: associado com a contribuição em dia. Acessa benefícios, suporte, inscrição em convenções e o PDF completo das convenções.
 
-- **Inadimplente**: associado que não está em dia (boleto vencido e não pago, ou que não contribui). Vê apenas as informações gerais das convenções.
+- **Inadimplente**: associado com contribuição ativa e boleto vencido e não pago. Perde benefícios e suporte quando o boleto expira, 30 dias após o vencimento. Vê o PDF resumido das convenções.
 
-- **Contribuição ativa** (atributo interno do cadastro, nome técnico livre): marca os associados com cobrança recorrente (~150) e define quem recebe boleto e lembretes. É ativada pelo próprio associado ao pedir a cobrança recorrente no app. Não é um tipo de usuário e não aparece para o associado. No painel da sede, aparece como filtro com o rótulo "Recebe boleto mensal: sim/não".
+- **Sem contribuição ativa**: o que o associado que não contribui vê na tela, no lugar de "Inadimplente" (aprovado pelo cliente em 27/10/2026). Tem o mesmo acesso do inadimplente.
+
+- **Contribuição ativa** (atributo interno do cadastro, nome técnico livre): marca os associados com cobrança recorrente (~150) e define quem recebe boleto e lembretes. É ativada pelo próprio associado ao pedir a cobrança recorrente no app. Não é um tipo de usuário. No painel da sede, aparece como filtro com o rótulo "Recebe boleto mensal: sim/não"; para o associado, a falta dela aparece como "Sem contribuição ativa".
 
 - **Contador**: não é tipo de usuário. O contador de uma farmácia acessa o sistema com a conta do associado (ver Acesso).
 
@@ -33,33 +35,35 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - Funcionalidades do MVP [validadas]:
 
-  - Landing page pública com o que o sindicato oferece, login e cadastro.
+  - Landing page pública com o que o sindicato oferece, login, criação de conta e um aviso com o e-mail para a farmácia pedir o cadastro.
 
-  - Cadastro/gestão de associados, com status (adimplente / inadimplente / cancelamento solicitado) e perfil completo rastreável pela sede.
+  - Cadastro/gestão de associados pela sede, a pedido das farmácias, com status (adimplente / inadimplente / sem contribuição ativa / cancelamento solicitado) e perfil completo rastreável pela sede.
+
+  - Criação de conta pelo próprio associado a partir do CNPJ, com link enviado ao e-mail que já está no cadastro (ver Acesso).
 
   - **Cobrança mensal via Sicredi**: o sistema gera o lote de boletos (com Pix QR Code), um administrador revisa/edita e envia com um único botão, **só para associados com contribuição ativa**.
 
-  - Adesão à cobrança recorrente pelo próprio associado no app, ativada automaticamente (sem aprovação da sede); o associado também pode pagar apenas um mês (boleto avulso).
+  - Adesão à cobrança recorrente pelo próprio associado no app, ativada automaticamente (sem aprovação da sede), com o boleto do mês gerado na hora e com o valor cheio; o associado também pode pagar apenas um mês (boleto avulso).
 
   - A sede pode interromper a cobrança recorrente de qualquer associado.
 
-  - Vencimento fixo (dia 10 de todo mês), validade do boleto de 30 dias.
+  - Vencimento fixo (dia 10 de todo mês), validade do boleto de 30 dias contados do vencimento.
 
   - Lembretes automáticos: 48h antes do vencimento e a cada 48h após o vencimento.
 
-  - Sem juros e sem multa por atraso (decisão do cliente).
+  - Sem juros e sem multa por atraso (decisão do cliente). Para voltar a ficar em dia, os meses em aberto são pagos num boleto só.
 
-  - Bloqueio automático e imediato de benefícios/suporte após o vencimento sem pagamento; desbloqueio automático após o pagamento; controle manual pelo admin.
+  - Bloqueio automático de benefícios/suporte quando o boleto expira sem pagamento (30 dias após o vencimento); desbloqueio automático após o pagamento; controle manual pelo admin.
 
   - Painel de valores (só admin): valor único para todos, plano anual à vista com 20% de desconto, reajuste a cada 5 anos para todos; toda alteração gera e-mail de aviso, vale para o próximo boleto e fica em histórico.
 
-  - Central de convenções coletivas (conteúdo atualizado por funcionário da sede); inadimplente vê informações gerais, mas não se inscreve.
+  - Central de convenções coletivas (conteúdo atualizado por funcionário da sede), com dois PDFs por convenção: quem está em dia vê o completo; os demais veem o resumido e não se inscrevem.
 
   - Feed de notícias num ponto único, publicado pela sede e visível a qualquer associado logado (adimplente ou inadimplente); visitantes não acessam.
 
-  - Módulo de benefícios separado do de convenções (lista de benefícios a definir em reunião futura do cliente).
+  - Módulo de benefícios separado do de convenções, em dois grupos: assessoria jurídica e consultoria (lista completa a definir pelo cliente).
 
-  - Cancelamento pelo app: mostra os benefícios que serão perdidos, a sede valida.
+  - Cancelamento pelo app: mostra os benefícios que serão perdidos; a sede tem 15 dias para recusar, e sem recusa o cancelamento é confirmado automaticamente.
 
   - Cobrança formal obrigatória a todos os associados (~2.000) por e-mail, **sem boleto**.
 
@@ -69,7 +73,9 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - Fora do escopo desta entrega: chatbot WhatsApp [confirmado pelo cliente], app mobile nativo, módulos de gestão fiscal/contábil.
 
-- Em avaliação: importação automática da base de associados via XML da JUCEMAT (depende da pendência P02).
+- Em avaliação: importação automática da base de associados via arquivo da JUCEMAT, que traz o e-mail das farmácias (formato e frequência dependem da pendência P02).
+
+- Carga inicial dos associados que já pagam: não existe lista, então o grupo monta uma planilha modelo para a sede preencher, e o sistema a importa.
 
 ## Roadmap (18 meses, 3 semestres)
 
@@ -168,7 +174,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Boleto + Pix QR Code no MVP [validado].
 
-- A fazer pelo cliente: solicitar à cooperativa o acesso à API de cobrança (credenciais/convênio).
+- O sindicato ainda não tem convênio de cobrança com o Sicredi (o contrato para emitir boletos) nem acesso à API de Cobrança. Os dois serão pedidos se necessário, depois de uma reunião do sindicato (respostas de 27/10/2026). Até lá, a cobrança funciona em **simulação**, com o mock do gateway (M3).
 
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
@@ -178,11 +184,13 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 ## Acesso
 
-- Login com e-mail + senha [validado].
+- Login com e-mail + senha [validado], para o associado e para a sede.
 
 - Recuperação de senha por link enviado ao e-mail [validado].
 
-- Confirmação de 5 dígitos aleatórios do CNPJ apenas no primeiro cadastro, junto com confirmação por e-mail [validado]. O CNPJ é público, então não serve como verificação a cada login. Comunicar o ajuste ao cliente, que havia pedido a verificação para garantir a identidade.
+- Cadastro da farmácia: feito pela sede, a pedido da farmácia, ou pela importação da JUCEMAT [validado]. Quem não está no cadastro pede pelo e-mail informado na página inicial (o endereço depende da P19).
+
+- Criação de conta pelo associado [validado, decisão do grupo de 27/10/2026]: ele informa o CNPJ, o sistema confere se a farmácia está no cadastro e manda para o e-mail desse cadastro um link para criar a senha. A sede não aprova a conta; no perfil do associado, ela vê se a conta existe. Os 5 dígitos do CNPJ saíram: o CNPJ é público, e quem abre o link prova que lê o e-mail da farmácia. O cliente preferia o login pelo CNPJ com código temporário e aceitou esta forma como alternativa; comunicar a decisão a ele (P08).
 
 - Contadores não têm conta própria [validado]. O contador acessa com o e-mail e a senha da conta do associado; se o dono da farmácia não quiser consultar pessoalmente, ele compartilha o próprio acesso. O compartilhamento é responsabilidade exclusiva do titular da conta, e toda ação feita com esse login é considerada ação do associado (RN29). A forma de deixar isso explícito para o associado depende da pendência P11.
 
@@ -196,25 +204,37 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 ### Com o cliente
 
-- P01: o que acontece após os 30 dias de validade do boleto (cancela, acumula, lembretes param?).
+Respondidas em 27/10/2026: P03 (criação de conta e primeiro boleto) e P09 (não existe lista dos associados que já pagam). Detalhes em [Requisitos](requisitos.md), seção 8.
 
-- P02: o XML da JUCEMAT traz e-mail das farmácias? Frequência e forma de recebimento.
+- P01: depois que o boleto expira, os lembretes param? (A validade conta do vencimento, e a expiração bloqueia os benefícios.)
 
-- P03: qualquer associado pode criar conta? Ao pedir a cobrança recorrente, o primeiro boleto sai na hora ou no próximo lote mensal?
+- P02: formato, frequência e forma de recebimento do arquivo da JUCEMAT (ele traz o e-mail das farmácias).
 
 - P04: o plano anual fica fora do lote mensal? Como é a renovação?
 
 - P05: o que significa "se registrar em uma convenção" na prática.
 
-- P06: lista de benefícios (reunião futura do cliente).
+- P06: lista completa de benefícios (os dois grupos já estão definidos).
 
-- P09: em que formato está a lista atual dos ~150 associados que já pagam (para a carga inicial)?
+- P08: comunicar ao cliente a decisão sobre a criação de conta.
 
-- P10: regras do boleto avulso (geração, vencimento, lembretes e período de acesso aos benefícios).
+- P10: regras do boleto avulso e do boleto único dos meses em aberto (geração, vencimento, lembretes e período de acesso aos benefícios).
 
 - P12: quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção.
 
 - P13: o que a inativação de um associado muda (conta de acesso e cobrança recorrente) e se a sede pode reativá-lo.
+
+- P14: matriz e filiais: como a conta da matriz acompanha as filiais.
+
+- P15: o que é "ano inteiro antecipado" para a assessoria jurídica, e quando a consultoria começa.
+
+- P16: vencimento do primeiro boleto, gerado na hora da adesão.
+
+- P17: até quando vale a liberação manual feita pela sede.
+
+- P18: troca do e-mail da conta e e-mail repetido em mais de uma farmácia.
+
+- P19: e-mail para os pedidos de cadastro e endereço de envio dos e-mails do sistema.
 
 ### Com os professores
 
