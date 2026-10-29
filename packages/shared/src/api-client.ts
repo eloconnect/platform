@@ -9,6 +9,11 @@ import type {
   MinhaConta,
 } from './associados.js';
 import type {
+  FiltrosLogAuditoria,
+  ListaLogAuditoria,
+  UsuarioSede,
+} from './auditoria.js';
+import type {
   ConfirmarContaRequest,
   CriarContaRequest,
   EsqueciSenhaRequest,
@@ -151,6 +156,13 @@ export function createApiClient(
         `/associados/${encodeURIComponent(id)}/acesso`,
         dados,
       ),
+    listarLogAuditoria: (filtros: FiltrosLogAuditoria = {}) =>
+      requisitar<ListaLogAuditoria>(
+        'GET',
+        `/auditoria${montarQuery({ ...filtros })}`,
+      ),
+    listarUsuariosSede: () =>
+      requisitar<UsuarioSede[]>('GET', '/auditoria/usuarios'),
   };
 }
 

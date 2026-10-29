@@ -1,6 +1,7 @@
 /**
  * Catálogo das ações gravadas no log de auditoria (RN26, RF39).
- * Cada funcionalidade nova da sede acrescenta as suas ações aqui.
+ * Cada funcionalidade nova da sede acrescenta as suas ações aqui e o texto
+ * delas em `TEXTO_ACAO_AUDITORIA`.
  */
 export const ACOES_AUDITORIA = [
   // Associados
@@ -22,3 +23,76 @@ export const ACOES_AUDITORIA = [
 ] as const;
 
 export type AcaoAuditoria = (typeof ACOES_AUDITORIA)[number];
+
+/** O que cada ação quer dizer, na tela do log (RF40). */
+export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
+  ASSOCIADO_CRIADO: 'Associado cadastrado',
+  ASSOCIADO_EDITADO: 'Cadastro editado',
+  ASSOCIADO_INATIVADO: 'Associado inativado',
+  ASSOCIADO_REATIVADO: 'Associado reativado',
+  CONTRIBUICAO_ATIVADA: 'Boleto mensal ativado',
+  CONTRIBUICAO_INTERROMPIDA: 'Boleto mensal interrompido',
+  CONTA_EMAIL_ALTERADO: 'E-mail de acesso trocado',
+  ACESSO_BLOQUEADO: 'Acesso bloqueado',
+  ACESSO_LIBERADO: 'Acesso liberado',
+  ACESSO_AUTOMATICO: 'Acesso voltou a seguir o pagamento',
+  VALOR_ALTERADO: 'Valor da contribuição alterado',
+  LOTE_ENVIADO: 'Lote mensal enviado',
+};
+
+export function ehAcaoAuditoria(valor: string): valor is AcaoAuditoria {
+  return (ACOES_AUDITORIA as readonly string[]).includes(valor);
+}
+
+/** Texto da ação; uma ação fora do catálogo aparece com o próprio código. */
+export function textoAcaoAuditoria(acao: string): string {
+  return ehAcaoAuditoria(acao) ? TEXTO_ACAO_AUDITORIA[acao] : acao;
+}
+
+/** Valor de um campo no log: as datas vêm em texto ISO. */
+export type ValorCampoLog = string | number | boolean | null;
+
+/** Uma ação do log, como a API devolve para a sede (RF40). */
+export interface ItemLogAuditoria {
+  id: string;
+  /** Data e hora em texto ISO. */
+  ocorridoEm: string;
+  /** Uma das `ACOES_AUDITORIA`. Use `textoAcaoAuditoria` para mostrar. */
+  acao: string;
+  /** Quem da sede fez a ação. */
+  usuario: UsuarioSede;
+  /** Nulo quando a ação não envolve um associado (ex.: valor alterado). */
+  associado: { id: string; cnpj: string; razaoSocial: string } | null;
+  /** Só os campos que mudaram, com o valor de antes e o de depois. */
+  valorAnterior: Record<string, ValorCampoLog> | null;
+  valorNovo: Record<string, ValorCampoLog> | null;
+}
+
+/** Pessoa da sede, para o filtro por usuário. */
+export interface UsuarioSede {
+  id: string;
+  nome: string;
+}
+
+/** Filtros da consulta do log (RF40). */
+export interface FiltrosLogAuditoria {
+  /** Quem da sede fez a ação. */
+  usuarioId?: string;
+  /** Parte da razão social, do nome fantasia ou do CNPJ do associado. */
+  associado?: string;
+  acao?: AcaoAuditoria;
+  /** Primeiro dia do período (AAAA-MM-DD), no horário de Mato Grosso. */
+  de?: string;
+  /** Último dia do período (AAAA-MM-DD), incluído na busca. */
+  ate?: string;
+  /** Começa em 1. */
+  pagina?: number;
+}
+
+/** Da ação mais recente para a mais antiga. */
+export interface ListaLogAuditoria {
+  itens: ItemLogAuditoria[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+}
