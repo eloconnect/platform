@@ -32,6 +32,7 @@ function item(dados: Partial<ItemLogAuditoria>): ItemLogAuditoria {
       cnpj: '11222333000181',
       razaoSocial: 'Farmácia Exemplo 01 Ltda',
     },
+    registro: null,
     valorAnterior: null,
     valorNovo: null,
     ...dados,
@@ -107,6 +108,29 @@ describe('PaginaLogAuditoria', () => {
     expect(
       screen.getAllByRole('link', { name: 'Farmácia Exemplo 01 Ltda' })[0],
     ).toHaveAttribute('href', '/admin/associados/associado-01');
+  });
+
+  it('diz qual benefício a ação afetou, com o nome do grupo', async () => {
+    vi.mocked(api.listarLogAuditoria).mockResolvedValue(
+      lista({
+        total: 1,
+        itens: [
+          item({
+            acao: 'BENEFICIO_EDITADO',
+            associado: null,
+            registro: { tipo: 'Benefício', nome: 'Benefício de exemplo 1' },
+            valorAnterior: { grupo: 'CONSULTORIA' },
+            valorNovo: { grupo: 'ASSESSORIA_JURIDICA' },
+          }),
+        ],
+      }),
+    );
+    abrir();
+
+    const [, linha] = await screen.findAllByRole('row');
+    expect(linha).toHaveTextContent('Benefício editado');
+    expect(linha).toHaveTextContent('Benefício: Benefício de exemplo 1');
+    expect(linha).toHaveTextContent('Grupo: Consultoria → Assessoria jurídica');
   });
 
   it('filtra por quem fez, ação, associado e período', async () => {

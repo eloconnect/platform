@@ -1,7 +1,15 @@
-import { render, screen } from '@testing-library/react';
+import type { ApiClient } from '@eloconnect/shared';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { api } from '../../api';
 import { PaginaInicial } from './PaginaInicial';
+
+vi.mock('../../api', () => ({
+  api: {
+    listarBeneficios: vi.fn<ApiClient['listarBeneficios']>(),
+  },
+}));
 
 function abrir() {
   render(
@@ -21,9 +29,71 @@ function aviso(): HTMLElement {
   return elemento;
 }
 
+function secaoBeneficios(): HTMLElement {
+  return screen.getByRole('region', { name: 'Benefícios e serviços' });
+}
+
 describe('PaginaInicial', () => {
+  beforeEach(() => {
+    vi.mocked(api.listarBeneficios).mockResolvedValue([]);
+  });
+
   afterEach(() => {
     vi.unstubAllEnvs();
+  });
+
+  it('mostra os benefícios cadastrados pela sede, por grupo (RF24)', async () => {
+    vi.mocked(api.listarBeneficios).mockResolvedValue([
+      {
+        id: 'beneficio-01',
+        titulo: 'Consultoria fiscal',
+        descricao: 'Descrição fictícia.',
+        grupo: 'CONSULTORIA',
+      },
+      {
+        id: 'beneficio-02',
+        titulo: 'Assessoria trabalhista',
+        descricao: 'Descrição fictícia.',
+        grupo: 'ASSESSORIA_JURIDICA',
+      },
+    ]);
+    abrir();
+
+    const secao = secaoBeneficios();
+    const titulos = await within(secao).findAllByRole('heading', { level: 3 });
+    expect(titulos.map((titulo) => titulo.textContent)).toEqual([
+      'Assessoria jurídica',
+      'Consultoria',
+    ]);
+    expect(
+      within(secao).getByRole('heading', {
+        level: 4,
+        name: 'Assessoria trabalhista',
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it('avisa quando ainda não há benefícios cadastrados', async () => {
+    abrir();
+
+    expect(
+      await within(secaoBeneficios()).findByText(
+        'Os benefícios do sindicato aparecem aqui assim que forem cadastrados.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('avisa quando não consegue carregar os benefícios', async () => {
+    vi.mocked(api.listarBeneficios).mockRejectedValue(
+      new TypeError('Failed to fetch'),
+    );
+    abrir();
+
+    expect(
+      await within(secaoBeneficios()).findByText(
+        /Não foi possível carregar os benefícios agora\./,
+      ),
+    ).toBeInTheDocument();
   });
 
   it('mostra o e-mail para pedir o cadastro, quando configurado', () => {

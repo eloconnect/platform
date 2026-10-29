@@ -360,13 +360,22 @@ model Noticia {
   @@index([publicadaEm])
 }
 
+/// Os dois grupos de benefícios (RN32). A regra de acesso de cada um depende
+/// da P15.
+enum GrupoBeneficio {
+  ASSESSORIA_JURIDICA
+  CONSULTORIA
+}
+
 /// Benefício exibido no app e na landing page (RF24). Lista real em P06.
 model Beneficio {
-  id           String   @id @default(uuid(7)) @db.Uuid
+  id           String         @id @default(uuid(7)) @db.Uuid
   titulo       String
-  descricao    String   @db.Text
-  ativo        Boolean  @default(true)
-  ordem        Int      @default(0)
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  descricao    String         @db.Text
+  grupo        GrupoBeneficio
+  /// Remover desliga o benefício, e o registro fica para o log (RN26).
+  ativo        Boolean        @default(true)
+  ordem        Int            @default(0)
+  criadoEm     DateTime       @default(now())
+  atualizadoEm DateTime       @updatedAt
 }

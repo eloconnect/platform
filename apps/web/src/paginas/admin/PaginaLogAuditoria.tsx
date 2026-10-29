@@ -8,8 +8,10 @@ import type {
 import {
   ACOES_AUDITORIA,
   ehAcaoAuditoria,
+  ehGrupoBeneficio,
   formatarCnpj,
   TEXTO_ACAO_AUDITORIA,
+  TEXTO_GRUPO_BENEFICIO,
   textoAcaoAuditoria,
 } from '@eloconnect/shared';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -43,6 +45,9 @@ const NOMES_CAMPOS: Record<string, string> = {
   motivo: 'Motivo',
   valorMensal: 'Valor mensal',
   valorAnual: 'Valor anual',
+  titulo: 'Título',
+  descricao: 'Descrição',
+  grupo: 'Grupo',
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -215,7 +220,7 @@ export function PaginaLogAuditoria() {
                 <th scope="col">Data e hora</th>
                 <th scope="col">Quem fez</th>
                 <th scope="col">Ação</th>
-                <th scope="col">Associado</th>
+                <th scope="col">Associado ou item</th>
                 <th scope="col">O que mudou</th>
               </tr>
             </thead>
@@ -237,6 +242,8 @@ export function PaginaLogAuditoria() {
                           {formatarCnpj(item.associado.cnpj)}
                         </div>
                       </>
+                    ) : item.registro ? (
+                      `${item.registro.tipo}: ${item.registro.nome}`
                     ) : (
                       '—'
                     )}
@@ -306,6 +313,13 @@ function Mudancas({ item }: { item: ItemLogAuditoria }) {
 }
 
 function textoValor(campo: string, valor: ValorCampoLog): string {
+  if (
+    campo === 'grupo' &&
+    typeof valor === 'string' &&
+    ehGrupoBeneficio(valor)
+  ) {
+    return TEXTO_GRUPO_BENEFICIO[valor];
+  }
   if (campo === 'acessoManual') {
     if (valor === 'BLOQUEADO') return 'Bloqueado pela sede';
     if (valor === 'LIBERADO') return 'Liberado pela sede';

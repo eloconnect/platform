@@ -146,6 +146,7 @@ erDiagram
         uuid id PK
         string titulo
         text descricao
+        GrupoBeneficio grupo "ASSESSORIA_JURIDICA, CONSULTORIA"
         boolean ativo
         int ordem
     }
@@ -183,7 +184,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 
-**Exclusões.** Associado é inativado (`inativadoEm`), não excluído (RF08). Notícia removida recebe `removidaEm` e some do feed, mas o registro fica para o log de auditoria. As chaves estrangeiras usam `Restrict`: nada que tenha histórico pode ser apagado em cascata. As exceções são tokens (apagados com o usuário) e anexos (apagados com a convenção).
+**Exclusões.** Associado é inativado (`inativadoEm`), não excluído (RF08). Notícia removida recebe `removidaEm` e some do feed, e benefício removido fica com `ativo` falso; nos dois casos, o registro fica para o log de auditoria. As chaves estrangeiras usam `Restrict`: nada que tenha histórico pode ser apagado em cascata. As exceções são tokens (apagados com o usuário) e anexos (apagados com a convenção).
 
 ## Tabelas imutáveis
 
@@ -228,7 +229,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Dois PDFs por convenção, completo e resumido (RN12) | — | `ConvencaoAnexo` precisa de um campo que diga se o PDF é o completo ou o resumido (com a #30). |
 | Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
-| Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, ordem). Os dois grupos (assessoria jurídica e consultoria, RN32) entram como um campo de grupo; a regra de acesso de cada grupo depende da P15. |
+| Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, grupo e ordem), cadastrada pela sede. O `grupo` separa assessoria jurídica e consultoria (RN32); a regra de acesso de cada grupo depende da P15. |
 | Matriz e filiais (RN31) | P14 | **Fora do modelo**. Provavelmente, uma ligação da filial com a matriz no `Associado`. |
 | Confirmação automática do cancelamento (RN18) | — | Status APROVADA com `decididaPorId` nulo = confirmado pelo sistema depois de 15 dias sem recusa (#56). |
 | Aceite do compartilhamento com o contador | P11 | **Fora do modelo**. Se for preciso registrar data e hora do aceite, entra um campo em `Usuario`. |

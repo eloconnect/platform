@@ -1,26 +1,29 @@
+import type { Beneficio } from '@eloconnect/shared';
+import { GRUPOS_BENEFICIO, TEXTO_GRUPO_BENEFICIO } from '@eloconnect/shared';
+import { useEffect, useState } from 'react';
 import { Card, Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
+import { api } from '../../api';
 import { useTituloPagina } from '../../componentes';
 
-const beneficiosProvisorios = [
-  {
-    titulo: 'Benefícios para associados',
-    descricao:
-      'Consulte as vantagens e os serviços disponibilizados pelo sindicato.',
-  },
-  {
-    titulo: 'Orientação sindical',
-    descricao:
-      'Encontre informações sobre os serviços e o suporte oferecidos pelo sindicato.',
-  },
-  {
-    titulo: 'Informações para farmácias',
-    descricao: 'Conheça os serviços disponíveis para os associados.',
-  },
-];
+type EstadoBeneficios = Beneficio[] | 'carregando' | 'erro';
 
 export function PaginaInicial() {
   useTituloPagina('Início');
+  // Cadastrados pela sede, em dois grupos (RF24, RN32).
+  const [beneficios, setBeneficios] = useState<EstadoBeneficios>('carregando');
+
+  useEffect(() => {
+    let ativo = true;
+    void api
+      .listarBeneficios()
+      .then((lista) => ativo && setBeneficios(lista))
+      .catch(() => ativo && setBeneficios('erro'));
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
   // TODO(P19): o sindicato vai informar o e-mail. Ele fica na configuração da
   // hospedagem, nunca no repositório (RNF10).
   const emailPedidoCadastro = import.meta.env.VITE_EMAIL_PEDIDO_CADASTRO;
@@ -78,22 +81,48 @@ export function PaginaInicial() {
           Benefícios e serviços
         </h2>
 
-        {/* TODO(P06): substituir pelos benefícios oficiais após a definição da P06. */}
-        <Row className="g-4">
-          {beneficiosProvisorios.map((beneficio) => (
-            <Col key={beneficio.titulo} md={6} lg={4}>
-              <Card className="h-100">
-                <Card.Body>
-                  <Card.Title>{beneficio.titulo}</Card.Title>
+        {beneficios === 'carregando' && <p>Carregando os benefícios...</p>}
+        {beneficios === 'erro' && (
+          <p>
+            Não foi possível carregar os benefícios agora. Tente de novo em
+            alguns minutos.
+          </p>
+        )}
+        {Array.isArray(beneficios) && beneficios.length === 0 && (
+          <p>
+            Os benefícios do sindicato aparecem aqui assim que forem
+            cadastrados.
+          </p>
+        )}
+        {Array.isArray(beneficios) &&
+          GRUPOS_BENEFICIO.map((grupo) => {
+            const doGrupo = beneficios.filter((b) => b.grupo === grupo);
+            if (doGrupo.length === 0) return null;
+            return (
+              <div key={grupo} className="mb-4">
+                <h3 className="h4 mb-3">{TEXTO_GRUPO_BENEFICIO[grupo]}</h3>
+                <Row className="g-4">
+                  {doGrupo.map((beneficio) => (
+                    <Col key={beneficio.id} md={6} lg={4}>
+                      <Card className="h-100">
+                        <Card.Body>
+                          <Card.Title as="h4" className="h5">
+                            {beneficio.titulo}
+                          </Card.Title>
 
-                  <Card.Text>{beneficio.descricao}</Card.Text>
+                          <Card.Text className="texto-com-quebras">
+                            {beneficio.descricao}
+                          </Card.Text>
 
-                  <Link to="/entrar">Acessar área do associado</Link>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                          <Link to="/entrar">Acessar área do associado</Link>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </div>
+            );
+          })}
       </section>
 
       <section className="container mb-5" aria-labelledby="titulo-convencoes">
