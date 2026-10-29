@@ -1,6 +1,6 @@
-# Elo Connect — Requisitos (v5)
+# Elo Connect — Requisitos (v6)
 
-Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seção 8). Última atualização: 28/10/2026.
+Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, e da conversa por vídeo de 28/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 e 9). Última atualização: 28/10/2026.
 
 **Legenda de status**
 
@@ -52,7 +52,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN01 | O valor da contribuição é o mesmo para todos os associados. | [Validado] |
 | RN02 | Vencimento fixo, até o dia 10 de cada mês. Os boletos mensais são enviados no primeiro dia útil do mês. | [Validado] — dia do envio: resposta 16 |
 | RN03 | Boleto com validade de 30 dias, contados a partir do vencimento. Depois disso, o boleto expira. | [Validado] — lembretes depois da expiração em P01 |
-| RN04 | Todo mês, antes do envio, um administrador revisa o lote de boletos (podendo editar) e confirma o envio com um único botão. | [A confirmar] — o cliente disse que não precisa de revisão e vai conversar sobre isso em reunião (respostas 16 e 17, P20) |
+| RN04 | Os boletos mensais são gerados e enviados automaticamente, sem revisão. A sede pode editar o boleto de um associado (o valor ou outro dado): a edição vale para o boleto do mês seguinte, e o associado recebe na hora um e-mail avisando que a cobrança vai mudar. | [Validado] — conversa de 28/10/2026 (P20); quais dados podem ser editados e até quando: decisão do grupo na M3 |
 | RN05 | Boletos são enviados **somente a associados com contribuição ativa**, nunca a todos os cadastrados. | [Validado] |
 | RN06 | Pagamento por boleto ou Pix (QR Code). | [Validado] |
 | RN07 | Lembretes: um 48h antes do vencimento; depois do vencimento, um por semana, até o boleto expirar e o acesso ser bloqueado (RN09). | [Validado] — mudou em 28/10/2026 (resposta 15); antes, a cada 48h |
@@ -63,7 +63,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN12 | Cada convenção tem dois PDFs. Quem está em dia vê o completo. Quem não está (inadimplente ou sem contribuição ativa) vê o resumido e não pode se inscrever nem acessar benefícios e suporte. | [Validado] |
 | RN13 | Plano anual pago à vista tem 20% de desconto. | [Validado] |
 | RN14 | Reajuste a cada 5 anos, aplicado a todos os associados com contribuição ativa ao mesmo tempo. | [Validado] |
-| RN15 | Toda alteração de valor gera um e-mail de aviso aos associados com contribuição ativa e passa a valer a partir do próximo boleto. | [Validado] |
+| RN15 | Toda alteração de valor gera, na hora, um e-mail de aviso aos associados com contribuição ativa e passa a valer a partir do boleto do mês seguinte ao da alteração. | [Validado] — aviso na hora: conversa de 28/10/2026 (pergunta 23) |
 | RN16 | Toda alteração de valor fica registrada em histórico (quem, quando, valor anterior e novo). | [Validado] |
 | RN17 | O histórico de transações é imutável e serve como prova em caso de divergência. | [Validado] |
 | RN18 | Cancelamento: o associado solicita pelo app, e o sistema mostra os benefícios e o suporte que ele perderá. A sede tem 15 dias para recusar o pedido (por exemplo, quando a farmácia desiste depois de conversar com a sede). Sem recusa nesse prazo, o cancelamento é confirmado automaticamente. | [Validado] |
@@ -74,7 +74,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN23 | O associado pode pedir pelo app que os boletos sejam enviados todo mês (cobrança recorrente). A adesão é automática, sem aprovação da sede, ativa a contribuição ativa e gera na hora o boleto do mês, com o valor cheio (sem valor proporcional). Para aderir, o associado aceita um termo, escrito pelos advogados do sindicato (resposta 19). | [Validado] — vencimento desse primeiro boleto em P16; texto do termo em P21 |
 | RN24 | O associado pode pagar apenas um mês, pedindo um boleto avulso pelo app, sem aderir à cobrança recorrente. Em dia, ele gera o boleto na hora, um por mês; um segundo pedido no mesmo mês passa pela sede, para evitar custo. O boleto vence no dia 10, com lembrete semanal (resposta 20). | [Validado] — o que falta em P10 |
 | RN25 | A sede pode interromper a cobrança recorrente de um associado a qualquer momento, além do cancelamento solicitado por ele. O associado recebe um aviso e mantém o acesso por mais 30 dias (resposta 12). | [Validado] |
-| RN26 | Toda ação dos usuários da sede fica registrada em log de auditoria imutável: cadastro e edição de associados, bloqueio/desbloqueio, ativação ou interrupção da cobrança recorrente, edição e envio do lote, alteração de valores, aprovação de cancelamentos e publicação de notícias e conteúdo. | [Validado] |
+| RN26 | Toda ação dos usuários da sede fica registrada em log de auditoria imutável: cadastro e edição de associados, bloqueio/desbloqueio, ativação ou interrupção da cobrança recorrente, edição de boletos, alteração de valores, aprovação de cancelamentos e publicação de notícias e conteúdo. | [Validado] |
 | RN27 | Princípio do projeto: automatizar processos sem criar novos processos manuais. A entrada na cobrança recorrente é automática; só o cancelamento passa por aprovação da sede. | [Validado] |
 | RN28 | O feed de notícias é visível a qualquer associado logado, adimplente ou inadimplente. Visitantes não têm acesso. | [Validado] |
 | RN29 | Não existe conta para contador. O contador acessa com o e-mail e a senha da conta do associado, vinculada ao CNPJ da farmácia, e tem exatamente o mesmo acesso dela. O compartilhamento do acesso é responsabilidade exclusiva do titular da conta, e toda ação feita com esse login é considerada ação do associado. O contador que atende várias farmácias entra em cada uma separadamente (resposta 5). | [Validado] — forma de deixar explícito em P11 |
@@ -111,8 +111,8 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF10 | Gerar mensalmente, em modo rascunho, o lote de boletos (com Pix QR Code) de todos os associados com contribuição ativa, para envio no primeiro dia útil do mês. | Must | [Validado] — o rascunho depende da revisão (P20) |
-| RF11 | Tela de aprovação do lote mensal: revisar, editar dados do boleto e enviar todos com um único botão. | Must | [A confirmar] — ver P20 |
+| RF10 | Gerar e enviar automaticamente, no primeiro dia útil do mês, o lote de boletos (com Pix QR Code) de todos os associados com contribuição ativa, sem revisão (RN04). | Must | [Validado] — conversa de 28/10/2026 (P20) |
+| RF11 | A sede edita o boleto de um associado (o valor ou outro dado). A edição vale para o boleto do mês seguinte, e o associado recebe um e-mail na hora (RN04). | Must | [Validado] — quais dados e até quando: decisão do grupo na M3 |
 | RF12 | Enviar o boleto por e-mail e disponibilizá-lo no app (boleto + Pix QR Code). | Must | [Validado] |
 | RF13 | Enviar lembrete automático 48h antes do vencimento. | Must | [Validado] |
 | RF14 | Enviar lembrete automático uma vez por semana após o vencimento, até o boleto expirar (RN07). | Must | [Validado] |
@@ -127,15 +127,15 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF18 | Alterar o valor da contribuição (mensal e anual). | Must | [Validado] |
-| RF19 | Ao alterar o valor, gerar e enviar e-mail de aviso aos associados com contribuição ativa; novo valor aplicado no próximo boleto. | Must | [Validado] |
+| RF18 | Alterar o valor mensal da contribuição. O valor anual é calculado: 12 vezes o mensal, com 20% de desconto (RN13). | Must | [Validado] — cálculo do anual em P23 |
+| RF19 | Ao alterar o valor, enviar na hora um e-mail de aviso aos associados com contribuição ativa; o novo valor vale a partir do boleto do mês seguinte (RN15). | Must | [Validado] |
 | RF20 | Exibir histórico de alterações de valor. | Must | [Validado] |
 
 ### 4.5 Convenções coletivas
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF21 | Funcionário da sede publica e edita a convenção coletiva: resumo em texto, PDF completo, PDF resumido e tabela de reajuste salarial. | Must | [Validado] |
+| RF21 | Funcionário da sede publica e edita a convenção coletiva: resumo em texto, PDF completo, PDF resumido e tabela de reajuste salarial. | Must | [Validado] — formato dos documentos e da tabela de reajuste em P24 |
 | RF22 | Qualquer usuário logado vê as convenções: quem está em dia, o PDF completo; os demais (inclusive inadimplente), o resumido (RN12). O contador acessa pela conta do associado (RN29). | Must | [Validado] |
 | RF23 | Associado adimplente pode se inscrever/registrar participação em uma convenção. | Should | [A confirmar] — ver P05 |
 
@@ -245,6 +245,8 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P17 | Respondida (28/10): a liberação manual vale 1 semana, com um aviso na conta do associado (resposta 11, RN11). | Cliente | RF09 |
 | P18 | Respondida (28/10): a sede pode trocar o e-mail da conta (resposta 6, RN34), e o contador entra em cada farmácia separadamente (resposta 5). Quando o mesmo e-mail está no cadastro de mais de uma farmácia, a sede troca o de uma delas. | Cliente | RF05, RN29 |
 | P19 | Qual e-mail recebe os pedidos de cadastro (resposta 2) e de qual endereço o sistema envia os e-mails (pergunta 46, em branco)? | Cliente | RF01, envio de e-mail |
-| P20 | Revisão do lote mensal: o cliente disse que não precisa revisar os boletos e vai marcar uma reunião, porque não entendeu para que serve a revisão (respostas 16 e 17). A revisão antes do envio fica ou sai? Se sair, o lote é gerado e enviado sozinho no primeiro dia útil. | Cliente | RN04, RF10, RF11 |
+| P20 | Respondida (28/10, conversa por vídeo): a revisão do lote sai. Os boletos são gerados e enviados sozinhos no primeiro dia útil, e a sede pode editar o boleto do mês seguinte, com aviso por e-mail na hora (RN04, RF10, RF11). A mesma conversa respondeu à pergunta 23: o aviso de mudança de valor sai na hora (RN15). | Cliente | RN04, RN15, RF10, RF11 |
 | P21 | Texto do termo de adesão à cobrança recorrente, que os advogados do sindicato vão escrever (resposta 19). | Cliente | RN23, RF36 |
 | P22 | O sindicato pediu um exemplo de termo de adesão para os advogados usarem de base (resposta 19). O grupo pode indicar um modelo? Que cuidados isso exige? O aceite do compartilhamento do acesso com o contador (P11) pode entrar no mesmo termo? | Professores | RN23, RN29, RF36 |
+| P23 | Qual é o valor atual da contribuição mensal? O plano anual é o valor de 12 meses com 20% de desconto? (pergunta 22, em branco) Enquanto não houver resposta, a sede digita o valor mensal, e o sistema calcula o anual assim. | Cliente | RF18, RN13, RF17 |
+| P24 | Em que formato chegam os documentos da convenção (PDF, planilha, outro)? Além do resumo, há algum conteúdo que sempre é publicado, como a tabela de reajuste? Os PDFs costumam passar de 4 MB? (pergunta 39, em branco; o envio pelo sistema tem esse limite por enquanto) Enquanto não houver resposta, a convenção tem o resumo em texto e os dois PDFs, e a tabela de reajuste espera. | Cliente | RF21, RF22 |
