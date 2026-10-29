@@ -8,9 +8,11 @@ import { PaginaBeneficios } from './paginas/admin/PaginaBeneficios';
 import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssociado';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
+import { PaginaNoticias } from './paginas/admin/PaginaNoticias';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
+import { PaginaNoticiasAssociado } from './paginas/associado/PaginaNoticiasAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
 import { PaginaEsqueciSenha } from './paginas/publico/PaginaEsqueciSenha';
 import { PaginaInicial } from './paginas/publico/PaginaInicial';
@@ -48,7 +50,11 @@ export const rotas: RouteObject[] = [
         <LayoutAssociado />
       </RotaProtegida>
     ),
-    children: [{ index: true, element: <PaginaInicioAssociado /> }],
+    children: [
+      { index: true, element: <PaginaInicioAssociado /> },
+      // Em dia ou não, todo associado logado vê as notícias (RN28).
+      { path: 'noticias', element: <PaginaNoticiasAssociado /> },
+    ],
   },
   {
     path: '/admin',
@@ -69,8 +75,9 @@ export const rotas: RouteObject[] = [
         ),
       },
       { path: 'associados/:id', element: <PaginaPerfilAssociado /> },
-      // Os dois perfis da sede publicam benefícios (RN33).
+      // Os dois perfis da sede publicam benefícios e notícias (RN33).
       { path: 'beneficios', element: <PaginaBeneficios /> },
+      { path: 'noticias', element: <PaginaNoticias /> },
       {
         path: 'associados/:id/editar',
         element: (

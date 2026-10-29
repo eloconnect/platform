@@ -24,6 +24,10 @@ export const ACOES_AUDITORIA = [
   'BENEFICIO_CRIADO',
   'BENEFICIO_EDITADO',
   'BENEFICIO_REMOVIDO',
+  // Notícias (RF41)
+  'NOTICIA_PUBLICADA',
+  'NOTICIA_EDITADA',
+  'NOTICIA_REMOVIDA',
 ] as const;
 
 export type AcaoAuditoria = (typeof ACOES_AUDITORIA)[number];
@@ -45,6 +49,9 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   BENEFICIO_CRIADO: 'Benefício cadastrado',
   BENEFICIO_EDITADO: 'Benefício editado',
   BENEFICIO_REMOVIDO: 'Benefício removido',
+  NOTICIA_PUBLICADA: 'Notícia publicada',
+  NOTICIA_EDITADA: 'Notícia editada',
+  NOTICIA_REMOVIDA: 'Notícia removida',
 };
 
 export function ehAcaoAuditoria(valor: string): valor is AcaoAuditoria {

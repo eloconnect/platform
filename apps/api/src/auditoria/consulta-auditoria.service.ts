@@ -112,16 +112,24 @@ export class ConsultaAuditoriaService {
         ),
       ),
     ];
-    const beneficios = await this.prisma.beneficio.findMany({
-      where: { id: { in: idsDe('Beneficio') } },
-      select: { id: true, titulo: true },
-    });
-    return new Map(
-      beneficios.map((beneficio) => [
-        `Beneficio:${beneficio.id}`,
-        { tipo: 'Benefício', nome: beneficio.titulo },
-      ]),
-    );
+    const [beneficios, noticias] = await Promise.all([
+      this.prisma.beneficio.findMany({
+        where: { id: { in: idsDe('Beneficio') } },
+        select: { id: true, titulo: true },
+      }),
+      this.prisma.noticia.findMany({
+        where: { id: { in: idsDe('Noticia') } },
+        select: { id: true, titulo: true },
+      }),
+    ]);
+    const nomes = new Map<string, { tipo: string; nome: string }>();
+    for (const { id, titulo } of beneficios) {
+      nomes.set(`Beneficio:${id}`, { tipo: 'Benefício', nome: titulo });
+    }
+    for (const { id, titulo } of noticias) {
+      nomes.set(`Noticia:${id}`, { tipo: 'Notícia', nome: titulo });
+    }
+    return nomes;
   }
 
   /** Quem é ou já foi da sede, para o filtro por usuário. */

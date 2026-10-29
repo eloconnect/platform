@@ -184,6 +184,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 
+**Notícia publicada na hora.** A tela da sede publica a notícia ao salvar, e `publicadaEm` é a data que o feed mostra. Editar não muda essa data. O rascunho (`publicadaEm` nulo) continua no modelo, mas a sede ainda não tem tela para ele.
+
 **Exclusões.** Associado é inativado (`inativadoEm`), não excluído (RF08). Notícia removida recebe `removidaEm` e some do feed, e benefício removido fica com `ativo` falso; nos dois casos, o registro fica para o log de auditoria. As chaves estrangeiras usam `Restrict`: nada que tenha histórico pode ser apagado em cascata. As exceções são tokens (apagados com o usuário) e anexos (apagados com a convenção).
 
 ## Tabelas imutáveis

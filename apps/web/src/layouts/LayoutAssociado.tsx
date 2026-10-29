@@ -8,6 +8,7 @@ export function LayoutAssociado() {
       inicio="/associado"
       itensMenu={[
         { para: '/associado', texto: 'Início' },
+        { para: '/associado/noticias', texto: 'Notícias' },
         { para: '/', texto: 'Sair', aoClicar: limparSessao },
       ]}
     />
