@@ -28,6 +28,11 @@ import type {
   EditarBeneficioRequest,
 } from './beneficios.js';
 import type { HealthResponse } from './health.js';
+import type {
+  EditarNoticiaRequest,
+  Noticia,
+  PublicarNoticiaRequest,
+} from './noticias.js';
 import type { AlterarValorRequest, PainelValores } from './valores.js';
 
 /**
@@ -183,6 +188,17 @@ export function createApiClient(
       ),
     removerBeneficio: (id: string) =>
       requisitar<Beneficio>('DELETE', `/beneficios/${encodeURIComponent(id)}`),
+    listarNoticias: () => requisitar<Noticia[]>('GET', '/noticias'),
+    publicarNoticia: (dados: PublicarNoticiaRequest) =>
+      requisitar<Noticia>('POST', '/noticias', dados),
+    editarNoticia: (id: string, dados: EditarNoticiaRequest) =>
+      requisitar<Noticia>(
+        'PATCH',
+        `/noticias/${encodeURIComponent(id)}`,
+        dados,
+      ),
+    removerNoticia: (id: string) =>
+      requisitar<Noticia>('DELETE', `/noticias/${encodeURIComponent(id)}`),
   };
 }
 

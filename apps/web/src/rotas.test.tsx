@@ -13,6 +13,7 @@ vi.mock('./api', () => ({
     listarBeneficios: vi.fn<ApiClient['listarBeneficios']>(),
     listarAssociados: vi.fn<ApiClient['listarAssociados']>(),
     listarLogAuditoria: vi.fn<ApiClient['listarLogAuditoria']>(),
+    listarNoticias: vi.fn<ApiClient['listarNoticias']>(),
     listarUsuariosSede: vi.fn<ApiClient['listarUsuariosSede']>(),
     minhaConta: vi.fn<ApiClient['minhaConta']>(),
     painelValores: vi.fn<ApiClient['painelValores']>(),
@@ -125,6 +126,7 @@ describe('Áreas logadas', () => {
       porPagina: 20,
     });
     vi.mocked(api.listarUsuariosSede).mockResolvedValue([]);
+    vi.mocked(api.listarNoticias).mockResolvedValue([]);
     vi.mocked(api.painelValores).mockResolvedValue({
       atual: null,
       historico: [],
@@ -140,9 +142,12 @@ describe('Áreas logadas', () => {
     ['/admin/valores', 'ADMIN', 'Valor da contribuição'],
     ['/admin/beneficios', 'ADMIN', 'Benefícios'],
     ['/admin/beneficios', 'ADMIN_BASICO', 'Benefícios'],
+    ['/admin/noticias', 'ADMIN', 'Notícias'],
+    ['/admin/noticias', 'ADMIN_BASICO', 'Notícias'],
     ['/admin', 'ADMIN_BASICO', 'Painel da sede'],
     ['/admin/associados', 'ADMIN_BASICO', 'Associados'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
+    ['/associado/noticias', 'ASSOCIADO', 'Notícias'],
   ] as const)('%s abre para o perfil %s', (caminho, perfil, titulo) => {
     entrarComo(perfil);
     abrir(caminho);
@@ -151,7 +156,7 @@ describe('Áreas logadas', () => {
     ).toBeInTheDocument();
   });
 
-  it.each(['/admin', '/associado'])(
+  it.each(['/admin', '/associado', '/associado/noticias'])(
     '%s sem login vai para o login',
     (caminho) => {
       abrir(caminho);
@@ -182,7 +187,7 @@ describe('Áreas logadas', () => {
   );
 
   it.each(['ADMIN', 'ADMIN_BASICO'] as const)(
-    'o perfil %s vê os benefícios no menu (RN33)',
+    'o perfil %s vê os benefícios e as notícias no menu (RN33)',
     (perfil) => {
       entrarComo(perfil);
       abrir('/admin');
@@ -190,8 +195,21 @@ describe('Áreas logadas', () => {
         'href',
         '/admin/beneficios',
       );
+      expect(screen.getByRole('link', { name: 'Notícias' })).toHaveAttribute(
+        'href',
+        '/admin/noticias',
+      );
     },
   );
+
+  it('o associado vê as notícias no menu', () => {
+    entrarComo('ASSOCIADO');
+    abrir('/associado');
+    expect(screen.getByRole('link', { name: 'Notícias' })).toHaveAttribute(
+      'href',
+      '/associado/noticias',
+    );
+  });
 
   it('só o chave mestre vê valores e histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN');

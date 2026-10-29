@@ -10,6 +10,7 @@ export function LayoutAdmin() {
         { para: '/admin', texto: 'Painel' },
         { para: '/admin/associados', texto: 'Associados' },
         { para: '/admin/beneficios', texto: 'Benefícios' },
+        { para: '/admin/noticias', texto: 'Notícias' },
         // Valores e histórico de ações são só do chave mestre (RN20, RN33).
         ...(ehChaveMestre()
           ? [

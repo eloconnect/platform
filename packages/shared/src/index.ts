@@ -50,3 +50,8 @@ export {
   type EditarBeneficioRequest,
   type GrupoBeneficio,
 } from './beneficios.js';
+export type {
+  EditarNoticiaRequest,
+  Noticia,
+  PublicarNoticiaRequest,
+} from './noticias.js';

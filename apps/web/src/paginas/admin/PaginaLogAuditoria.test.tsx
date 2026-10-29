@@ -133,6 +133,29 @@ describe('PaginaLogAuditoria', () => {
     expect(linha).toHaveTextContent('Grupo: Consultoria → Assessoria jurídica');
   });
 
+  it('diz qual notícia a ação afetou', async () => {
+    vi.mocked(api.listarLogAuditoria).mockResolvedValue(
+      lista({
+        total: 1,
+        itens: [
+          item({
+            acao: 'NOTICIA_EDITADA',
+            associado: null,
+            registro: { tipo: 'Notícia', nome: 'Reunião da diretoria' },
+            valorAnterior: { conteudo: 'Texto antigo.' },
+            valorNovo: { conteudo: 'Texto novo.' },
+          }),
+        ],
+      }),
+    );
+    abrir();
+
+    const [, linha] = await screen.findAllByRole('row');
+    expect(linha).toHaveTextContent('Notícia editada');
+    expect(linha).toHaveTextContent('Notícia: Reunião da diretoria');
+    expect(linha).toHaveTextContent('Texto: Texto antigo. → Texto novo.');
+  });
+
   it('filtra por quem fez, ação, associado e período', async () => {
     abrir();
     await screen.findByText('Nenhuma ação encontrada.');
