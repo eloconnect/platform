@@ -11,6 +11,7 @@ import { AuditoriaModule } from './auditoria/auditoria.module.js';
 import { ValoresModule } from './valores/valores.module.js';
 import { BeneficiosModule } from './beneficios/beneficios.module.js';
 import { NoticiasModule } from './noticias/noticias.module.js';
+import { ConvencoesModule } from './convencoes/convencoes.module.js';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NoticiasModule } from './noticias/noticias.module.js';
     ValoresModule,
     BeneficiosModule,
     NoticiasModule,
+    ConvencoesModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

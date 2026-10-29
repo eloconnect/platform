@@ -327,21 +327,6 @@ model Convencao {
   @@index([ano])
 }
 
-/// PDF anexado a uma convenção. Onde os arquivos ficam depende da
-/// hospedagem (#28).
-model ConvencaoAnexo {
-  id           String   @id @default(uuid(7)) @db.Uuid
-  convencaoId  String   @db.Uuid
-  nomeArquivo  String
-  arquivoUrl   String
-  tamanhoBytes Int
-  criadoEm     DateTime @default(now())
-
-  convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Cascade)
-
-  @@index([convencaoId])
-}
-
 /// Feed de notícias, visível a qualquer associado logado (RN28, RF35, RF41).
 model Noticia {
   id           String    @id @default(uuid(7)) @db.Uuid
@@ -378,4 +363,26 @@ model Beneficio {
   ordem        Int            @default(0)
   criadoEm     DateTime       @default(now())
   atualizadoEm DateTime       @updatedAt
+}
+
+/// Tipo de PDF anexado à convenção coletiva.
+enum TipoAnexoConvencao {
+  INTEGRAL
+  RESUMIDA
+}
+
+/// PDF anexado a uma convenção, armazenado em serviço privado.
+model ConvencaoAnexo {
+  id           String             @id @default(uuid(7)) @db.Uuid
+  convencaoId  String             @db.Uuid
+  tipo         TipoAnexoConvencao
+  nomeArquivo  String
+  arquivoUrl   String
+  tamanhoBytes Int
+  criadoEm     DateTime           @default(now())
+
+  convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Cascade)
+
+  @@index([convencaoId])
+  @@index([convencaoId, tipo])
 }

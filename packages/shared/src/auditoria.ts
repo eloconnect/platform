@@ -28,6 +28,12 @@ export const ACOES_AUDITORIA = [
   'NOTICIA_PUBLICADA',
   'NOTICIA_EDITADA',
   'NOTICIA_REMOVIDA',
+  // Convenções coletivas (RF21)
+  'CONVENCAO_CRIADA',
+  'CONVENCAO_EDITADA',
+  'CONVENCAO_PUBLICADA',
+  'CONVENCAO_REMOVIDA',
+  'CONVENCAO_ANEXOS_ATUALIZADOS',
 ] as const;
 
 export type AcaoAuditoria = (typeof ACOES_AUDITORIA)[number];
@@ -52,6 +58,11 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   NOTICIA_PUBLICADA: 'Notícia publicada',
   NOTICIA_EDITADA: 'Notícia editada',
   NOTICIA_REMOVIDA: 'Notícia removida',
+  CONVENCAO_CRIADA: 'Convenção cadastrada',
+  CONVENCAO_EDITADA: 'Convenção editada',
+  CONVENCAO_PUBLICADA: 'Convenção publicada',
+  CONVENCAO_REMOVIDA: 'Convenção removida',
+  CONVENCAO_ANEXOS_ATUALIZADOS: 'PDFs da convenção atualizados',
 };
 
 export function ehAcaoAuditoria(valor: string): valor is AcaoAuditoria {

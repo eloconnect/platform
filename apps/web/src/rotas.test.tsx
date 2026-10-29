@@ -17,6 +17,7 @@ vi.mock('./api', () => ({
     listarUsuariosSede: vi.fn<ApiClient['listarUsuariosSede']>(),
     minhaConta: vi.fn<ApiClient['minhaConta']>(),
     painelValores: vi.fn<ApiClient['painelValores']>(),
+    listarConvencoes: vi.fn<ApiClient['listarConvencoes']>(),
   },
 }));
 
@@ -32,7 +33,9 @@ describe('Rotas', () => {
   beforeEach(() => {
     vi.mocked(api.getHealth).mockReset();
     vi.mocked(api.listarBeneficios).mockResolvedValue([]);
+    vi.mocked(api.listarConvencoes).mockResolvedValue([]);
   });
+
   it('abre a página de criar conta', () => {
     abrir('/cadastro');
 
@@ -59,9 +62,7 @@ describe('Rotas', () => {
     expect(
       screen.getByRole('link', { name: 'Pular para o conteúdo' }),
     ).toHaveAttribute('href', '#conteudo');
-    expect(
-      screen.getByRole('link', { name: 'Pular para o conteúdo' }),
-    ).toBeInTheDocument();
+
     expect(
       screen.getByRole('navigation', { name: 'Menu principal' }),
     ).toBeInTheDocument();
@@ -71,10 +72,11 @@ describe('Rotas', () => {
     ['/entrar', 'Entrar'],
     ['/esqueci-senha', 'Esqueci minha senha'],
     ['/nao-existe', 'Página não encontrada'],
-  ])('%s mostra "%s"', (caminho, titulo) => {
+  ])('%s mostra "%s"', async (caminho, titulo) => {
     abrir(caminho);
+
     expect(
-      screen.getByRole('heading', { level: 1, name: titulo }),
+      await screen.findByRole('heading', { level: 1, name: titulo }),
     ).toBeInTheDocument();
   });
 
@@ -84,13 +86,17 @@ describe('Rotas', () => {
       database: 'ok',
       timestamp: new Date().toISOString(),
     });
+
     abrir('/status');
+
     expect(await screen.findByText('Tudo funcionando')).toBeInTheDocument();
   });
 
   it('/status avisa quando a API não responde', async () => {
     vi.mocked(api.getHealth).mockRejectedValue(new Error('sem conexão'));
+
     abrir('/status');
+
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'A API não respondeu',
     );
@@ -107,26 +113,33 @@ function entrarComo(perfil: Perfil) {
 describe('Áreas logadas', () => {
   beforeEach(() => {
     sessionStorage.clear();
+
     vi.mocked(api.listarBeneficios).mockResolvedValue([]);
+    vi.mocked(api.listarConvencoes).mockResolvedValue([]);
+
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Farmácia Teste',
       situacao: 'Adimplente',
       acessoLiberadoAte: null,
     });
+
     vi.mocked(api.listarAssociados).mockResolvedValue({
       itens: [],
       total: 0,
       pagina: 1,
       porPagina: 20,
     });
+
     vi.mocked(api.listarLogAuditoria).mockResolvedValue({
       itens: [],
       total: 0,
       pagina: 1,
       porPagina: 20,
     });
+
     vi.mocked(api.listarUsuariosSede).mockResolvedValue([]);
     vi.mocked(api.listarNoticias).mockResolvedValue([]);
+
     vi.mocked(api.painelValores).mockResolvedValue({
       atual: null,
       historico: [],
@@ -142,26 +155,30 @@ describe('Áreas logadas', () => {
     ['/admin/valores', 'ADMIN', 'Valor da contribuição'],
     ['/admin/beneficios', 'ADMIN', 'Benefícios'],
     ['/admin/beneficios', 'ADMIN_BASICO', 'Benefícios'],
+    ['/admin/convencoes', 'ADMIN', 'Convenções coletivas'],
+    ['/admin/convencoes', 'ADMIN_BASICO', 'Convenções coletivas'],
     ['/admin/noticias', 'ADMIN', 'Notícias'],
     ['/admin/noticias', 'ADMIN_BASICO', 'Notícias'],
     ['/admin', 'ADMIN_BASICO', 'Painel da sede'],
     ['/admin/associados', 'ADMIN_BASICO', 'Associados'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
     ['/associado/noticias', 'ASSOCIADO', 'Notícias'],
-  ] as const)('%s abre para o perfil %s', (caminho, perfil, titulo) => {
+  ] as const)('%s abre para o perfil %s', async (caminho, perfil, titulo) => {
     entrarComo(perfil);
     abrir(caminho);
+
     expect(
-      screen.getByRole('heading', { level: 1, name: titulo }),
+      await screen.findByRole('heading', { level: 1, name: titulo }),
     ).toBeInTheDocument();
   });
 
   it.each(['/admin', '/associado', '/associado/noticias'])(
     '%s sem login vai para o login',
-    (caminho) => {
+    async (caminho) => {
       abrir(caminho);
+
       expect(
-        screen.getByRole('heading', { level: 1, name: 'Entrar' }),
+        await screen.findByRole('heading', { level: 1, name: 'Entrar' }),
       ).toBeInTheDocument();
     },
   );
@@ -177,24 +194,32 @@ describe('Áreas logadas', () => {
     ['/admin/valores', 'ADMIN_BASICO', 'Painel da sede'],
   ] as const)(
     '%s com o perfil %s vai para a própria área',
-    (caminho, perfil, titulo) => {
+    async (caminho, perfil, titulo) => {
       entrarComo(perfil);
       abrir(caminho);
+
       expect(
-        screen.getByRole('heading', { level: 1, name: titulo }),
+        await screen.findByRole('heading', { level: 1, name: titulo }),
       ).toBeInTheDocument();
     },
   );
 
   it.each(['ADMIN', 'ADMIN_BASICO'] as const)(
-    'o perfil %s vê os benefícios e as notícias no menu (RN33)',
+    'o perfil %s vê benefícios, convenções e notícias no menu (RN33)',
     (perfil) => {
       entrarComo(perfil);
       abrir('/admin');
+
       expect(screen.getByRole('link', { name: 'Benefícios' })).toHaveAttribute(
         'href',
         '/admin/beneficios',
       );
+
+      expect(screen.getByRole('link', { name: 'Convenções' })).toHaveAttribute(
+        'href',
+        '/admin/convencoes',
+      );
+
       expect(screen.getByRole('link', { name: 'Notícias' })).toHaveAttribute(
         'href',
         '/admin/noticias',
@@ -205,6 +230,7 @@ describe('Áreas logadas', () => {
   it('o associado vê as notícias no menu', () => {
     entrarComo('ASSOCIADO');
     abrir('/associado');
+
     expect(screen.getByRole('link', { name: 'Notícias' })).toHaveAttribute(
       'href',
       '/associado/noticias',
@@ -214,10 +240,12 @@ describe('Áreas logadas', () => {
   it('só o chave mestre vê valores e histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN');
     abrir('/admin');
+
     expect(screen.getByRole('link', { name: 'Valores' })).toHaveAttribute(
       'href',
       '/admin/valores',
     );
+
     expect(
       screen.getByRole('link', { name: 'Histórico de ações' }),
     ).toHaveAttribute('href', '/admin/auditoria');
@@ -226,9 +254,11 @@ describe('Áreas logadas', () => {
   it('o perfil básico não vê valores nem histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN_BASICO');
     abrir('/admin');
+
     expect(
       screen.queryByRole('link', { name: 'Valores' }),
     ).not.toBeInTheDocument();
+
     expect(
       screen.queryByRole('link', { name: 'Histórico de ações' }),
     ).not.toBeInTheDocument();
@@ -237,7 +267,9 @@ describe('Áreas logadas', () => {
   it('"Sair" encerra a sessão', async () => {
     entrarComo('ADMIN');
     abrir('/admin');
+
     await userEvent.click(screen.getByRole('link', { name: 'Sair' }));
+
     expect(lerSessao()).toBeNull();
   });
 });

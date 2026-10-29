@@ -55,3 +55,4 @@ export type {
   Noticia,
   PublicarNoticiaRequest,
 } from './noticias.js';
+export type * from './convencoes.js';
