@@ -1,6 +1,6 @@
-# Elo Connect — Requisitos (v6)
+# Elo Connect — Requisitos (v7)
 
-Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, e da conversa por vídeo de 28/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 e 9). Última atualização: 28/10/2026.
+Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 29/10/2026.
 
 **Legenda de status**
 
@@ -174,7 +174,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | ID | Requisito | Prioridade | Status |
 |---|---|---|---|
 | RF35 | Feed de notícias no app, num ponto único, visível a qualquer associado logado (adimplente ou inadimplente). | Must | [Validado] |
-| RF41 | Funcionário da sede publica, edita e remove notícias do feed. | Must | [Validado] |
+| RF41 | Funcionário da sede publica, edita e remove notícias do feed. A notícia pode ter imagens, que são opcionais. | Must | [Validado] — imagens pedidas pelo cliente (29/10/2026) |
 
 ### 4.11 Fora do MVP
 

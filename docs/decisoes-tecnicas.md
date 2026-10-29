@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 28/10/2026.
+Última atualização: 29/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -59,7 +59,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Central de convenções coletivas (conteúdo atualizado por funcionário da sede), com dois PDFs por convenção: quem está em dia vê o completo; os demais veem o resumido e não se inscrevem.
 
-  - Feed de notícias num ponto único, publicado pela sede e visível a qualquer associado logado (adimplente ou inadimplente); visitantes não acessam.
+  - Feed de notícias num ponto único, publicado pela sede e visível a qualquer associado logado (adimplente ou inadimplente); visitantes não acessam. A notícia pode ter imagens, que são opcionais (pedido do cliente, 29/10/2026).
 
   - Módulo de benefícios separado do de convenções, em dois grupos: assessoria jurídica e consultoria (lista completa a definir pelo cliente).
 
