@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { EmailModule } from './email/email.module.js';
 import { AssociadosModule } from './associados/associados.module.js';
 import { AuditoriaModule } from './auditoria/auditoria.module.js';
+import { ValoresModule } from './valores/valores.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuditoriaModule } from './auditoria/auditoria.module.js';
     EmailModule,
     AssociadosModule,
     AuditoriaModule,
+    ValoresModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

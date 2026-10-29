@@ -14,6 +14,7 @@ vi.mock('./api', () => ({
     listarLogAuditoria: vi.fn<ApiClient['listarLogAuditoria']>(),
     listarUsuariosSede: vi.fn<ApiClient['listarUsuariosSede']>(),
     minhaConta: vi.fn<ApiClient['minhaConta']>(),
+    painelValores: vi.fn<ApiClient['painelValores']>(),
   },
 }));
 
@@ -121,6 +122,11 @@ describe('Áreas logadas', () => {
       porPagina: 20,
     });
     vi.mocked(api.listarUsuariosSede).mockResolvedValue([]);
+    vi.mocked(api.painelValores).mockResolvedValue({
+      atual: null,
+      historico: [],
+      associadosAvisados: 0,
+    });
   });
 
   it.each([
@@ -128,6 +134,7 @@ describe('Áreas logadas', () => {
     ['/admin/associados', 'ADMIN', 'Associados'],
     ['/admin/associados/novo', 'ADMIN', 'Cadastrar associado'],
     ['/admin/auditoria', 'ADMIN', 'Histórico de ações'],
+    ['/admin/valores', 'ADMIN', 'Valor da contribuição'],
     ['/admin', 'ADMIN_BASICO', 'Painel da sede'],
     ['/admin/associados', 'ADMIN_BASICO', 'Associados'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
@@ -155,8 +162,9 @@ describe('Áreas logadas', () => {
     ['/associado', 'ADMIN_BASICO', 'Painel da sede'],
     // O cadastro é só do chave mestre (RN33).
     ['/admin/associados/novo', 'ADMIN_BASICO', 'Painel da sede'],
-    // O histórico de ações também (RN33).
+    // O histórico de ações e os valores também (RN20, RN33).
     ['/admin/auditoria', 'ADMIN_BASICO', 'Painel da sede'],
+    ['/admin/valores', 'ADMIN_BASICO', 'Painel da sede'],
   ] as const)(
     '%s com o perfil %s vai para a própria área',
     (caminho, perfil, titulo) => {
@@ -168,17 +176,24 @@ describe('Áreas logadas', () => {
     },
   );
 
-  it('só o chave mestre vê o histórico de ações no menu (RN33)', () => {
+  it('só o chave mestre vê valores e histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN');
     abrir('/admin');
+    expect(screen.getByRole('link', { name: 'Valores' })).toHaveAttribute(
+      'href',
+      '/admin/valores',
+    );
     expect(
       screen.getByRole('link', { name: 'Histórico de ações' }),
     ).toHaveAttribute('href', '/admin/auditoria');
   });
 
-  it('o perfil básico não vê o histórico de ações no menu (RN33)', () => {
+  it('o perfil básico não vê valores nem histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN_BASICO');
     abrir('/admin');
+    expect(
+      screen.queryByRole('link', { name: 'Valores' }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('link', { name: 'Histórico de ações' }),
     ).not.toBeInTheDocument();

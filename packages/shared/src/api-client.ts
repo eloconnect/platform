@@ -23,6 +23,7 @@ import type {
   RedefinirSenhaRequest,
 } from './auth.js';
 import type { HealthResponse } from './health.js';
+import type { AlterarValorRequest, PainelValores } from './valores.js';
 
 /**
  * Erro de uma chamada à API, com o status HTTP e, quando a API informa, o
@@ -163,6 +164,9 @@ export function createApiClient(
       ),
     listarUsuariosSede: () =>
       requisitar<UsuarioSede[]>('GET', '/auditoria/usuarios'),
+    painelValores: () => requisitar<PainelValores>('GET', '/valores'),
+    alterarValor: (dados: AlterarValorRequest) =>
+      requisitar<PainelValores>('POST', '/valores', dados),
   };
 }
 

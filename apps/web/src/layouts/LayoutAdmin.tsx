@@ -9,9 +9,12 @@ export function LayoutAdmin() {
       itensMenu={[
         { para: '/admin', texto: 'Painel' },
         { para: '/admin/associados', texto: 'Associados' },
-        // O histórico de ações é só do chave mestre (RN33).
+        // Valores e histórico de ações são só do chave mestre (RN20, RN33).
         ...(ehChaveMestre()
-          ? [{ para: '/admin/auditoria', texto: 'Histórico de ações' }]
+          ? [
+              { para: '/admin/valores', texto: 'Valores' },
+              { para: '/admin/auditoria', texto: 'Histórico de ações' },
+            ]
           : []),
         { para: '/', texto: 'Sair', aoClicar: limparSessao },
       ]}

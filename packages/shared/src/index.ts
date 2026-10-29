@@ -28,3 +28,16 @@ export {
   type SituacaoAcesso,
   type AcessoManualStatus,
 } from './access-policy.js';
+export {
+  calcularValorAnual,
+  competenciaDoNovoValor,
+  DESCONTO_PLANO_ANUAL,
+  FORMATO_VALOR,
+  formatarReais,
+  lerValorEmReais,
+  textoCompetencia,
+  type AlterarValorRequest,
+  type Competencia,
+  type PainelValores,
+  type ValorContribuicao,
+} from './valores.js';
