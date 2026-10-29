@@ -177,7 +177,9 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Boleto vencido é calculado.** Não existe status VENCIDO: um boleto EM_ABERTO com `vencimento` no passado está vencido. Evita que um job precise atualizar boletos todo dia.
 
-**Lote mensal** agrupa os boletos MENSAL de uma competência para a revisão e o envio pela sede (RN04). Boletos avulsos e anuais ficam fora do lote até as pendências P10 e P04 serem respondidas.
+**Lote mensal** agrupa os boletos MENSAL de uma competência, gerados e enviados sozinhos no primeiro dia útil, sem revisão (RN04). O status RASCUNHO vinha da revisão, que saiu (P20); se ele continua, é decisão da #44. Boletos avulsos e anuais ficam fora do lote até as pendências P10 e P04 serem respondidas.
+
+**Valor de cada boleto.** Uma alteração de valor vale a partir do boleto do mês seguinte (RN15). O boleto de uma competência usa o `ValorContribuicao` mais recente criado antes do primeiro dia desse mês, no horário de Cuiabá. Por isso, a data de início não precisa de coluna própria.
 
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 
@@ -187,7 +189,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 | Tabela | Regra | O que guarda |
 | --- | --- | --- |
-| `ValorContribuicao` | RN16, RF20 | Cada alteração de valor é um registro novo. O vigente é o mais recente; o anterior é o de antes. |
+| `ValorContribuicao` | RN16, RF20 | Cada alteração de valor é um registro novo, com o mensal digitado pela sede e o anual calculado (P23). O valor atual é o mais recente; o anterior é o de antes. |
 | `Transacao` | RN17, RF30 | Cada evento de um boleto (gerado, editado, emitido, pago, cancelado), com cópia do valor e do nosso número no momento do evento. |
 | `LogAuditoria` | RN26, RF39 | Cada ação de um usuário da sede, com valor anterior e novo. |
 
@@ -221,8 +223,10 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
 | Boleto AVULSO e boleto único dos meses em aberto (RN24, RN30) | P10 (em parte) | O tipo AVULSO existe. O pedido que passa pela sede (boleto dos meses em aberto e segundo avulso do mês) precisa de um registro de pedido, com aprovação ou recusa. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita. Tabelas novas, desenhadas com a #63. |
 | Aceite do termo de adesão (RN23) | P21 | **Fora do modelo** até a #43: data, hora e versão do termo aceito. |
-| Revisão do lote (`LoteMensal` em RASCUNHO) | P20 | Se a revisão sair, o lote é gerado e enviado direto no primeiro dia útil. |
+| Edição do boleto do mês seguinte (RN04, RF11) | — | Quais dados podem ser editados, até quando e como a edição é guardada: decisão do grupo na M3 (#44, #45). |
+| Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |
 | Dois PDFs por convenção, completo e resumido (RN12) | — | `ConvencaoAnexo` precisa de um campo que diga se o PDF é o completo ou o resumido (com a #30). |
+| Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
 | Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, ordem). Os dois grupos (assessoria jurídica e consultoria, RN32) entram como um campo de grupo; a regra de acesso de cada grupo depende da P15. |
 | Matriz e filiais (RN31) | P14 | **Fora do modelo**. Provavelmente, uma ligação da filial com a matriz no `Associado`. |

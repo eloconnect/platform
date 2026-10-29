@@ -1,6 +1,6 @@
 # Elo Connect — Registro da Entrevista com o Cliente
 
-Sindicato patronal de farmácias e drogarias de Mato Grosso. Baseado nas anotações da entrevista, nas respostas complementares do cliente e no questionário de 14/10/2026 (seção 8). Última atualização: 28/10/2026.
+Sindicato patronal de farmácias e drogarias de Mato Grosso. Baseado nas anotações da entrevista, nas respostas complementares do cliente, no questionário de 14/10/2026 (seção 8) e na conversa por vídeo de 28/10/2026 (seção 9). Última atualização: 28/10/2026.
 
 > Este documento é o registro do que foi dito na entrevista. Requisitos formais e regras de negócio estão em [Requisitos](requisitos.md); o backlog está no GitHub Projects da organização.
 
@@ -149,13 +149,13 @@ Menor ênfase:
 
 - **Liberação manual, e-mail da conta e contador** (28/10/2026): respostas 5, 6 e 11 (seção 8).
 
+- **Revisão do lote mensal e aviso de mudança de valor** (28/10/2026): conversa por vídeo (seção 9).
+
 ### Em aberto
 
 - Formato, frequência e forma de recebimento do arquivo da JUCEMAT (o arquivo traz o e-mail).
 
 - O que falta das regras do boleto avulso: vencimento do pedido feito depois do dia 10 e período de acesso de quem paga só um mês (Requisitos, P10).
-
-- Revisão do lote mensal: o cliente vai marcar uma reunião (respostas 16 e 17).
 
 - Texto do termo de adesão, que os advogados do sindicato vão escrever (resposta 19).
 
@@ -201,4 +201,15 @@ O grupo enviou ao sindicato um questionário com 48 perguntas. O sindicato respo
 | 42 | Lista dos associados que já pagam | Não existe; tudo é feito à mão. O grupo pode montar uma planilha que facilite o trabalho da sede; senão, o cadastro começa do zero. |
 | 45 | Os donos leem e-mail? | Nem sempre o dono, mas a parte da gestão normalmente lê. |
 
-Ficaram em branco: plano anual (21), valor atual (22), antecedência do aviso de reajuste (23), condições diferentes em contrato (24), tarifas do Sicredi (27), cancelamento: boleto do mês, acesso ao histórico e volta (29 a 31), aviso de cancelamento para a sede (32), inscrição em convenção (34), lista de benefícios (35), suporte (36), aviso por e-mail de conteúdo novo (37), notícias (38), formato dos documentos da convenção (39), CNAE (41), boleto de quem já paga (43), comunicado obrigatório (44), endereço de envio dos e-mails (46), histórico de pagamentos (47) e conteúdo da página inicial (48).
+Ficaram em branco: plano anual (21), valor atual (22), antecedência do aviso de reajuste (23, respondida depois, na seção 9), condições diferentes em contrato (24), tarifas do Sicredi (27), cancelamento: boleto do mês, acesso ao histórico e volta (29 a 31), aviso de cancelamento para a sede (32), inscrição em convenção (34), lista de benefícios (35), suporte (36), aviso por e-mail de conteúdo novo (37), notícias (38), formato dos documentos da convenção (39), CNAE (41), boleto de quem já paga (43), comunicado obrigatório (44), endereço de envio dos e-mails (46), histórico de pagamentos (47) e conteúdo da página inicial (48).
+
+## 9. Conversa por vídeo de 28/10/2026
+
+Conversa do grupo com o cliente, depois das respostas da seção 8. Ela responde à P20 (revisão do lote mensal) e à pergunta 23 (antecedência do aviso de mudança de valor).
+
+- Os boletos são gerados todo mês automaticamente, sem revisão, mas a sede precisa poder editá-los.
+- A edição, para mudar o valor ou outro dado, vale só para o próximo boleto, o do mês seguinte.
+- Na hora da edição, antes desse boleto, o sistema manda um e-mail a quem vai receber a cobrança diferente, avisando da mudança.
+- No começo, a sede provavelmente vai precisar marcar à mão quem recebe os boletos e preencher o próprio boleto. Por isso, a edição do boleto é essencial para ela.
+
+O que isso mudou nos requisitos está em [Requisitos](requisitos.md) (RN04, RN15, RF10, RF11, RF19 e P20).

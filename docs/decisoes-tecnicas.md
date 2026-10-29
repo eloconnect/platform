@@ -41,7 +41,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Criação de conta pelo próprio associado a partir do CNPJ, com link enviado ao e-mail que já está no cadastro (ver Acesso).
 
-  - **Cobrança mensal via Sicredi**: o sistema gera o lote de boletos (com Pix QR Code) e envia no primeiro dia útil do mês, **só para associados com contribuição ativa**. A revisão do lote por um administrador antes do envio ficou em dúvida: o cliente disse que não precisa e vai conversar sobre isso em reunião (P20).
+  - **Cobrança mensal via Sicredi**: o sistema gera o lote de boletos (com Pix QR Code) e envia no primeiro dia útil do mês, **só para associados com contribuição ativa**, sem revisão antes do envio. A sede pode editar o boleto de um associado: a edição vale para o boleto do mês seguinte, e o associado recebe na hora um e-mail avisando da mudança (conversa com o cliente de 28/10/2026, P20 respondida).
 
   - Adesão à cobrança recorrente pelo próprio associado no app, ativada automaticamente (sem aprovação da sede), com o boleto do mês gerado na hora e com o valor cheio, depois de aceitar um termo de adesão (texto dos advogados do sindicato, P21); o associado também pode pagar apenas um mês (boleto avulso, um por mês sem passar pela sede quando está em dia).
 
@@ -55,7 +55,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
   - Bloqueio automático de benefícios/suporte quando o boleto expira sem pagamento (30 dias após o vencimento); desbloqueio automático após o pagamento; controle manual pelo admin, com a liberação manual valendo 7 dias e aparecendo como aviso para o associado.
 
-  - Painel de valores (só admin): valor único para todos, plano anual à vista com 20% de desconto, reajuste a cada 5 anos para todos; toda alteração gera e-mail de aviso, vale para o próximo boleto e fica em histórico.
+  - Painel de valores (só admin): valor único para todos, plano anual à vista com 20% de desconto, reajuste a cada 5 anos para todos. A sede digita o valor mensal, e o anual é calculado (P23). Toda alteração gera na hora um e-mail de aviso, vale a partir do boleto do mês seguinte e fica em histórico.
 
   - Central de convenções coletivas (conteúdo atualizado por funcionário da sede), com dois PDFs por convenção: quem está em dia vê o completo; os demais veem o resumido e não se inscrevem.
 
@@ -208,7 +208,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 ### Com o cliente
 
-Respondidas: P03 e P09 (27/10/2026), P01, P17 e P18 (28/10/2026). Detalhes em [Requisitos](requisitos.md), seção 8.
+Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes em [Requisitos](requisitos.md), seção 8.
 
 - P02: formato, frequência e forma de recebimento do arquivo da JUCEMAT (ele traz o e-mail das farmácias).
 
@@ -234,9 +234,11 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17 e P18 (28/10/2026). Detalhes em [R
 
 - P19: e-mail para os pedidos de cadastro e endereço de envio dos e-mails do sistema.
 
-- P20: a revisão do lote mensal antes do envio fica ou sai (reunião do cliente).
-
 - P21: texto do termo de adesão (advogados do sindicato).
+
+- P23: valor atual da contribuição mensal, e se o plano anual é o valor de 12 meses com 20% de desconto.
+
+- P24: formato dos documentos da convenção, conteúdo que sempre é publicado (como a tabela de reajuste) e tamanho dos PDFs.
 
 ### Com os professores
 
