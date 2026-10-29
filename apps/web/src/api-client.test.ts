@@ -141,6 +141,28 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('consulta e altera o valor da contribuição', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({}))),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await cliente.painelValores();
+    await cliente.alterarValor({ valorMensal: '130.00' });
+    expect(
+      fetchFalso.mock.calls.map(([url, init]) => [
+        url,
+        init?.method,
+        init?.body,
+      ]),
+    ).toEqual([
+      ['/api/valores', 'GET', undefined],
+      ['/api/valores', 'POST', '{"valorMensal":"130.00"}'],
+    ]);
+  });
+
   it('busca o perfil do associado pelo id', async () => {
     const fetchFalso = vi
       .fn<Fetch>()

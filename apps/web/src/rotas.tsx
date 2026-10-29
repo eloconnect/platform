@@ -8,6 +8,7 @@ import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssoc
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
+import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
 import { PaginaEsqueciSenha } from './paginas/publico/PaginaEsqueciSenha';
@@ -80,6 +81,14 @@ export const rotas: RouteObject[] = [
         element: (
           <RotaProtegida perfis={['ADMIN']}>
             <PaginaLogAuditoria />
+          </RotaProtegida>
+        ),
+      },
+      {
+        path: 'valores',
+        element: (
+          <RotaProtegida perfis={['ADMIN']}>
+            <PaginaValores />
           </RotaProtegida>
         ),
       },

@@ -152,12 +152,14 @@ model SolicitacaoCancelamento {
 // ---------------------------------------------------------------------------
 
 /// Histórico imutável de valores (RN01, RN13 a RN16, RF18 a RF20).
-/// O valor vigente é o registro mais recente; o anterior é o registro de antes.
+/// O valor atual é o registro mais recente; o anterior é o registro de antes.
+/// O boleto de um mês usa o registro mais recente criado antes do início desse
+/// mês, no horário de Mato Grosso (RN15).
 model ValorContribuicao {
   id            String   @id @default(uuid(7)) @db.Uuid
   valorMensal   Decimal  @db.Decimal(10, 2)
-  /// Plano anual à vista, com 20% de desconto (RN13). Guardado à parte porque
-  /// a sede edita os dois valores (RF18).
+  /// Plano anual à vista, calculado a partir do mensal (RN13, RF18) e guardado
+  /// junto, para o histórico mostrar o que valia (P23).
   valorAnual    Decimal  @db.Decimal(10, 2)
   alteradoPorId String   @db.Uuid
   criadoEm      DateTime @default(now())
