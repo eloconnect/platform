@@ -23,6 +23,13 @@ describe('CampoTexto', () => {
     expect(campo).toHaveAttribute('aria-invalid', 'true');
     expect(campo).toHaveAccessibleDescription('Só os números CNPJ inválido');
   });
+
+  it('vira caixa de texto de várias linhas com "linhas"', () => {
+    render(<CampoTexto rotulo="Descrição" linhas={4} />);
+    const campo = screen.getByLabelText('Descrição');
+    expect(campo.tagName).toBe('TEXTAREA');
+    expect(campo).toHaveAttribute('rows', '4');
+  });
 });
 
 describe('Botao', () => {

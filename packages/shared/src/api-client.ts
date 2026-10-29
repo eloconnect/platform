@@ -22,6 +22,11 @@ import type {
   MensagemResponse,
   RedefinirSenhaRequest,
 } from './auth.js';
+import type {
+  Beneficio,
+  CriarBeneficioRequest,
+  EditarBeneficioRequest,
+} from './beneficios.js';
 import type { HealthResponse } from './health.js';
 import type { AlterarValorRequest, PainelValores } from './valores.js';
 
@@ -167,6 +172,17 @@ export function createApiClient(
     painelValores: () => requisitar<PainelValores>('GET', '/valores'),
     alterarValor: (dados: AlterarValorRequest) =>
       requisitar<PainelValores>('POST', '/valores', dados),
+    listarBeneficios: () => requisitar<Beneficio[]>('GET', '/beneficios'),
+    criarBeneficio: (dados: CriarBeneficioRequest) =>
+      requisitar<Beneficio>('POST', '/beneficios', dados),
+    editarBeneficio: (id: string, dados: EditarBeneficioRequest) =>
+      requisitar<Beneficio>(
+        'PATCH',
+        `/beneficios/${encodeURIComponent(id)}`,
+        dados,
+      ),
+    removerBeneficio: (id: string) =>
+      requisitar<Beneficio>('DELETE', `/beneficios/${encodeURIComponent(id)}`),
   };
 }
 

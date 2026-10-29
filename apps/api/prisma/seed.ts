@@ -293,16 +293,19 @@ async function main() {
         {
           titulo: 'Benefício de exemplo 1',
           descricao: 'Descrição fictícia.',
+          grupo: 'ASSESSORIA_JURIDICA',
           ordem: 1,
         },
         {
           titulo: 'Benefício de exemplo 2',
           descricao: 'Descrição fictícia.',
+          grupo: 'CONSULTORIA',
           ordem: 2,
         },
         {
           titulo: 'Benefício de exemplo 3',
           descricao: 'Descrição fictícia.',
+          grupo: 'CONSULTORIA',
           ordem: 3,
         },
       ],

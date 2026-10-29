@@ -67,6 +67,8 @@ export class ConsultaAuditoriaService {
           id: true,
           ocorridoEm: true,
           acao: true,
+          entidade: true,
+          entidadeId: true,
           valorAnterior: true,
           valorNovo: true,
           usuario: { select: { id: true, nome: true } },
@@ -75,17 +77,51 @@ export class ConsultaAuditoriaService {
       }),
     ]);
 
+    const nomes = await this.nomesDosRegistros(linhas);
     return {
-      itens: linhas.map((linha): ItemLogAuditoria => ({
-        ...linha,
-        ocorridoEm: linha.ocorridoEm.toISOString(),
-        valorAnterior: campos(linha.valorAnterior),
-        valorNovo: campos(linha.valorNovo),
-      })),
+      itens: linhas.map(
+        ({ entidade, entidadeId, ...linha }): ItemLogAuditoria => ({
+          ...linha,
+          ocorridoEm: linha.ocorridoEm.toISOString(),
+          registro: entidadeId
+            ? (nomes.get(`${entidade}:${entidadeId}`) ?? null)
+            : null,
+          valorAnterior: campos(linha.valorAnterior),
+          valorNovo: campos(linha.valorNovo),
+        }),
+      ),
       total,
       pagina,
       porPagina: POR_PAGINA,
     };
+  }
+
+  /**
+   * Tipo e nome do que cada ação afetou, quando não é um associado, para a
+   * tela dizer qual foi (ex.: o título do benefício removido).
+   */
+  private async nomesDosRegistros(
+    linhas: { entidade: string; entidadeId: string | null }[],
+  ): Promise<Map<string, { tipo: string; nome: string }>> {
+    const idsDe = (entidade: string) => [
+      ...new Set(
+        linhas.flatMap((linha) =>
+          linha.entidade === entidade && linha.entidadeId
+            ? [linha.entidadeId]
+            : [],
+        ),
+      ),
+    ];
+    const beneficios = await this.prisma.beneficio.findMany({
+      where: { id: { in: idsDe('Beneficio') } },
+      select: { id: true, titulo: true },
+    });
+    return new Map(
+      beneficios.map((beneficio) => [
+        `Beneficio:${beneficio.id}`,
+        { tipo: 'Benefício', nome: beneficio.titulo },
+      ]),
+    );
   }
 
   /** Quem é ou já foi da sede, para o filtro por usuário. */

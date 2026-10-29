@@ -4,6 +4,7 @@ import { LayoutAssociado } from './layouts/LayoutAssociado';
 import { LayoutPublico } from './layouts/LayoutPublico';
 import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
+import { PaginaBeneficios } from './paginas/admin/PaginaBeneficios';
 import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssociado';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
@@ -68,6 +69,8 @@ export const rotas: RouteObject[] = [
         ),
       },
       { path: 'associados/:id', element: <PaginaPerfilAssociado /> },
+      // Os dois perfis da sede publicam benefícios (RN33).
+      { path: 'beneficios', element: <PaginaBeneficios /> },
       {
         path: 'associados/:id/editar',
         element: (

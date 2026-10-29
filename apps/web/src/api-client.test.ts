@@ -141,6 +141,33 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('lista, cadastra, edita e remove benefícios', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({}))),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+    const dados = {
+      titulo: 'Benefício',
+      descricao: 'Descrição.',
+      grupo: 'CONSULTORIA',
+    } as const;
+
+    await cliente.listarBeneficios();
+    await cliente.criarBeneficio(dados);
+    await cliente.editarBeneficio('id-01', { titulo: 'Outro' });
+    await cliente.removerBeneficio('id-01');
+    expect(
+      fetchFalso.mock.calls.map(([url, init]) => [url, init?.method]),
+    ).toEqual([
+      ['/api/beneficios', 'GET'],
+      ['/api/beneficios', 'POST'],
+      ['/api/beneficios/id-01', 'PATCH'],
+      ['/api/beneficios/id-01', 'DELETE'],
+    ]);
+  });
+
   it('consulta e altera o valor da contribuição', async () => {
     const fetchFalso = vi
       .fn<Fetch>()

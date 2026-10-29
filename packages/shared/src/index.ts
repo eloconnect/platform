@@ -41,3 +41,12 @@ export {
   type PainelValores,
   type ValorContribuicao,
 } from './valores.js';
+export {
+  ehGrupoBeneficio,
+  GRUPOS_BENEFICIO,
+  TEXTO_GRUPO_BENEFICIO,
+  type Beneficio,
+  type CriarBeneficioRequest,
+  type EditarBeneficioRequest,
+  type GrupoBeneficio,
+} from './beneficios.js';

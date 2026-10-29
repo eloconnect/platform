@@ -17,9 +17,13 @@ export const ACOES_AUDITORIA = [
   'ACESSO_BLOQUEADO',
   'ACESSO_LIBERADO',
   'ACESSO_AUTOMATICO',
-  // Cobrança (já usadas pelo seed; as telas vêm na M2 e na M3)
+  // Cobrança (o lote mensal vem na M3)
   'VALOR_ALTERADO',
   'LOTE_ENVIADO',
+  // Benefícios (RF24)
+  'BENEFICIO_CRIADO',
+  'BENEFICIO_EDITADO',
+  'BENEFICIO_REMOVIDO',
 ] as const;
 
 export type AcaoAuditoria = (typeof ACOES_AUDITORIA)[number];
@@ -38,6 +42,9 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   ACESSO_AUTOMATICO: 'Acesso voltou a seguir o pagamento',
   VALOR_ALTERADO: 'Valor da contribuição alterado',
   LOTE_ENVIADO: 'Lote mensal enviado',
+  BENEFICIO_CRIADO: 'Benefício cadastrado',
+  BENEFICIO_EDITADO: 'Benefício editado',
+  BENEFICIO_REMOVIDO: 'Benefício removido',
 };
 
 export function ehAcaoAuditoria(valor: string): valor is AcaoAuditoria {
@@ -63,6 +70,11 @@ export interface ItemLogAuditoria {
   usuario: UsuarioSede;
   /** Nulo quando a ação não envolve um associado (ex.: valor alterado). */
   associado: { id: string; cnpj: string; razaoSocial: string } | null;
+  /**
+   * O que a ação afetou, quando não é um associado, para a tela dizer qual
+   * foi (ex.: { tipo: 'Benefício', nome: 'Assessoria trabalhista' }).
+   */
+  registro: { tipo: string; nome: string } | null;
   /** Só os campos que mudaram, com o valor de antes e o de depois. */
   valorAnterior: Record<string, ValorCampoLog> | null;
   valorNovo: Record<string, ValorCampoLog> | null;

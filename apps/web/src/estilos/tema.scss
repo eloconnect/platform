@@ -90,3 +90,8 @@ main {
     text-align: center;
   }
 }
+
+/* Texto escrito pela sede, com as quebras de linha que ela digitou. */
+.texto-com-quebras {
+  white-space: pre-line;
+}

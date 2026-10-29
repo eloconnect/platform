@@ -14,6 +14,8 @@ type Props = Omit<
   erro?: string;
   /** Mostra "(obrigatório)" no rótulo e marca o campo como obrigatório. */
   obrigatorio?: boolean;
+  /** Com um número, o campo vira uma caixa de texto com essa altura em linhas. */
+  linhas?: number;
   id?: string;
 };
 
@@ -26,6 +28,7 @@ export function CampoTexto({
   ajuda,
   erro,
   obrigatorio = false,
+  linhas,
   id,
   ...props
 }: Props) {
@@ -45,6 +48,7 @@ export function CampoTexto({
       </Form.Label>
       <Form.Control
         size="lg"
+        {...(linhas ? { as: 'textarea', rows: linhas } : {})}
         required={obrigatorio}
         isInvalid={Boolean(erro)}
         aria-invalid={erro ? true : undefined}

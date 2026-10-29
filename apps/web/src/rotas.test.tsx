@@ -10,6 +10,7 @@ import { lerSessao, salvarSessao } from './sessao';
 vi.mock('./api', () => ({
   api: {
     getHealth: vi.fn<ApiClient['getHealth']>(),
+    listarBeneficios: vi.fn<ApiClient['listarBeneficios']>(),
     listarAssociados: vi.fn<ApiClient['listarAssociados']>(),
     listarLogAuditoria: vi.fn<ApiClient['listarLogAuditoria']>(),
     listarUsuariosSede: vi.fn<ApiClient['listarUsuariosSede']>(),
@@ -29,6 +30,7 @@ function abrir(caminho: string) {
 describe('Rotas', () => {
   beforeEach(() => {
     vi.mocked(api.getHealth).mockReset();
+    vi.mocked(api.listarBeneficios).mockResolvedValue([]);
   });
   it('abre a página de criar conta', () => {
     abrir('/cadastro');
@@ -104,6 +106,7 @@ function entrarComo(perfil: Perfil) {
 describe('Áreas logadas', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    vi.mocked(api.listarBeneficios).mockResolvedValue([]);
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Farmácia Teste',
       situacao: 'Adimplente',
@@ -135,6 +138,8 @@ describe('Áreas logadas', () => {
     ['/admin/associados/novo', 'ADMIN', 'Cadastrar associado'],
     ['/admin/auditoria', 'ADMIN', 'Histórico de ações'],
     ['/admin/valores', 'ADMIN', 'Valor da contribuição'],
+    ['/admin/beneficios', 'ADMIN', 'Benefícios'],
+    ['/admin/beneficios', 'ADMIN_BASICO', 'Benefícios'],
     ['/admin', 'ADMIN_BASICO', 'Painel da sede'],
     ['/admin/associados', 'ADMIN_BASICO', 'Associados'],
     ['/associado', 'ASSOCIADO', 'Área do associado'],
@@ -173,6 +178,18 @@ describe('Áreas logadas', () => {
       expect(
         screen.getByRole('heading', { level: 1, name: titulo }),
       ).toBeInTheDocument();
+    },
+  );
+
+  it.each(['ADMIN', 'ADMIN_BASICO'] as const)(
+    'o perfil %s vê os benefícios no menu (RN33)',
+    (perfil) => {
+      entrarComo(perfil);
+      abrir('/admin');
+      expect(screen.getByRole('link', { name: 'Benefícios' })).toHaveAttribute(
+        'href',
+        '/admin/beneficios',
+      );
     },
   );
 
