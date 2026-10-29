@@ -6,6 +6,7 @@ import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
 import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssociado';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
+import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
@@ -71,6 +72,14 @@ export const rotas: RouteObject[] = [
         element: (
           <RotaProtegida perfis={['ADMIN']}>
             <PaginaFormularioAssociado />
+          </RotaProtegida>
+        ),
+      },
+      {
+        path: 'auditoria',
+        element: (
+          <RotaProtegida perfis={['ADMIN']}>
+            <PaginaLogAuditoria />
           </RotaProtegida>
         ),
       },

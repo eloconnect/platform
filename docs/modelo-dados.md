@@ -212,7 +212,7 @@ await this.prisma.$transaction(async (tx) => {
 });
 ```
 
-Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/auditoria.ts`), que cada funcionalidade nova completa. O `valorAnterior` e o `valorNovo` guardam só os campos que mudaram, e as datas viram texto ISO.
+Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/auditoria.ts`), que cada funcionalidade nova completa, junto com o texto da ação em `TEXTO_ACAO_AUDITORIA`. O `valorAnterior` e o `valorNovo` guardam só os campos que mudaram, e as datas viram texto ISO. Um campo novo no log ganha o nome que aparece na tela em `NOMES_CAMPOS` (`apps/web/src/paginas/admin/PaginaLogAuditoria.tsx`), onde a sede consulta o log (RF40).
 
 ## O que depende de pendência
 

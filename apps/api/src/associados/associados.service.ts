@@ -12,7 +12,6 @@ import {
 import {
   acessoManualEmVigor,
   DIAS_LIBERACAO_MANUAL,
-  normalizarCnpj,
   textoSituacao,
   type AcaoAuditoria,
   type MinhaConta,
@@ -26,6 +25,7 @@ import type {
   DefinirAcessoDto,
   EditarAssociadoDto,
 } from './dto/associado.dto.js';
+import { buscaAssociado } from './busca-associado.js';
 import type { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
 /** Campos que a API devolve para a sede. */
@@ -97,7 +97,6 @@ export class AssociadosService {
     pagina = 1,
   }: FiltrosAssociadosDto) {
     const texto = busca?.trim();
-    const cnpj = texto ? normalizarCnpj(texto) : '';
     const where: Prisma.AssociadoWhereInput = {
       ...(incluirInativos ? {} : { inativadoEm: null }),
       // AND, para o filtro de status não apagar o de "Recebe boleto mensal".
@@ -105,15 +104,7 @@ export class AssociadosService {
         contribuicaoAtiva === undefined ? {} : { contribuicaoAtiva },
         status ? FILTRO_STATUS[status] : {},
       ],
-      ...(texto
-        ? {
-            OR: [
-              { razaoSocial: { contains: texto, mode: 'insensitive' } },
-              { nomeFantasia: { contains: texto, mode: 'insensitive' } },
-              ...(cnpj ? [{ cnpj: { contains: cnpj } }] : []),
-            ],
-          }
-        : {}),
+      ...(texto ? buscaAssociado(texto) : {}),
     };
 
     const [total, linhas] = await this.prisma.$transaction([

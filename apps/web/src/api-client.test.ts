@@ -117,6 +117,30 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('consulta o log de auditoria só com os filtros informados', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({}))),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await cliente.listarLogAuditoria();
+    await cliente.listarLogAuditoria({
+      acao: 'ACESSO_BLOQUEADO',
+      associado: '11.222.333/0001-81',
+      de: '2026-10-01',
+      ate: '2026-10-28',
+      pagina: 2,
+    });
+    await cliente.listarUsuariosSede();
+    expect(fetchFalso.mock.calls.map(([url]) => url)).toEqual([
+      '/api/auditoria',
+      '/api/auditoria?acao=ACESSO_BLOQUEADO&associado=11.222.333%2F0001-81&de=2026-10-01&ate=2026-10-28&pagina=2',
+      '/api/auditoria/usuarios',
+    ]);
+  });
+
   it('busca o perfil do associado pelo id', async () => {
     const fetchFalso = vi
       .fn<Fetch>()

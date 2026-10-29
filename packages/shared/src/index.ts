@@ -1,6 +1,17 @@
 export type { HealthResponse } from './health.js';
 export type * from './auth.js';
-export { ACOES_AUDITORIA, type AcaoAuditoria } from './auditoria.js';
+export {
+  ACOES_AUDITORIA,
+  ehAcaoAuditoria,
+  TEXTO_ACAO_AUDITORIA,
+  textoAcaoAuditoria,
+  type AcaoAuditoria,
+  type FiltrosLogAuditoria,
+  type ItemLogAuditoria,
+  type ListaLogAuditoria,
+  type UsuarioSede,
+  type ValorCampoLog,
+} from './auditoria.js';
 export { cnpjValido, formatarCnpj, normalizarCnpj } from './cnpj.js';
 export type * from './associados.js';
 export { textoSituacao, type TextoSituacao } from './situacao.js';
