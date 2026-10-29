@@ -1,6 +1,6 @@
 # Elo Connect — Registro da Entrevista com o Cliente
 
-Sindicato patronal de farmácias e drogarias de Mato Grosso. Baseado nas anotações da entrevista, nas respostas complementares do cliente, no questionário de 14/10/2026 (seção 8) e na conversa por vídeo de 28/10/2026 (seção 9). Última atualização: 28/10/2026.
+Sindicato patronal de farmácias e drogarias de Mato Grosso. Baseado nas anotações da entrevista, nas respostas complementares do cliente, no questionário de 14/10/2026 (seção 8), na conversa por vídeo de 28/10/2026 (seção 9) e no pedido de imagens nas notícias, registrado em 29/10/2026 (seção 10). Última atualização: 29/10/2026.
 
 > Este documento é o registro do que foi dito na entrevista. Requisitos formais e regras de negócio estão em [Requisitos](requisitos.md); o backlog está no GitHub Projects da organização.
 
@@ -213,3 +213,9 @@ Conversa do grupo com o cliente, depois das respostas da seção 8. Ela responde
 - No começo, a sede provavelmente vai precisar marcar à mão quem recebe os boletos e preencher o próprio boleto. Por isso, a edição do boleto é essencial para ela.
 
 O que isso mudou nos requisitos está em [Requisitos](requisitos.md) (RN04, RN15, RF10, RF11, RF19 e P20).
+
+## 10. Pedido do cliente registrado em 29/10/2026
+
+- As notícias também precisam aceitar imagens. As imagens são opcionais: a sede pode publicar a notícia com ou sem elas.
+
+O que isso mudou nos requisitos está em [Requisitos](requisitos.md) (RF41).
