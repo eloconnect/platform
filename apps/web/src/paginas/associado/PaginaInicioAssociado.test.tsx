@@ -18,6 +18,8 @@ describe('PaginaInicioAssociado', () => {
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Drogaria Exemplo',
       situacao: 'Sem contribuição ativa',
+      situacaoAcesso: 'ADIMPLENTE',
+      contribuicaoAtiva: false,
       acessoLiberadoAte: null,
     });
     render(<PaginaInicioAssociado />);
@@ -35,6 +37,8 @@ describe('PaginaInicioAssociado', () => {
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Drogaria Exemplo',
       situacao: 'Inadimplente',
+      situacaoAcesso: 'INADIMPLENTE',
+      contribuicaoAtiva: false,
       acessoLiberadoAte: '2026-11-04T12:00:00.000Z',
     });
     render(<PaginaInicioAssociado />);

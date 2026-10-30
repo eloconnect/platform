@@ -7,7 +7,7 @@
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../../prisma/prisma.service.js';
-import { REQUIRE_FINANCIAL_ACCESS_KEY } from '../decorators/require-access.decorator.js';
+import { REQUIRE_FINANCIAL_ACCESS_KEY } from '../decorators/require-access.constants.js';
 import {
   acessoManualEmVigor,
   podeAcessarRecursoRestrito,

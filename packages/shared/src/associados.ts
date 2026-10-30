@@ -128,6 +128,9 @@ export interface ListaAssociados {
 export interface MinhaConta {
   nome: string;
   situacao: TextoSituacao;
+  situacaoAcesso: SituacaoAcesso;
+  /** Se o associado recebe boleto mensal. */
+  contribuicaoAtiva: boolean;
   /** Data de fim da liberação manual em vigor; nulo sem liberação (RN11). */
   acessoLiberadoAte: string | null;
 }

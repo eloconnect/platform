@@ -21,6 +21,7 @@ import { PaginaRedefinirSenha } from './paginas/publico/PaginaRedefinirSenha';
 import { PaginaStatus } from './paginas/publico/PaginaStatus';
 import { PaginaCadastro } from './paginas/publico/PaginaCadastro';
 import { PaginaConvencoes } from './paginas/admin/PaginaConvencoes';
+import { PaginaConvencoesAssociado } from './paginas/associado/PaginaConvencoesAssociado';
 
 /**
  * Rotas do app, em três áreas: pública, do associado e da sede.
@@ -55,6 +56,7 @@ export const rotas: RouteObject[] = [
       { index: true, element: <PaginaInicioAssociado /> },
       // Em dia ou não, todo associado logado vê as notícias (RN28).
       { path: 'noticias', element: <PaginaNoticiasAssociado /> },
+      { path: 'convencoes', element: <PaginaConvencoesAssociado /> },
     ],
   },
   {

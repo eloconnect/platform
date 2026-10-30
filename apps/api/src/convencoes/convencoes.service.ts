@@ -6,10 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Convencao, TipoAnexoConvencao } from '@eloconnect/shared';
-import {
-  acessoManualEmVigor,
-  podeAcessarRecursoRestrito,
-} from '@eloconnect/shared';
+
 import {
   AuditoriaService,
   diferencas,
@@ -89,6 +86,7 @@ export class ConvencoesService {
         perfil: true,
         associado: {
           select: {
+            contribuicaoAtiva: true,
             inativadoEm: true,
           },
         },
@@ -141,6 +139,7 @@ export class ConvencoesService {
         perfil: true,
         associado: {
           select: {
+            contribuicaoAtiva: true,
             situacao: true,
             acessoManual: true,
             acessoManualAte: true,
@@ -164,15 +163,9 @@ export class ConvencoesService {
       throw new ForbiddenException('O acesso deste associado está inativado.');
     }
 
-    const acessoManual = acessoManualEmVigor(
-      usuario.associado.acessoManual,
-      usuario.associado.acessoManualAte,
-    );
-
-    const podeAcessarIntegral = podeAcessarRecursoRestrito(
-      usuario.associado.situacao,
-      acessoManual,
-    );
+    const podeAcessarIntegral =
+      usuario.associado.situacao === 'ADIMPLENTE' &&
+      usuario.associado.contribuicaoAtiva;
 
     const tipoEfetivo: TipoAnexoConvencao =
       tipoSolicitado === 'INTEGRAL' && !podeAcessarIntegral

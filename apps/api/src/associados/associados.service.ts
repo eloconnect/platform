@@ -220,13 +220,13 @@ export class AssociadosService {
         if (!antes) {
           throw new NotFoundException('Associado não encontrado.');
         }
-        const trocaDeEmail = await this.trocarEmailDaConta(
+        const emailAtualizado = await this.trocarEmailDaConta(
           tx,
           usuarioId,
           id,
           dados.email,
         );
-        const associado = await tx.associado.update({
+        const associadoAtualizado = await tx.associado.update({
           where: { id },
           data: dados,
           select: CAMPOS,
@@ -257,7 +257,10 @@ export class AssociadosService {
             ...mudancaContribuicao,
           });
         }
-        return { associado, trocaDeEmail };
+        return {
+          associado: associadoAtualizado,
+          trocaDeEmail: emailAtualizado,
+        };
       }),
     );
     if (trocaDeEmail) {
@@ -447,6 +450,8 @@ export class AssociadosService {
     return {
       nome: associado.nomeFantasia ?? associado.razaoSocial,
       situacao: textoSituacao(associado),
+      contribuicaoAtiva: associado.contribuicaoAtiva,
+      situacaoAcesso: associado.situacao,
       acessoLiberadoAte: liberado
         ? (associado.acessoManualAte?.toISOString() ?? null)
         : null,

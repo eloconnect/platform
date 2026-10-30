@@ -32,6 +32,7 @@ describe('ConvencoesService', () => {
     perfil: 'ASSOCIADO',
     associado: {
       situacao: 'ADIMPLENTE',
+      contribuicaoAtiva: true,
       acessoManual: null,
       acessoManualAte: null,
       inativadoEm: null,
@@ -124,7 +125,7 @@ describe('ConvencoesService', () => {
   });
 
   describe('obterAnexoAssociado', () => {
-    it('permite PDF integral para associado adimplente', async () => {
+    it('permite PDF integral para associado adimplente com contribuição ativa', async () => {
       prisma.usuario.findUnique.mockResolvedValue(usuarioAdimplente as any);
       prisma.convencao.findFirst.mockResolvedValue(convencaoPublicada as any);
 
@@ -204,18 +205,24 @@ describe('ConvencoesService', () => {
       expect(resultado.nomeArquivo).toBe('convencao-resumida.pdf');
     });
 
-    it('permite PDF integral com liberação manual vigente', async () => {
+    it('entrega PDF resumido para adimplente sem contribuição ativa', async () => {
       prisma.usuario.findUnique.mockResolvedValue({
         ...usuarioAdimplente,
         associado: {
           ...usuarioAdimplente.associado,
-          situacao: 'INADIMPLENTE',
-          acessoManual: 'LIBERADO',
-          acessoManualAte: new Date(Date.now() + 60_000),
+          contribuicaoAtiva: false,
         },
       } as any);
 
-      prisma.convencao.findFirst.mockResolvedValue(convencaoPublicada as any);
+      prisma.convencao.findFirst.mockResolvedValue({
+        id: 'convencao-1',
+        anexos: [
+          {
+            nomeArquivo: 'convencao-resumida.pdf',
+            arquivoUrl: 'convencoes/convencao-1/resumida.pdf',
+          },
+        ],
+      } as any);
 
       armazenamento.obter.mockResolvedValue({
         stream: {} as ReadableStream<Uint8Array>,
@@ -232,13 +239,58 @@ describe('ConvencoesService', () => {
         expect.objectContaining({
           select: expect.objectContaining({
             anexos: expect.objectContaining({
-              where: { tipo: 'INTEGRAL' },
+              where: { tipo: 'RESUMIDA' },
             }),
           }),
         }),
       );
 
-      expect(resultado.nomeArquivo).toBe('convencao-integral.pdf');
+      expect(resultado.nomeArquivo).toBe('convencao-resumida.pdf');
+    });
+
+    it('entrega PDF resumido mesmo com liberação manual vigente para inadimplente', async () => {
+      prisma.usuario.findUnique.mockResolvedValue({
+        ...usuarioAdimplente,
+        associado: {
+          ...usuarioAdimplente.associado,
+          situacao: 'INADIMPLENTE',
+          acessoManual: 'LIBERADO',
+          acessoManualAte: new Date(Date.now() + 60_000),
+        },
+      } as any);
+
+      prisma.convencao.findFirst.mockResolvedValue({
+        id: 'convencao-1',
+        anexos: [
+          {
+            nomeArquivo: 'convencao-resumida.pdf',
+            arquivoUrl: 'convencoes/convencao-1/resumida.pdf',
+          },
+        ],
+      } as any);
+
+      armazenamento.obter.mockResolvedValue({
+        stream: {} as ReadableStream<Uint8Array>,
+        contentType: 'application/pdf',
+      } as any);
+
+      const resultado = await service.obterAnexoAssociado(
+        'usuario-1',
+        'convencao-1',
+        'INTEGRAL',
+      );
+
+      expect(prisma.convencao.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            anexos: expect.objectContaining({
+              where: { tipo: 'RESUMIDA' },
+            }),
+          }),
+        }),
+      );
+
+      expect(resultado.nomeArquivo).toBe('convencao-resumida.pdf');
     });
 
     it('bloqueia associado inativado', async () => {

@@ -321,6 +321,13 @@ export function createApiClient(
         'POST',
         `/convencoes/${encodeURIComponent(id)}/publicar`,
       ),
+    listarConvencoesAssociado: () =>
+      requisitar<Convencao[]>('GET', '/associado/convencoes'),
+
+    baixarAnexoConvencaoAssociado: (id: string, tipo: TipoAnexoConvencao) =>
+      requisitarArquivo(
+        `/associado/convencoes/${encodeURIComponent(id)}/anexos/${tipo}`,
+      ),
   };
 }
 

@@ -120,9 +120,10 @@ describe('Áreas logadas', () => {
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Farmácia Teste',
       situacao: 'Adimplente',
+      situacaoAcesso: 'ADIMPLENTE',
+      contribuicaoAtiva: true,
       acessoLiberadoAte: null,
     });
-
     vi.mocked(api.listarAssociados).mockResolvedValue({
       itens: [],
       total: 0,
