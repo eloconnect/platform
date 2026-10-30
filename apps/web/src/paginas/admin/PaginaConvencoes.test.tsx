@@ -232,6 +232,37 @@ describe('PaginaConvencoes', () => {
     expect(screen.getByText('Publicada')).toBeInTheDocument();
   });
 
+  it('não deixa publicar sem os dois PDFs', async () => {
+    vi.mocked(api.listarConvencoes).mockResolvedValue([
+      { ...CONVENCAO, anexos: [CONVENCAO.anexos[1]] },
+    ]);
+
+    await abrir();
+
+    expect(screen.getByRole('button', { name: 'Publicar' })).toBeDisabled();
+    expect(
+      screen.getByText(
+        'Para publicar, envie os dois PDFs: o integral e o resumido.',
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('avisa quando não consegue publicar', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(api.publicarConvencao).mockRejectedValue(
+      new TypeError('Failed to fetch'),
+    );
+
+    await abrir();
+
+    await user.click(screen.getByRole('button', { name: 'Publicar' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível publicar a convenção.',
+    );
+  });
+
   it('remove a convenção após confirmação', async () => {
     const user = userEvent.setup();
 

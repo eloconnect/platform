@@ -34,6 +34,7 @@ export function PaginaConvencoes() {
   const [janela, setJanela] = useState<Janela | null>(null);
   const [aviso, setAviso] = useState<string>();
   const [erroAcao, setErroAcao] = useState(false);
+  const [erroPublicacao, setErroPublicacao] = useState(false);
 
   async function carregar() {
     try {
@@ -63,44 +64,27 @@ export function PaginaConvencoes() {
 
   const convencoes = estado.tipo === 'ok' ? estado.convencoes : [];
 
-  async function executarAcao(
-    acao: () => Promise<Convencao>,
-    mensagem: string,
-  ) {
-    setErroAcao(false);
+  async function publicar(convencao: Convencao) {
+    setAviso(undefined);
+    setErroPublicacao(false);
 
     try {
-      const salva = await acao();
+      const publicada = await api.publicarConvencao(convencao.id);
 
-      setEstado((atual) => {
-        if (atual.tipo !== 'ok') {
-          return { tipo: 'ok', convencoes: [salva] };
-        }
-
-        const existe = atual.convencoes.some((item) => item.id === salva.id);
-
-        return {
-          tipo: 'ok',
-          convencoes: existe
-            ? atual.convencoes.map((item) =>
-                item.id === salva.id ? salva : item,
-              )
-            : [...atual.convencoes, salva],
-        };
-      });
-
-      setJanela(null);
-      setAviso(mensagem);
+      setEstado((atual) =>
+        atual.tipo === 'ok'
+          ? {
+              tipo: 'ok',
+              convencoes: atual.convencoes.map((item) =>
+                item.id === publicada.id ? publicada : item,
+              ),
+            }
+          : atual,
+      );
+      setAviso('Convenção publicada.');
     } catch {
-      setErroAcao(true);
+      setErroPublicacao(true);
     }
-  }
-
-  async function publicar(convencao: Convencao) {
-    await executarAcao(
-      () => api.publicarConvencao(convencao.id),
-      'Convenção publicada.',
-    );
   }
 
   async function remover(convencao: Convencao) {
@@ -131,6 +115,12 @@ export function PaginaConvencoes() {
       </p>
 
       {aviso && <AvisoSucesso>{aviso}</AvisoSucesso>}
+
+      {erroPublicacao && (
+        <MensagemErro>
+          Não foi possível publicar a convenção. Tente novamente.
+        </MensagemErro>
+      )}
 
       {estado.tipo === 'carregando' && (
         <p role="status">Carregando as convenções...</p>
@@ -188,6 +178,13 @@ export function PaginaConvencoes() {
                       .join(', ') || 'Nenhum enviado'}
                   </p>
 
+                  {!convencao.publicadaEm && !temOsDoisPdfs(convencao) && (
+                    <p>
+                      Para publicar, envie os dois PDFs: o integral e o
+                      resumido.
+                    </p>
+                  )}
+
                   <div className="d-flex flex-wrap gap-3">
                     <Botao
                       variant="outline-primary"
@@ -210,7 +207,10 @@ export function PaginaConvencoes() {
                     </Botao>
 
                     {!convencao.publicadaEm && (
-                      <Botao onClick={() => void publicar(convencao)}>
+                      <Botao
+                        disabled={!temOsDoisPdfs(convencao)}
+                        onClick={() => void publicar(convencao)}
+                      >
                         Publicar
                       </Botao>
                     )}
@@ -587,6 +587,13 @@ function JanelaAnexos({
         </Modal.Footer>
       </Form>
     </Modal>
+  );
+}
+
+/** A publicação exige os dois PDFs (RN12). */
+function temOsDoisPdfs(convencao: Convencao): boolean {
+  return (['INTEGRAL', 'RESUMIDA'] as const).every((tipo) =>
+    convencao.anexos.some((anexo) => anexo.tipo === tipo),
   );
 }
 

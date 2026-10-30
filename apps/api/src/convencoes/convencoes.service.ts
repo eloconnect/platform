@@ -43,6 +43,8 @@ const CAMPOS = {
 
 const ENTIDADE = 'Convencao';
 
+const TIPOS_ANEXO = ['INTEGRAL', 'RESUMIDA'] as const;
+
 interface ArquivoPdf {
   mimetype: string;
   buffer: Buffer;
@@ -351,7 +353,7 @@ export class ConvencoesService {
 
     const tiposEnviados = new Set(enviados.map((item) => item.tipo));
 
-    for (const tipo of ['INTEGRAL', 'RESUMIDA'] as const) {
+    for (const tipo of TIPOS_ANEXO) {
       const jaExiste = existente.anexos.some((anexo) => anexo.tipo === tipo);
 
       if (!jaExiste && !tiposEnviados.has(tipo)) {
@@ -450,11 +452,25 @@ export class ConvencoesService {
   }
 
   /**
-   * Publica uma convenção ou atualiza sua data de publicação.
+   * Publica a convenção. Só publica com os PDFs integral e resumido (RN12).
    */
   async publicar(usuarioId: string, id: string): Promise<Convencao> {
     return this.prisma.$transaction(async (tx) => {
       const antes = await this.buscar(tx, id);
+
+      if (antes.publicadaEm) {
+        throw new BadRequestException('A convenção já está publicada.');
+      }
+
+      const faltaPdf = TIPOS_ANEXO.some(
+        (tipo) => !antes.anexos.some((anexo) => anexo.tipo === tipo),
+      );
+
+      if (faltaPdf) {
+        throw new BadRequestException(
+          'Envie o PDF integral e o resumido antes de publicar.',
+        );
+      }
 
       const convencao = await tx.convencao.update({
         where: { id },
@@ -467,9 +483,7 @@ export class ConvencoesService {
         acao: 'CONVENCAO_PUBLICADA',
         entidade: ENTIDADE,
         entidadeId: id,
-        valorAnterior: {
-          publicadaEm: antes.publicadaEm?.toISOString() ?? null,
-        },
+        valorAnterior: { publicadaEm: null },
         valorNovo: {
           publicadaEm: convencao.publicadaEm?.toISOString() ?? null,
         },
@@ -556,6 +570,7 @@ export class ConvencoesService {
         ano: true,
         resumo: true,
         publicadaEm: true,
+        anexos: { select: { tipo: true } },
       },
     });
 
