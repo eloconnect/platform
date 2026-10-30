@@ -316,6 +316,17 @@ export function createApiClient(
 
     baixarAnexoConvencao: (id: string, tipo: TipoAnexoConvencao) =>
       requisitarArquivo(`/convencoes/${encodeURIComponent(id)}/anexos/${tipo}`),
+    /** Convenções publicadas, para o associado (RF22). */
+    listarConvencoesAssociado: () =>
+      requisitar<Convencao[]>('GET', '/associado/convencoes'),
+    /**
+     * PDF da convenção para o associado. Pede o integral, e a API devolve o
+     * resumido para quem não está em dia (RN12).
+     */
+    baixarPdfConvencaoAssociado: (id: string) =>
+      requisitarArquivo(
+        `/associado/convencoes/${encodeURIComponent(id)}/anexos/INTEGRAL`,
+      ),
     publicarConvencao: (id: string) =>
       requisitar<Convencao>(
         'POST',

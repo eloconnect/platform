@@ -12,6 +12,7 @@ import { PaginaNoticias } from './paginas/admin/PaginaNoticias';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
+import { PaginaConvencoesAssociado } from './paginas/associado/PaginaConvencoesAssociado';
 import { PaginaNoticiasAssociado } from './paginas/associado/PaginaNoticiasAssociado';
 import { PaginaEntrar } from './paginas/publico/PaginaEntrar';
 import { PaginaEsqueciSenha } from './paginas/publico/PaginaEsqueciSenha';
@@ -55,6 +56,8 @@ export const rotas: RouteObject[] = [
       { index: true, element: <PaginaInicioAssociado /> },
       // Em dia ou não, todo associado logado vê as notícias (RN28).
       { path: 'noticias', element: <PaginaNoticiasAssociado /> },
+      // Em dia ou não, o associado vê as convenções; o PDF muda (RN12).
+      { path: 'convencoes', element: <PaginaConvencoesAssociado /> },
     ],
   },
   {

@@ -9,6 +9,7 @@ export function LayoutAssociado() {
       itensMenu={[
         { para: '/associado', texto: 'Início' },
         { para: '/associado/noticias', texto: 'Notícias' },
+        { para: '/associado/convencoes', texto: 'Convenções' },
         { para: '/', texto: 'Sair', aoClicar: limparSessao },
       ]}
     />
