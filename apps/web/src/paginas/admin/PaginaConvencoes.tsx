@@ -10,6 +10,7 @@ import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import { api } from '../../api';
+import { abrirArquivo } from '../../arquivos';
 import {
   AvisoSucesso,
   Botao,
@@ -17,6 +18,7 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+import { CartaoConvencao } from '../associado/CartaoConvencao';
 
 /** A Vercel aceita no máximo 4,5 MB por requisição (P24). */
 const TAMANHO_MAXIMO_PDF = 4 * 1024 * 1024;
@@ -429,6 +431,7 @@ function JanelaConvencao({
 
           <CampoTexto
             rotulo="Resumo"
+            ajuda="Comece pelo que mudou em relação à convenção anterior."
             name="resumo"
             linhas={4}
             maxLength={2000}
@@ -620,19 +623,14 @@ function JanelaPrevia({
       </Modal.Header>
 
       <Modal.Body>
-        <Card as="article">
-          <Card.Body>
-            <Card.Title as="h3" className="h4">
-              {convencao?.titulo}
-            </Card.Title>
-            <Card.Text className="text-body-secondary">
-              Ano: {convencao?.ano}
-            </Card.Text>
-            <Card.Text className="texto-com-quebras fs-5">
-              {convencao?.resumo}
-            </Card.Text>
-          </Card.Body>
-        </Card>
+        {convencao && (
+          <CartaoConvencao
+            titulo={convencao.titulo}
+            ano={convencao.ano}
+            resumo={convencao.resumo}
+            nivelTitulo="h3"
+          />
+        )}
         <p className="mt-3 mb-0">
           Quem está em dia abre o PDF integral. Os demais abrem o PDF resumido.
         </p>
@@ -645,23 +643,6 @@ function JanelaPrevia({
       </Modal.Footer>
     </Modal>
   );
-}
-
-/**
- * Abre o PDF numa aba nova. Se o navegador bloquear a aba, baixa o arquivo.
- */
-function abrirArquivo(arquivo: Blob, nome: string) {
-  const endereco = URL.createObjectURL(arquivo);
-
-  if (!window.open(endereco, '_blank')) {
-    const link = document.createElement('a');
-    link.href = endereco;
-    link.download = nome;
-    link.click();
-  }
-
-  // Tempo para a aba nova carregar o arquivo antes de liberar a memória.
-  setTimeout(() => URL.revokeObjectURL(endereco), 60_000);
 }
 
 /** A publicação exige os dois PDFs (RN12). */

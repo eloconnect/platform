@@ -212,6 +212,26 @@ describe('createApiClient', () => {
     );
   });
 
+  it('consulta e baixa as convenções do associado', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify([])))
+      .mockResolvedValueOnce(new Response('%PDF-'));
+    const cliente = createApiClient('/api', fetchFalso);
+
+    await cliente.listarConvencoesAssociado();
+    const pdf = await cliente.baixarPdfConvencaoAssociado('id-01');
+
+    expect(await pdf.text()).toBe('%PDF-');
+    expect(
+      fetchFalso.mock.calls.map(([url, init]) => [url, init?.method]),
+    ).toEqual([
+      ['/api/associado/convencoes', 'GET'],
+      // Pede o integral; a API entrega o resumido a quem não está em dia.
+      ['/api/associado/convencoes/id-01/anexos/INTEGRAL', 'GET'],
+    ]);
+  });
+
   it('consulta e altera o valor da contribuição', async () => {
     const fetchFalso = vi
       .fn<Fetch>()
