@@ -20,7 +20,10 @@ import type {
   CriarConvencaoDto,
   EditarConvencaoDto,
 } from './dto/convencao.dto.js';
-import { ArmazenamentoConvencoesService } from './armazenamento-convencoes.service.js';
+import {
+  ArmazenamentoService,
+  nomeOriginal,
+} from '../armazenamento/armazenamento.service.js';
 
 const TAMANHO_MAXIMO_PDF = 4 * 1024 * 1024;
 
@@ -63,7 +66,7 @@ export class ConvencoesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
-    private readonly armazenamento: ArmazenamentoConvencoesService,
+    private readonly armazenamento: ArmazenamentoService,
   ) {}
 
   /**
@@ -456,7 +459,7 @@ export class ConvencoesService {
           valorNovo: Object.fromEntries(
             enviados.map(({ tipo, arquivo }) => [
               tipo === 'INTEGRAL' ? 'pdfIntegral' : 'pdfResumido',
-              nomeOriginal(arquivo.originalname),
+              nomeOriginal(arquivo.originalname, 'arquivo.pdf'),
             ]),
           ),
         });
@@ -566,14 +569,6 @@ export class ConvencoesService {
 
     return convencao;
   }
-}
-
-/** Só o nome do arquivo enviado, sem pastas nem caracteres de controle. */
-function nomeOriginal(nome: string): string {
-  const limpo = (nome.split(/[\\/]/).pop() ?? '')
-    .replace(/\p{Cc}/gu, '')
-    .trim();
-  return limpo ? limpo.slice(-200) : 'arquivo.pdf';
 }
 
 /**

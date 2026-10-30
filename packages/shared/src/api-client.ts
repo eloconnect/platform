@@ -36,6 +36,7 @@ import type {
 import type { HealthResponse } from './health.js';
 import type {
   EditarNoticiaRequest,
+  EnviarImagemNoticiaRequest,
   Noticia,
   PublicarNoticiaRequest,
 } from './noticias.js';
@@ -295,6 +296,28 @@ export function createApiClient(
 
     removerNoticia: (id: string) =>
       requisitar<Noticia>('DELETE', `/noticias/${encodeURIComponent(id)}`),
+
+    enviarImagemNoticia: (
+      id: string,
+      { imagem, descricao }: EnviarImagemNoticiaRequest,
+    ) => {
+      const corpo = new FormData();
+      if (imagem) corpo.append('imagem', imagem);
+      corpo.append('descricao', descricao);
+      return requisitarMultipart<Noticia>(
+        `/noticias/${encodeURIComponent(id)}/imagem`,
+        corpo,
+      );
+    },
+
+    removerImagemNoticia: (id: string) =>
+      requisitar<Noticia>(
+        'DELETE',
+        `/noticias/${encodeURIComponent(id)}/imagem`,
+      ),
+
+    baixarImagemNoticia: (id: string) =>
+      requisitarArquivo(`/noticias/${encodeURIComponent(id)}/imagem`),
 
     listarConvencoes: () => requisitar<Convencao[]>('GET', '/convencoes'),
 

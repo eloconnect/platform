@@ -190,6 +190,35 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('põe, tira e baixa a imagem da notícia', async () => {
+    const fetchFalso = vi
+      .fn<Fetch>()
+      .mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({}))),
+      );
+    const cliente = createApiClient('/api', fetchFalso);
+    const imagem = new File(['png'], 'foto.png', { type: 'image/png' });
+
+    await cliente.enviarImagemNoticia('id-01', { imagem, descricao: 'Foto' });
+    await cliente.enviarImagemNoticia('id-01', { descricao: '' });
+    await cliente.removerImagemNoticia('id-01');
+    await cliente.baixarImagemNoticia('id-01');
+    expect(
+      fetchFalso.mock.calls.map(([url, init]) => [url, init?.method]),
+    ).toEqual([
+      ['/api/noticias/id-01/imagem', 'POST'],
+      ['/api/noticias/id-01/imagem', 'POST'],
+      ['/api/noticias/id-01/imagem', 'DELETE'],
+      ['/api/noticias/id-01/imagem', 'GET'],
+    ]);
+    // Sem o arquivo, vai só a descrição.
+    const [comImagem, soDescricao] = fetchFalso.mock.calls.map(([, init]) =>
+      init?.body instanceof FormData ? Object.fromEntries(init.body) : null,
+    );
+    expect(comImagem).toEqual({ imagem: expect.any(File), descricao: 'Foto' });
+    expect(soDescricao).toEqual({ descricao: '' });
+  });
+
   it('baixa o PDF da convenção para a sede', async () => {
     const fetchFalso = vi.fn<Fetch>().mockResolvedValue(
       new Response('%PDF-', {

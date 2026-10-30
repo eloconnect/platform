@@ -54,6 +54,8 @@ const NOMES_CAMPOS: Record<string, string> = {
   publicadaEm: 'Publicada em',
   pdfIntegral: 'PDF integral',
   pdfResumido: 'PDF resumido',
+  imagem: 'Imagem',
+  descricaoImagem: 'Descrição da imagem',
 };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

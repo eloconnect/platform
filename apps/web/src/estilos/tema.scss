@@ -95,3 +95,9 @@ main {
 .texto-com-quebras {
   white-space: pre-line;
 }
+
+/* Imagem atual da notícia na janela de edição, sem empurrar os campos. */
+.imagem-previa {
+  max-height: 12rem;
+  max-width: 100%;
+}

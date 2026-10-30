@@ -8,29 +8,36 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { del, get, put } from '@vercel/blob';
 
-const TIPO_CONTEUDO_PDF = 'application/pdf';
+/** Tipo de cada extensão: os PDFs das convenções e a imagem das notícias. */
+const TIPO_POR_EXTENSAO: Record<string, string> = {
+  '.pdf': 'application/pdf',
+  '.jpg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+};
 
 /** Prefixo do caminho dos arquivos guardados na pasta local. */
 const LOCAL = 'local:';
 
 /**
- * Guarda os PDFs das convenções. Com o Vercel Blob ligado ao projeto, eles
- * ficam numa área privada, que só a API lê. Fora da Vercel, sem o Blob (em
- * desenvolvimento e nos testes), ficam na pasta `ARQUIVOS_DIR`.
+ * Guarda os PDFs das convenções e a imagem das notícias. Com o Vercel Blob
+ * ligado ao projeto, eles ficam numa área privada, que só a API lê. Fora da
+ * Vercel, sem o Blob (em desenvolvimento e nos testes), ficam na pasta
+ * `ARQUIVOS_DIR`. O tipo do arquivo vem da extensão do nome.
  */
 @Injectable()
-export class ArmazenamentoConvencoesService {
+export class ArmazenamentoService {
   constructor(private readonly config: ConfigService) {}
 
   /**
-   * Armazena um PDF privado e retorna somente seu caminho interno.
+   * Armazena um arquivo privado e retorna somente seu caminho interno.
    * O caminho nunca deve ser enviado ao frontend.
    */
   async salvar(nomeArquivo: string, conteudo: Buffer): Promise<string> {
     if (this.usaBlob()) {
       const arquivo = await put(nomeArquivo, conteudo, {
         access: 'private',
-        contentType: TIPO_CONTEUDO_PDF,
+        contentType: tipoDoArquivo(nomeArquivo),
         addRandomSuffix: true,
       });
 
@@ -47,7 +54,7 @@ export class ArmazenamentoConvencoesService {
   }
 
   /**
-   * Recupera o conteúdo de um PDF privado para a API transmiti-lo
+   * Recupera o conteúdo de um arquivo privado para a API transmiti-lo
    * após verificar as permissões do usuário.
    */
   async obter(
@@ -64,7 +71,7 @@ export class ArmazenamentoConvencoesService {
 
       return {
         stream: createReadStream(arquivo),
-        contentType: TIPO_CONTEUDO_PDF,
+        contentType: tipoDoArquivo(arquivo),
       };
     }
 
@@ -109,7 +116,7 @@ export class ArmazenamentoConvencoesService {
 
     if (!configurado && this.config.get<string>('VERCEL')) {
       throw new ServiceUnavailableException(
-        'O armazenamento de PDFs não está configurado.',
+        'O armazenamento de arquivos não está configurado.',
       );
     }
 
@@ -120,7 +127,7 @@ export class ArmazenamentoConvencoesService {
   private exigirBlob(): void {
     if (!this.usaBlob()) {
       throw new ServiceUnavailableException(
-        'O armazenamento de PDFs não está configurado.',
+        'O armazenamento de arquivos não está configurado.',
       );
     }
   }
@@ -138,4 +145,21 @@ export class ArmazenamentoConvencoesService {
 
     return arquivo;
   }
+}
+
+function tipoDoArquivo(nome: string): string {
+  return (
+    TIPO_POR_EXTENSAO[extname(nome).toLowerCase()] ?? 'application/octet-stream'
+  );
+}
+
+/**
+ * Só o nome do arquivo enviado, sem pastas nem caracteres de controle, para o
+ * log de auditoria. Sem nome, fica o `padrao`.
+ */
+export function nomeOriginal(nome: string, padrao: string): string {
+  const limpo = (nome.split(/[\\/]/).pop() ?? '')
+    .replace(/\p{Cc}/gu, '')
+    .trim();
+  return limpo ? limpo.slice(-200) : padrao;
 }

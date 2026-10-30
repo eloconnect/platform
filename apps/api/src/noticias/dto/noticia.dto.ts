@@ -39,3 +39,15 @@ export class EditarNoticiaDto implements EditarNoticiaRequest {
   @MaxLength(10000)
   conteudo?: string;
 }
+
+/**
+ * Descrição da imagem, para quem usa leitor de tela (RNF02). Vazia tira a
+ * descrição; sem o campo, ela não muda.
+ */
+export class ImagemNoticiaDto {
+  @ValidateIf((_objeto, valor) => valor !== undefined)
+  @SemEspacosNasPontas()
+  @IsString()
+  @MaxLength(150)
+  descricao?: string;
+}

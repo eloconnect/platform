@@ -1,6 +1,6 @@
 # Elo Connect — Modelo de Dados (DER)
 
-Última atualização: 28/10/2026.
+Última atualização: 30/10/2026.
 
 Fonte da verdade do banco: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma). Este documento explica o modelo e as decisões; se os dois divergirem, vale o schema, e este documento deve ser corrigido no mesmo PR.
 
@@ -139,6 +139,9 @@ erDiagram
         uuid id PK
         string titulo
         text conteudo
+        string imagemCaminho "nulo: sem imagem"
+        string imagemNome
+        string imagemDescricao "opcional"
         datetime publicadaEm "nulo: rascunho"
         datetime removidaEm
         uuid autorId FK
@@ -186,6 +189,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 
 **Notícia publicada na hora.** A tela da sede publica a notícia ao salvar, e `publicadaEm` é a data que o feed mostra. Editar não muda essa data. O rascunho (`publicadaEm` nulo) continua no modelo, mas a sede ainda não tem tela para ele.
+
+**Uma imagem por notícia, opcional (RF41).** Fica em colunas da própria `Noticia`, não numa tabela à parte, porque a notícia tem no máximo uma. O arquivo fica no mesmo Vercel Blob privado dos PDFs das convenções (`imagemCaminho` guarda o caminho dele) e só sai pela API, para quem está logado (RN28). `imagemNome` é o nome do arquivo que a sede enviou, para o log de auditoria, e `imagemDescricao` é o texto para leitor de tela (RNF02). A notícia removida guarda a imagem, como guarda o texto.
 
 **Convenção publicada com os dois PDFs.** A sede cria a convenção como rascunho (`publicadaEm` nulo), envia o PDF integral e o resumido e publica. A API só publica com os dois. Cada convenção tem no máximo um `ConvencaoAnexo` de cada `tipo`, e enviar outro troca o anterior. O arquivo fica no Vercel Blob, numa área privada (`arquivoUrl` guarda o caminho dele), e só sai pela API: a sede abre os dois, e o associado em atraso que pede o integral recebe o resumido (RN12).
 
