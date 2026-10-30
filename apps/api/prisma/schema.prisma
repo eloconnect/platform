@@ -383,6 +383,7 @@ model ConvencaoAnexo {
 
   convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Cascade)
 
+  /// Um PDF de cada tipo por convenção.
+  @@unique([convencaoId, tipo])
   @@index([convencaoId])
-  @@index([convencaoId, tipo])
 }

@@ -130,6 +130,7 @@ erDiagram
     ConvencaoAnexo {
         uuid id PK
         uuid convencaoId FK
+        TipoAnexoConvencao tipo "INTEGRAL, RESUMIDA"
         string nomeArquivo
         string arquivoUrl
         int tamanhoBytes
@@ -186,6 +187,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Notícia publicada na hora.** A tela da sede publica a notícia ao salvar, e `publicadaEm` é a data que o feed mostra. Editar não muda essa data. O rascunho (`publicadaEm` nulo) continua no modelo, mas a sede ainda não tem tela para ele.
 
+**Convenção publicada com os dois PDFs.** A sede cria a convenção como rascunho (`publicadaEm` nulo), envia o PDF integral e o resumido e publica. A API só publica com os dois. Cada convenção tem no máximo um `ConvencaoAnexo` de cada `tipo`, e enviar outro troca o anterior. O arquivo fica no Vercel Blob, numa área privada (`arquivoUrl` guarda o caminho dele), e só sai pela API: a sede abre os dois, e o associado em atraso que pede o integral recebe o resumido (RN12).
+
 **Exclusões.** Associado é inativado (`inativadoEm`), não excluído (RF08). Notícia removida recebe `removidaEm` e some do feed, e benefício removido fica com `ativo` falso; nos dois casos, o registro fica para o log de auditoria. As chaves estrangeiras usam `Restrict`: nada que tenha histórico pode ser apagado em cascata. As exceções são tokens (apagados com o usuário) e anexos (apagados com a convenção).
 
 ## Tabelas imutáveis
@@ -228,7 +231,6 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Aceite do termo de adesão (RN23) | P21 | **Fora do modelo** até a #43: data, hora e versão do termo aceito. |
 | Edição do boleto do mês seguinte (RN04, RF11) | — | Quais dados podem ser editados, até quando e como a edição é guardada: decisão do grupo na M3 (#44, #45). |
 | Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |
-| Dois PDFs por convenção, completo e resumido (RN12) | — | `ConvencaoAnexo` precisa de um campo que diga se o PDF é o completo ou o resumido (com a #30). |
 | Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
 | Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, grupo e ordem), cadastrada pela sede. O `grupo` separa assessoria jurídica e consultoria (RN32); a regra de acesso de cada grupo depende da P15. |
@@ -238,7 +240,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Retenção e exclusão de dados (LGPD) | P07 | Inativação em vez de exclusão. Revisar quando houver orientação. |
 | Efeitos da inativação e reativação do associado | P13 | A inativação só preenche `inativadoEm` (o guard já barra benefícios e suporte); a reativação limpa o campo. |
 | Campos do Sicredi (nosso número, linha digitável, Pix) | Estudo #40 | Provisórios. |
-| Onde ficam os PDFs das convenções | Estudo #28 | `arquivoUrl` genérico. |
+| Tamanho dos PDFs das convenções | P24 | Até 4 MB cada, por causa do limite de 4,5 MB por requisição da Vercel. PDFs maiores pedem outro jeito de envio. |
 
 As duas perguntas que surgiram na modelagem foram respondidas em 27/10/2026: a sede não tem base com os dados das farmácias que já pagam (resposta 42), e a sede pode recusar um pedido de cancelamento em até 15 dias (resposta 28), o que confirma o status RECUSADA.
 

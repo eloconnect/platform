@@ -1,4 +1,4 @@
-﻿export type TipoAnexoConvencao = 'INTEGRAL' | 'RESUMIDA';
+export type TipoAnexoConvencao = 'INTEGRAL' | 'RESUMIDA';
 
 export interface AnexoConvencao {
   id: string;

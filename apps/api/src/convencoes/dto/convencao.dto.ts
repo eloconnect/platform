@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   CriarConvencaoRequest,
   EditarConvencaoRequest,
 } from '@eloconnect/shared';

@@ -8,7 +8,6 @@ import {
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
-import type { TipoAnexoConvencao } from '@eloconnect/shared';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
@@ -39,7 +38,7 @@ export class AssociadosConvencoesController {
     const arquivo = await this.convencoes.obterAnexoAssociado(
       usuarioId,
       id,
-      tipo as TipoAnexoConvencao,
+      tipo,
     );
 
     return new StreamableFile(arquivo.stream, {

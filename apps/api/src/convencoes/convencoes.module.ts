@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuditoriaModule } from '../auditoria/auditoria.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { ArmazenamentoConvencoesService } from './armazenamento-convencoes.service.js';
