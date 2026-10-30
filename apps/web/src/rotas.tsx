@@ -20,6 +20,7 @@ import { PaginaNaoEncontrada } from './paginas/publico/PaginaNaoEncontrada';
 import { PaginaRedefinirSenha } from './paginas/publico/PaginaRedefinirSenha';
 import { PaginaStatus } from './paginas/publico/PaginaStatus';
 import { PaginaCadastro } from './paginas/publico/PaginaCadastro';
+import { PaginaConvencoes } from './paginas/admin/PaginaConvencoes';
 
 /**
  * Rotas do app, em três áreas: pública, do associado e da sede.
@@ -77,6 +78,7 @@ export const rotas: RouteObject[] = [
       { path: 'associados/:id', element: <PaginaPerfilAssociado /> },
       // Os dois perfis da sede publicam benefícios e notícias (RN33).
       { path: 'beneficios', element: <PaginaBeneficios /> },
+      { path: 'convencoes', element: <PaginaConvencoes /> },
       { path: 'noticias', element: <PaginaNoticias /> },
       {
         path: 'associados/:id/editar',

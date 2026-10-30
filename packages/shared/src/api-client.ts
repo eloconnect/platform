@@ -27,6 +27,12 @@ import type {
   CriarBeneficioRequest,
   EditarBeneficioRequest,
 } from './beneficios.js';
+import type {
+  Convencao,
+  CriarConvencaoRequest,
+  EditarConvencaoRequest,
+  TipoAnexoConvencao,
+} from './convencoes.js';
 import type { HealthResponse } from './health.js';
 import type {
   EditarNoticiaRequest,
@@ -70,6 +76,7 @@ type Fetch = (input: string, init?: RequestInit) => Promise<Response>;
 export interface OpcoesApiClient {
   /** Token da sessão, enviado em `Authorization: Bearer`. */
   obterToken?: () => string | null;
+
   /**
    * Chamado quando a API recusa o token (401), por exemplo depois que ele
    * vence. Chamadas sem token, como o login com a senha errada, não chamam.
@@ -95,6 +102,7 @@ export function createApiClient(
     corpo?: unknown,
   ): Promise<T> {
     const token = obterToken?.() ?? null;
+
     const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
       method: metodo,
       headers: {
@@ -105,9 +113,11 @@ export function createApiClient(
       body: corpo === undefined ? undefined : JSON.stringify(corpo),
       credentials: 'include',
     });
+
     if (resposta.status === 401 && token) {
       aoNaoAutorizado?.();
     }
+
     if (!resposta.ok) {
       throw new ApiError(
         resposta.status,
@@ -115,90 +125,202 @@ export function createApiClient(
         await campoDoErro(resposta),
       );
     }
-    // O formato da resposta é garantido pelo contrato da API (tipos deste pacote).
+
+    // O formato da resposta é garantido pelo contrato da API.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     return (await resposta.json()) as T;
   }
 
+  /**
+   * Envia arquivos usando multipart/form-data.
+   * O navegador define automaticamente o Content-Type e seu boundary.
+   */
+  async function requisitarMultipart<T>(
+    caminho: string,
+    corpo: FormData,
+  ): Promise<T> {
+    const token = obterToken?.() ?? null;
+
+    const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: corpo,
+      credentials: 'include',
+    });
+
+    if (resposta.status === 401 && token) {
+      aoNaoAutorizado?.();
+    }
+
+    if (!resposta.ok) {
+      throw new ApiError(
+        resposta.status,
+        `A API respondeu ${resposta.status} em POST ${caminho}`,
+        await campoDoErro(resposta),
+      );
+    }
+
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    return (await resposta.json()) as T;
+  }
+
+  /** Baixa um arquivo (ex.: PDF), para abrir ou salvar no navegador. */
+  async function requisitarArquivo(caminho: string): Promise<Blob> {
+    const token = obterToken?.() ?? null;
+
+    const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
+      method: 'GET',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
+    });
+
+    if (resposta.status === 401 && token) {
+      aoNaoAutorizado?.();
+    }
+
+    if (!resposta.ok) {
+      throw new ApiError(
+        resposta.status,
+        `A API respondeu ${resposta.status} em GET ${caminho}`,
+      );
+    }
+
+    return resposta.blob();
+  }
+
   return {
     getHealth: () => requisitar<HealthResponse>('GET', '/health'),
+
     login: (dados: LoginRequest) =>
       requisitar<LoginResponse>('POST', '/auth/login', dados),
+
     solicitarRecuperacaoSenha: (dados: EsqueciSenhaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/esqueci-senha', dados),
+
     redefinirSenha: (dados: RedefinirSenhaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/redefinir-senha', dados),
+
     criarConta: (dados: CriarContaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/criar-conta', dados),
+
     confirmarConta: (dados: ConfirmarContaRequest) =>
       requisitar<MensagemResponse>('POST', '/auth/confirmar-conta', dados),
+
     listarAssociados: (filtros: FiltrosAssociados = {}) =>
       requisitar<ListaAssociados>(
         'GET',
         `/associados${montarQuery({ ...filtros })}`,
       ),
+
     buscarAssociado: (id: string) =>
       requisitar<AssociadoDetalhe>(
         'GET',
         `/associados/${encodeURIComponent(id)}`,
       ),
+
     criarAssociado: (dados: CriarAssociadoRequest) =>
       requisitar<Associado>('POST', '/associados', dados),
+
     editarAssociado: (id: string, dados: EditarAssociadoRequest) =>
       requisitar<Associado>(
         'PATCH',
         `/associados/${encodeURIComponent(id)}`,
         dados,
       ),
+
     inativarAssociado: (id: string) =>
       requisitar<Associado>(
         'POST',
         `/associados/${encodeURIComponent(id)}/inativar`,
       ),
+
     reativarAssociado: (id: string) =>
       requisitar<Associado>(
         'POST',
         `/associados/${encodeURIComponent(id)}/reativar`,
       ),
+
     minhaConta: () => requisitar<MinhaConta>('GET', '/minha-conta'),
+
     definirAcesso: (id: string, dados: DefinirAcessoRequest) =>
       requisitar<Associado>(
         'PUT',
         `/associados/${encodeURIComponent(id)}/acesso`,
         dados,
       ),
+
     listarLogAuditoria: (filtros: FiltrosLogAuditoria = {}) =>
       requisitar<ListaLogAuditoria>(
         'GET',
         `/auditoria${montarQuery({ ...filtros })}`,
       ),
+
     listarUsuariosSede: () =>
       requisitar<UsuarioSede[]>('GET', '/auditoria/usuarios'),
+
     painelValores: () => requisitar<PainelValores>('GET', '/valores'),
+
     alterarValor: (dados: AlterarValorRequest) =>
       requisitar<PainelValores>('POST', '/valores', dados),
+
     listarBeneficios: () => requisitar<Beneficio[]>('GET', '/beneficios'),
+
     criarBeneficio: (dados: CriarBeneficioRequest) =>
       requisitar<Beneficio>('POST', '/beneficios', dados),
+
     editarBeneficio: (id: string, dados: EditarBeneficioRequest) =>
       requisitar<Beneficio>(
         'PATCH',
         `/beneficios/${encodeURIComponent(id)}`,
         dados,
       ),
+
     removerBeneficio: (id: string) =>
       requisitar<Beneficio>('DELETE', `/beneficios/${encodeURIComponent(id)}`),
+
     listarNoticias: () => requisitar<Noticia[]>('GET', '/noticias'),
+
     publicarNoticia: (dados: PublicarNoticiaRequest) =>
       requisitar<Noticia>('POST', '/noticias', dados),
+
     editarNoticia: (id: string, dados: EditarNoticiaRequest) =>
       requisitar<Noticia>(
         'PATCH',
         `/noticias/${encodeURIComponent(id)}`,
         dados,
       ),
+
     removerNoticia: (id: string) =>
       requisitar<Noticia>('DELETE', `/noticias/${encodeURIComponent(id)}`),
+
+    listarConvencoes: () => requisitar<Convencao[]>('GET', '/convencoes'),
+
+    criarConvencao: (dados: CriarConvencaoRequest) =>
+      requisitar<Convencao>('POST', '/convencoes', dados),
+
+    editarConvencao: (id: string, dados: EditarConvencaoRequest) =>
+      requisitar<Convencao>(
+        'PATCH',
+        `/convencoes/${encodeURIComponent(id)}`,
+        dados,
+      ),
+
+    atualizarAnexosConvencao: (id: string, arquivos: FormData) =>
+      requisitarMultipart<Convencao>(
+        `/convencoes/${encodeURIComponent(id)}/anexos`,
+        arquivos,
+      ),
+
+    baixarAnexoConvencao: (id: string, tipo: TipoAnexoConvencao) =>
+      requisitarArquivo(`/convencoes/${encodeURIComponent(id)}/anexos/${tipo}`),
+    publicarConvencao: (id: string) =>
+      requisitar<Convencao>(
+        'POST',
+        `/convencoes/${encodeURIComponent(id)}/publicar`,
+      ),
   };
 }
 
@@ -207,9 +329,13 @@ function montarQuery(
   parametros: Record<string, string | number | boolean | undefined>,
 ): string {
   const query = new URLSearchParams();
+
   for (const [chave, valor] of Object.entries(parametros)) {
-    if (valor !== undefined && valor !== '') query.set(chave, String(valor));
+    if (valor !== undefined && valor !== '') {
+      query.set(chave, String(valor));
+    }
   }
+
   const texto = query.toString();
   return texto ? `?${texto}` : '';
 }
