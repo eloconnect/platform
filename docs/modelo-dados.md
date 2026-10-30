@@ -188,6 +188,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 
+**Histórico de cada boleto (RN17, RF30).** Todo código que cria ou muda um boleto usa o `TransacoesService` (`apps/api/src/cobranca`). Ele grava a linha da `Transacao` na mesma transação do banco da mudança: se uma das duas falhar, nenhuma entra. A linha guarda uma cópia do valor e do nosso número daquele momento, a forma de pagamento (só no `PAGO`) e quem da sede fez a mudança (nulo quando foi o sistema). Linhas gravadas na mesma transação do banco ficam com a mesma data e hora.
+
 **Notícia publicada na hora.** A tela da sede publica a notícia ao salvar, e `publicadaEm` é a data que o feed mostra. Editar não muda essa data. O rascunho (`publicadaEm` nulo) continua no modelo, mas a sede ainda não tem tela para ele.
 
 **Uma imagem por notícia, opcional (RF41).** Fica em colunas da própria `Noticia`, não numa tabela à parte, porque a notícia tem no máximo uma. O arquivo fica no mesmo Vercel Blob privado dos PDFs das convenções (`imagemCaminho` guarda o caminho dele) e só sai pela API, para quem está logado (RN28). `imagemNome` é o nome do arquivo que a sede enviou, para o log de auditoria, e `imagemDescricao` é o texto para leitor de tela (RNF02). A notícia removida guarda a imagem, como guarda o texto.
