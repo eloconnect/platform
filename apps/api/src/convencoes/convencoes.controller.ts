@@ -3,10 +3,13 @@
   Body,
   Controller,
   Get,
+  Header,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  StreamableFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -91,6 +94,25 @@ export class ConvencoesController {
     return this.convencoes.atualizarAnexos(usuarioId, id, {
       ...(integral ? { integral } : {}),
       ...(resumida ? { resumida } : {}),
+    });
+  }
+
+  /** A sede abre os PDFs para conferir, inclusive os do rascunho. */
+  @Get(':id/anexos/:tipo')
+  @Header('Cache-Control', 'private, no-store')
+  async baixarAnexo(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('tipo') tipo: string,
+  ): Promise<StreamableFile> {
+    if (tipo !== 'INTEGRAL' && tipo !== 'RESUMIDA') {
+      throw new NotFoundException('Tipo de PDF não encontrado.');
+    }
+
+    const arquivo = await this.convencoes.obterAnexoSede(id, tipo);
+
+    return new StreamableFile(arquivo.stream, {
+      type: arquivo.contentType,
+      disposition: `inline; filename="${arquivo.nomeArquivo}"`,
     });
   }
 

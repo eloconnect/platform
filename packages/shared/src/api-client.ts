@@ -31,6 +31,7 @@ import type {
   Convencao,
   CriarConvencaoRequest,
   EditarConvencaoRequest,
+  TipoAnexoConvencao,
 } from './convencoes.js';
 import type { HealthResponse } from './health.js';
 import type {
@@ -166,6 +167,30 @@ export function createApiClient(
     return (await resposta.json()) as T;
   }
 
+  /** Baixa um arquivo (ex.: PDF), para abrir ou salvar no navegador. */
+  async function requisitarArquivo(caminho: string): Promise<Blob> {
+    const token = obterToken?.() ?? null;
+
+    const resposta = await fetchImpl(`${baseUrl}${caminho}`, {
+      method: 'GET',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
+    });
+
+    if (resposta.status === 401 && token) {
+      aoNaoAutorizado?.();
+    }
+
+    if (!resposta.ok) {
+      throw new ApiError(
+        resposta.status,
+        `A API respondeu ${resposta.status} em GET ${caminho}`,
+      );
+    }
+
+    return resposta.blob();
+  }
+
   return {
     getHealth: () => requisitar<HealthResponse>('GET', '/health'),
 
@@ -289,6 +314,8 @@ export function createApiClient(
         arquivos,
       ),
 
+    baixarAnexoConvencao: (id: string, tipo: TipoAnexoConvencao) =>
+      requisitarArquivo(`/convencoes/${encodeURIComponent(id)}/anexos/${tipo}`),
     publicarConvencao: (id: string) =>
       requisitar<Convencao>(
         'POST',

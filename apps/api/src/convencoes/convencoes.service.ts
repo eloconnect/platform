@@ -179,15 +179,41 @@ export class ConvencoesService {
         ? 'RESUMIDA'
         : tipoSolicitado;
 
+    return this.abrirAnexo(convencaoId, tipoEfetivo, true);
+  }
+
+  /**
+   * Obtém um PDF para a sede conferir, inclusive de rascunho.
+   */
+  obterAnexoSede(
+    convencaoId: string,
+    tipo: TipoAnexoConvencao,
+  ): Promise<{
+    stream: Readable;
+    contentType: string;
+    nomeArquivo: string;
+  }> {
+    return this.abrirAnexo(convencaoId, tipo, false);
+  }
+
+  private async abrirAnexo(
+    convencaoId: string,
+    tipo: TipoAnexoConvencao,
+    somentePublicada: boolean,
+  ): Promise<{
+    stream: Readable;
+    contentType: string;
+    nomeArquivo: string;
+  }> {
     const convencao = await this.prisma.convencao.findFirst({
       where: {
         id: convencaoId,
-        publicadaEm: { not: null },
+        ...(somentePublicada ? { publicadaEm: { not: null } } : {}),
       },
       select: {
         id: true,
         anexos: {
-          where: { tipo: tipoEfetivo },
+          where: { tipo },
           select: {
             nomeArquivo: true,
             arquivoUrl: true,
@@ -198,7 +224,11 @@ export class ConvencoesService {
     });
 
     if (!convencao) {
-      throw new NotFoundException('Convenção publicada não encontrada.');
+      throw new NotFoundException(
+        somentePublicada
+          ? 'Convenção publicada não encontrada.'
+          : 'Convenção não encontrada.',
+      );
     }
 
     const anexo = convencao.anexos[0];
@@ -221,7 +251,7 @@ export class ConvencoesService {
       stream: arquivo.stream,
       contentType: arquivo.contentType,
       nomeArquivo:
-        tipoEfetivo === 'INTEGRAL'
+        tipo === 'INTEGRAL'
           ? 'convencao-integral.pdf'
           : 'convencao-resumida.pdf',
     };

@@ -2,7 +2,7 @@ import type { ApiClient, Convencao } from '@eloconnect/shared';
 import { ApiError } from '@eloconnect/shared';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../api';
 import { entrarComo } from '../../test/sessao';
 import { PaginaConvencoes } from './PaginaConvencoes';
@@ -14,6 +14,7 @@ vi.mock('../../api', () => ({
     editarConvencao: vi.fn<ApiClient['editarConvencao']>(),
     atualizarAnexosConvencao: vi.fn<ApiClient['atualizarAnexosConvencao']>(),
     publicarConvencao: vi.fn<ApiClient['publicarConvencao']>(),
+    baixarAnexoConvencao: vi.fn<ApiClient['baixarAnexoConvencao']>(),
   },
 }));
 
@@ -57,6 +58,10 @@ describe('PaginaConvencoes', () => {
     vi.mocked(api.publicarConvencao).mockReset();
 
     vi.mocked(api.listarConvencoes).mockResolvedValue([CONVENCAO]);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('mostra a convenção e sua situação', async () => {
@@ -341,6 +346,53 @@ describe('PaginaConvencoes', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível publicar a convenção.',
     );
+  });
+
+  it('mostra como o associado vê a convenção', async () => {
+    const user = userEvent.setup();
+
+    await abrir();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Ver como o associado vê' }),
+    );
+
+    const janela = screen.getByRole('dialog', { name: 'Como o associado vê' });
+    expect(
+      within(janela).getByRole('heading', {
+        level: 3,
+        name: 'Convenção coletiva de teste',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(janela).getByText('Resumo fictício da convenção.'),
+    ).toHaveClass('texto-com-quebras');
+  });
+
+  it('abre o PDF numa aba nova', async () => {
+    const user = userEvent.setup();
+    const arquivo = new Blob(['%PDF-'], { type: 'application/pdf' });
+    vi.mocked(api.baixarAnexoConvencao).mockResolvedValue(arquivo);
+    const criarEndereco = vi.fn<typeof URL.createObjectURL>(() => 'blob:pdf');
+    vi.stubGlobal('URL', {
+      createObjectURL: criarEndereco,
+      revokeObjectURL: vi.fn<typeof URL.revokeObjectURL>(),
+    });
+    const abrirJanela = vi.fn<typeof window.open>(() => window);
+    vi.stubGlobal('open', abrirJanela);
+
+    await abrir();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Abrir PDF resumido' }),
+    );
+
+    expect(api.baixarAnexoConvencao).toHaveBeenCalledWith(
+      'convencao-01',
+      'RESUMIDA',
+    );
+    expect(criarEndereco).toHaveBeenCalledWith(arquivo);
+    expect(abrirJanela).toHaveBeenCalledWith('blob:pdf', '_blank');
   });
 
   it('avisa quando não consegue carregar as convenções', async () => {

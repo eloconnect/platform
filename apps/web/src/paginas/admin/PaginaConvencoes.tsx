@@ -2,6 +2,7 @@ import type {
   Convencao,
   CriarConvencaoRequest,
   EditarConvencaoRequest,
+  TipoAnexoConvencao,
 } from '@eloconnect/shared';
 import { ApiError } from '@eloconnect/shared';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -31,7 +32,8 @@ type Estado =
 type Janela =
   | { tipo: 'cadastro' }
   | { tipo: 'edicao'; convencao: Convencao }
-  | { tipo: 'anexos'; convencao: Convencao };
+  | { tipo: 'anexos'; convencao: Convencao }
+  | { tipo: 'previa'; convencao: Convencao };
 
 export function PaginaConvencoes() {
   useTituloPagina('Convenções coletivas');
@@ -40,6 +42,7 @@ export function PaginaConvencoes() {
   const [janela, setJanela] = useState<Janela | null>(null);
   const [aviso, setAviso] = useState<string>();
   const [erroPublicacao, setErroPublicacao] = useState(false);
+  const [erroPdf, setErroPdf] = useState(false);
 
   async function carregar() {
     try {
@@ -68,6 +71,22 @@ export function PaginaConvencoes() {
   }, []);
 
   const convencoes = estado.tipo === 'ok' ? estado.convencoes : [];
+
+  async function abrirPdf(convencao: Convencao, tipo: TipoAnexoConvencao) {
+    setErroPdf(false);
+
+    try {
+      const arquivo = await api.baixarAnexoConvencao(convencao.id, tipo);
+      abrirArquivo(
+        arquivo,
+        tipo === 'INTEGRAL'
+          ? 'convencao-integral.pdf'
+          : 'convencao-resumida.pdf',
+      );
+    } catch {
+      setErroPdf(true);
+    }
+  }
 
   async function publicar(convencao: Convencao) {
     setAviso(undefined);
@@ -101,6 +120,12 @@ export function PaginaConvencoes() {
       </p>
 
       {aviso && <AvisoSucesso>{aviso}</AvisoSucesso>}
+
+      {erroPdf && (
+        <MensagemErro>
+          Não foi possível abrir o PDF. Tente novamente.
+        </MensagemErro>
+      )}
 
       {erroPublicacao && (
         <MensagemErro>
@@ -163,6 +188,22 @@ export function PaginaConvencoes() {
                       .join(', ') || 'Nenhum enviado'}
                   </p>
 
+                  {convencao.anexos.length > 0 && (
+                    <div className="d-flex flex-wrap gap-3 mb-3">
+                      {convencao.anexos.map((anexo) => (
+                        <Botao
+                          key={anexo.tipo}
+                          variant="outline-secondary"
+                          onClick={() => void abrirPdf(convencao, anexo.tipo)}
+                        >
+                          {anexo.tipo === 'INTEGRAL'
+                            ? 'Abrir PDF integral'
+                            : 'Abrir PDF resumido'}
+                        </Botao>
+                      ))}
+                    </div>
+                  )}
+
                   {!convencao.publicadaEm && !temOsDoisPdfs(convencao) && (
                     <p>
                       Para publicar, envie os dois PDFs: o integral e o
@@ -178,6 +219,13 @@ export function PaginaConvencoes() {
                       }}
                     >
                       Editar
+                    </Botao>
+
+                    <Botao
+                      variant="outline-primary"
+                      onClick={() => setJanela({ tipo: 'previa', convencao })}
+                    >
+                      Ver como o associado vê
                     </Botao>
 
                     <Botao
@@ -230,6 +278,11 @@ export function PaginaConvencoes() {
           setJanela(null);
           setAviso(editando ? 'Convenção alterada.' : 'Convenção cadastrada.');
         }}
+      />
+
+      <JanelaPrevia
+        convencao={janela?.tipo === 'previa' ? janela.convencao : null}
+        aoFechar={() => setJanela(null)}
       />
 
       <JanelaAnexos
@@ -539,6 +592,76 @@ function JanelaAnexos({
       </Form>
     </Modal>
   );
+}
+
+/**
+ * Como o associado vê a convenção: o título, o ano e o resumo em destaque.
+ * Quem está em dia abre o PDF integral; os demais, o resumido (RN12).
+ */
+function JanelaPrevia({
+  convencao,
+  aoFechar,
+}: {
+  convencao: Convencao | null;
+  aoFechar: () => void;
+}) {
+  return (
+    <Modal
+      show={convencao !== null}
+      onHide={aoFechar}
+      centered
+      size="lg"
+      aria-labelledby="titulo-previa-convencao"
+    >
+      <Modal.Header closeButton closeLabel="Fechar">
+        <Modal.Title as="h2" className="h4" id="titulo-previa-convencao">
+          Como o associado vê
+        </Modal.Title>
+      </Modal.Header>
+
+      <Modal.Body>
+        <Card as="article">
+          <Card.Body>
+            <Card.Title as="h3" className="h4">
+              {convencao?.titulo}
+            </Card.Title>
+            <Card.Text className="text-body-secondary">
+              Ano: {convencao?.ano}
+            </Card.Text>
+            <Card.Text className="texto-com-quebras fs-5">
+              {convencao?.resumo}
+            </Card.Text>
+          </Card.Body>
+        </Card>
+        <p className="mt-3 mb-0">
+          Quem está em dia abre o PDF integral. Os demais abrem o PDF resumido.
+        </p>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Botao variant="outline-secondary" onClick={aoFechar}>
+          Fechar
+        </Botao>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+/**
+ * Abre o PDF numa aba nova. Se o navegador bloquear a aba, baixa o arquivo.
+ */
+function abrirArquivo(arquivo: Blob, nome: string) {
+  const endereco = URL.createObjectURL(arquivo);
+
+  if (!window.open(endereco, '_blank')) {
+    const link = document.createElement('a');
+    link.href = endereco;
+    link.download = nome;
+    link.click();
+  }
+
+  // Tempo para a aba nova carregar o arquivo antes de liberar a memória.
+  setTimeout(() => URL.revokeObjectURL(endereco), 60_000);
 }
 
 /** A publicação exige os dois PDFs (RN12). */
