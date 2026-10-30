@@ -494,51 +494,6 @@ export class ConvencoesService {
   }
 
   /**
-   * Remove a convenção do banco e tenta excluir seus PDFs privados.
-   * Os arquivos só são removidos depois que a transação é concluída.
-   */
-  async remover(usuarioId: string, id: string): Promise<void> {
-    const caminhos = await this.prisma.$transaction(async (tx) => {
-      const convencao = await tx.convencao.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          titulo: true,
-          ano: true,
-          anexos: {
-            select: {
-              arquivoUrl: true,
-            },
-          },
-        },
-      });
-
-      if (!convencao) {
-        throw new NotFoundException('Convenção não encontrada.');
-      }
-
-      await this.auditoria.registrar(tx, {
-        usuarioId,
-        acao: 'CONVENCAO_REMOVIDA',
-        entidade: ENTIDADE,
-        entidadeId: id,
-        valorAnterior: {
-          titulo: convencao.titulo,
-          ano: convencao.ano,
-        },
-      });
-
-      await tx.convencao.delete({ where: { id } });
-
-      return convencao.anexos.map((anexo) => anexo.arquivoUrl);
-    });
-
-    await Promise.allSettled(
-      caminhos.map((caminho) => this.armazenamento.excluir(caminho)),
-    );
-  }
-
-  /**
    * Valida o tamanho, o tipo MIME e a assinatura do arquivo PDF.
    */
   private validarPdf(arquivo: ArquivoPdf): void {

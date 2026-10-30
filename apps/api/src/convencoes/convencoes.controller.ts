@@ -2,7 +2,6 @@
   BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -101,13 +100,5 @@ export class ConvencoesController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.convencoes.publicar(usuarioId, id);
-  }
-
-  @Delete(':id')
-  remover(
-    @UsuarioAtual() usuarioId: string,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
-    return this.convencoes.remover(usuarioId, id);
   }
 }

@@ -13,7 +13,6 @@ vi.mock('../../api', () => ({
     editarConvencao: vi.fn<ApiClient['editarConvencao']>(),
     atualizarAnexosConvencao: vi.fn<ApiClient['atualizarAnexosConvencao']>(),
     publicarConvencao: vi.fn<ApiClient['publicarConvencao']>(),
-    removerConvencao: vi.fn<ApiClient['removerConvencao']>(),
   },
 }));
 
@@ -55,7 +54,6 @@ describe('PaginaConvencoes', () => {
     vi.mocked(api.editarConvencao).mockReset();
     vi.mocked(api.atualizarAnexosConvencao).mockReset();
     vi.mocked(api.publicarConvencao).mockReset();
-    vi.mocked(api.removerConvencao).mockReset();
 
     vi.mocked(api.listarConvencoes).mockResolvedValue([CONVENCAO]);
   });
@@ -261,36 +259,6 @@ describe('PaginaConvencoes', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível publicar a convenção.',
     );
-  });
-
-  it('remove a convenção após confirmação', async () => {
-    const user = userEvent.setup();
-
-    vi.mocked(api.removerConvencao).mockResolvedValue(CONVENCAO);
-
-    await abrir();
-
-    await user.click(screen.getByRole('button', { name: 'Remover' }));
-
-    const janela = screen.getByRole('dialog', {
-      name: 'Remover convenção?',
-    });
-
-    await user.click(
-      within(janela).getByRole('button', { name: 'Sim, remover' }),
-    );
-
-    expect(api.removerConvencao).toHaveBeenCalledWith('convencao-01');
-
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'Convenção removida.',
-    );
-
-    expect(
-      screen.queryByRole('heading', {
-        name: 'Convenção coletiva de teste',
-      }),
-    ).not.toBeInTheDocument();
   });
 
   it('avisa quando não consegue carregar as convenções', async () => {

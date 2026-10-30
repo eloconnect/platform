@@ -294,9 +294,6 @@ export function createApiClient(
         'POST',
         `/convencoes/${encodeURIComponent(id)}/publicar`,
       ),
-
-    removerConvencao: (id: string) =>
-      requisitar<Convencao>('DELETE', `/convencoes/${encodeURIComponent(id)}`),
   };
 }
 

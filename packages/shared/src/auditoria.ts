@@ -32,7 +32,6 @@ export const ACOES_AUDITORIA = [
   'CONVENCAO_CRIADA',
   'CONVENCAO_EDITADA',
   'CONVENCAO_PUBLICADA',
-  'CONVENCAO_REMOVIDA',
   'CONVENCAO_ANEXOS_ATUALIZADOS',
 ] as const;
 
@@ -61,7 +60,6 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   CONVENCAO_CRIADA: 'Convenção cadastrada',
   CONVENCAO_EDITADA: 'Convenção editada',
   CONVENCAO_PUBLICADA: 'Convenção publicada',
-  CONVENCAO_REMOVIDA: 'Convenção removida',
   CONVENCAO_ANEXOS_ATUALIZADOS: 'PDFs da convenção atualizados',
 };
 

@@ -24,8 +24,7 @@ type Estado =
 type Janela =
   | { tipo: 'cadastro' }
   | { tipo: 'edicao'; convencao: Convencao }
-  | { tipo: 'anexos'; convencao: Convencao }
-  | { tipo: 'remocao'; convencao: Convencao };
+  | { tipo: 'anexos'; convencao: Convencao };
 
 export function PaginaConvencoes() {
   useTituloPagina('Convenções coletivas');
@@ -84,25 +83,6 @@ export function PaginaConvencoes() {
       setAviso('Convenção publicada.');
     } catch {
       setErroPublicacao(true);
-    }
-  }
-
-  async function remover(convencao: Convencao) {
-    setErroAcao(false);
-
-    try {
-      await api.removerConvencao(convencao.id);
-      setEstado((atual) => ({
-        tipo: 'ok',
-        convencoes:
-          atual.tipo === 'ok'
-            ? atual.convencoes.filter((item) => item.id !== convencao.id)
-            : [],
-      }));
-      setJanela(null);
-      setAviso('Convenção removida.');
-    } catch {
-      setErroAcao(true);
     }
   }
 
@@ -214,16 +194,6 @@ export function PaginaConvencoes() {
                         Publicar
                       </Botao>
                     )}
-
-                    <Botao
-                      variant="outline-danger"
-                      onClick={() => {
-                        setErroAcao(false);
-                        setJanela({ tipo: 'remocao', convencao });
-                      }}
-                    >
-                      Remover
-                    </Botao>
                   </div>
                 </Card.Body>
               </Card>
@@ -284,50 +254,6 @@ export function PaginaConvencoes() {
           setAviso('Documentos enviados.');
         }}
       />
-
-      <Modal
-        show={janela?.tipo === 'remocao'}
-        onHide={() => setJanela(null)}
-        centered
-        aria-labelledby="titulo-remover-convencao"
-      >
-        <Modal.Header closeButton closeLabel="Fechar">
-          <Modal.Title as="h2" className="h4" id="titulo-remover-convencao">
-            Remover convenção?
-          </Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          {erroAcao && (
-            <MensagemErro>
-              Não foi possível remover a convenção. Tente novamente.
-            </MensagemErro>
-          )}
-          <p>
-            Deseja remover a convenção{' '}
-            <strong>
-              {janela?.tipo === 'remocao' ? janela.convencao.titulo : ''}
-            </strong>
-            ?
-          </p>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Botao variant="outline-secondary" onClick={() => setJanela(null)}>
-            Cancelar
-          </Botao>
-          <Botao
-            variant="danger"
-            onClick={() => {
-              if (janela?.tipo === 'remocao') {
-                void remover(janela.convencao);
-              }
-            }}
-          >
-            Sim, remover
-          </Botao>
-        </Modal.Footer>
-      </Modal>
     </>
   );
 }
