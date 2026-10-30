@@ -2,6 +2,7 @@ import type { Noticia } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../../api';
 import { MensagemErro, useTituloPagina } from '../../componentes';
+import { ImagemNoticia } from './ImagemNoticia';
 
 type Estado =
   | { tipo: 'carregando' }
@@ -10,7 +11,8 @@ type Estado =
 
 /**
  * Feed de notícias da sede (RF35), da mais recente para a mais antiga. Todo
- * associado logado vê, em dia ou não (RN28).
+ * associado logado vê, em dia ou não (RN28). A imagem, quando há, vem depois
+ * do texto.
  */
 export function PaginaNoticiasAssociado() {
   useTituloPagina('Notícias');
@@ -50,6 +52,9 @@ export function PaginaNoticiasAssociado() {
               Publicada em {formatarData(noticia.publicadaEm)}
             </p>
             <p className="texto-com-quebras">{noticia.conteudo}</p>
+            {noticia.imagem && (
+              <ImagemNoticia noticiaId={noticia.id} imagem={noticia.imagem} />
+            )}
           </article>
         ))}
     </>

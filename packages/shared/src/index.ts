@@ -50,9 +50,13 @@ export {
   type EditarBeneficioRequest,
   type GrupoBeneficio,
 } from './beneficios.js';
-export type {
-  EditarNoticiaRequest,
-  Noticia,
-  PublicarNoticiaRequest,
+export {
+  TAMANHO_MAXIMO_IMAGEM_NOTICIA,
+  TIPOS_IMAGEM_NOTICIA,
+  type EditarNoticiaRequest,
+  type EnviarImagemNoticiaRequest,
+  type ImagemNoticia,
+  type Noticia,
+  type PublicarNoticiaRequest,
 } from './noticias.js';
 export type * from './convencoes.js';

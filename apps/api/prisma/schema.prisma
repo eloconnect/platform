@@ -329,16 +329,23 @@ model Convencao {
 
 /// Feed de notícias, visível a qualquer associado logado (RN28, RF35, RF41).
 model Noticia {
-  id           String    @id @default(uuid(7)) @db.Uuid
-  titulo       String
-  conteudo     String    @db.Text
+  id              String    @id @default(uuid(7)) @db.Uuid
+  titulo          String
+  conteudo        String    @db.Text
+  /// Imagem opcional (RF41): caminho no armazenamento privado. Nunca vai para
+  /// as telas; a imagem sai pela API, só para quem está logado (RN28).
+  imagemCaminho   String?
+  /// Nome do arquivo que a sede enviou, para o log de auditoria.
+  imagemNome      String?
+  /// Descrição da imagem para quem usa leitor de tela (RNF02). Opcional.
+  imagemDescricao String?
   /// Nulo = rascunho.
-  publicadaEm  DateTime?
+  publicadaEm     DateTime?
   /// Remoção lógica: o registro fica para o log de auditoria.
-  removidaEm   DateTime?
-  autorId      String    @db.Uuid
-  criadoEm     DateTime  @default(now())
-  atualizadoEm DateTime  @updatedAt
+  removidaEm      DateTime?
+  autorId         String    @db.Uuid
+  criadoEm        DateTime  @default(now())
+  atualizadoEm    DateTime  @updatedAt
 
   autor Usuario @relation(fields: [autorId], references: [id], onDelete: Restrict)
 

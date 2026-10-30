@@ -1,8 +1,12 @@
 // Notícias (RF35, RF41). Qualquer associado logado lê o feed, em dia ou não
-// (RN28); visitante não. Os dois perfis da sede publicam, editam e removem
-// (RN33), com registro no log (RN26). Roda no banco de teste
-// (preparar-banco.mjs); os dados ficam lá, então cada teste usa nomes novos.
+// (RN28); visitante não. Os dois perfis da sede publicam, editam e removem,
+// inclusive a imagem (RN33), com registro no log (RN26). Roda no banco de
+// teste (preparar-banco.mjs); os dados ficam lá, então cada teste usa nomes
+// novos. As imagens vão para uma pasta temporária.
 import 'dotenv/config';
+import { existsSync, mkdtempSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { ListaLogAuditoria, Noticia } from '@eloconnect/shared';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -13,6 +17,22 @@ import { AppModule } from '../src/app.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 
 process.env.JWT_SECRET ??= 'segredo-so-para-teste-com-mais-de-32-caracteres';
+// Sem o Vercel Blob: as imagens vão para uma pasta só deste teste.
+delete process.env.BLOB_READ_WRITE_TOKEN;
+delete process.env.BLOB_STORE_ID;
+delete process.env.VERCEL;
+const PASTA = mkdtempSync(join(tmpdir(), 'eloconnect-noticias-'));
+process.env.ARQUIVOS_DIR = PASTA;
+
+// Só o começo de cada formato: a API confere os primeiros bytes.
+const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
+const JPG = Buffer.from('ffd8ffe000104a46494600', 'hex');
+
+/** Arquivos guardados para a notícia. */
+function arquivosDa(id: string): string[] {
+  const pasta = join(PASTA, 'noticias', id);
+  return existsSync(pasta) ? readdirSync(pasta) : [];
+}
 
 describe('Notícias (e2e)', () => {
   let app: INestApplication<App>;
@@ -52,6 +72,25 @@ describe('Notícias (e2e)', () => {
       .expect(201);
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     return resposta.body as Noticia;
+  }
+
+  /** Envio da imagem; sem `arquivo`, só a descrição. */
+  function enviarImagem(
+    token: string,
+    id: string,
+    {
+      arquivo,
+      nome = 'foto.png',
+      descricao,
+    }: { arquivo?: Buffer; nome?: string; descricao?: string },
+  ) {
+    let chamada = http()
+      .post(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${token}`);
+    if (arquivo) chamada = chamada.attach('imagem', arquivo, nome);
+    if (descricao !== undefined)
+      chamada = chamada.field('descricao', descricao);
+    return chamada;
   }
 
   beforeAll(async () => {
@@ -159,6 +198,7 @@ describe('Notícias (e2e)', () => {
       titulo,
       conteudo: 'Primeira linha.\nSegunda linha.',
       publicadaEm: expect.any(String),
+      imagem: null,
     });
 
     const editada = await http()
@@ -250,5 +290,158 @@ describe('Notícias (e2e)', () => {
       .delete(`/noticias/${id}`)
       .set('Authorization', `Bearer ${tokenAdmin}`)
       .expect(404);
+  });
+
+  it('a imagem exige login, e só a sede põe ou tira (401 e 403)', async () => {
+    const { id } = await publicar(tokenAdmin);
+    await enviarImagem(tokenAdmin, id, { arquivo: PNG }).expect(201);
+
+    await http().get(`/noticias/${id}/imagem`).expect(401);
+    await enviarImagem('', id, { arquivo: PNG }).expect(401);
+    await http().delete(`/noticias/${id}/imagem`).expect(401);
+    await enviarImagem(tokenAssociado, id, { arquivo: PNG }).expect(403);
+    await http()
+      .delete(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenAssociado}`)
+      .expect(403);
+  });
+
+  it('o perfil básico põe, troca e tira a imagem, com tudo no log', async () => {
+    const { id } = await publicar(tokenBasico);
+
+    const comImagem = await enviarImagem(tokenBasico, id, {
+      arquivo: PNG,
+      nome: 'assembléia.png',
+      descricao: '  Diretoria na assembleia  ',
+    }).expect(201);
+    expect(comImagem.body).toMatchObject({
+      imagem: { descricao: 'Diretoria na assembleia' },
+    });
+    // O caminho do arquivo não sai da API.
+    expect(JSON.stringify(comImagem.body)).not.toContain('noticias/');
+    const noFeed = (await listar(tokenAssociado)).find((n) => n.id === id);
+    expect(noFeed?.imagem).toEqual({ descricao: 'Diretoria na assembleia' });
+
+    const imagem = await http()
+      .get(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenAssociado}`)
+      .buffer(true)
+      .expect(200);
+    expect(imagem.headers['content-type']).toBe('image/png');
+    expect(imagem.headers['cache-control']).toBe('private, no-store');
+    expect(imagem.headers['x-content-type-options']).toBe('nosniff');
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    expect(Buffer.from(imagem.body as Buffer)).toEqual(PNG);
+
+    // Trocar o arquivo sem mandar a descrição mantém a descrição.
+    const trocada = await enviarImagem(tokenBasico, id, {
+      arquivo: JPG,
+      nome: 'foto.jpg',
+    }).expect(201);
+    expect(trocada.body).toMatchObject({
+      imagem: { descricao: 'Diretoria na assembleia' },
+    });
+    await http()
+      .get(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .expect('Content-Type', 'image/jpeg')
+      .expect(200);
+    // O arquivo anterior sai do armazenamento.
+    expect(arquivosDa(id)).toEqual([expect.stringMatching(/\.jpg$/)]);
+
+    // Sem arquivo, só a descrição muda; vazia, ela sai.
+    const semDescricao = await enviarImagem(tokenBasico, id, {
+      descricao: ' ',
+    }).expect(201);
+    expect(semDescricao.body).toMatchObject({ imagem: { descricao: null } });
+
+    const semImagem = await http()
+      .delete(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenBasico}`)
+      .expect(200);
+    expect(semImagem.body).toMatchObject({ id, imagem: null });
+    await http()
+      .get(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenAssociado}`)
+      .expect(404);
+    expect(arquivosDa(id)).toEqual([]);
+
+    const logs = await prisma.logAuditoria.findMany({
+      where: { entidadeId: id },
+      orderBy: { ocorridoEm: 'asc' },
+    });
+    expect(
+      logs.map(({ acao, usuarioId, valorAnterior, valorNovo }) => ({
+        acao,
+        usuarioId,
+        valorAnterior,
+        valorNovo,
+      })),
+    ).toEqual([
+      expect.objectContaining({ acao: 'NOTICIA_PUBLICADA' }),
+      {
+        acao: 'NOTICIA_IMAGEM_ALTERADA',
+        usuarioId: basicoId,
+        valorAnterior: { imagem: null, descricaoImagem: null },
+        valorNovo: {
+          imagem: 'assembléia.png',
+          descricaoImagem: 'Diretoria na assembleia',
+        },
+      },
+      {
+        acao: 'NOTICIA_IMAGEM_ALTERADA',
+        usuarioId: basicoId,
+        valorAnterior: { imagem: 'assembléia.png' },
+        valorNovo: { imagem: 'foto.jpg' },
+      },
+      {
+        acao: 'NOTICIA_IMAGEM_ALTERADA',
+        usuarioId: basicoId,
+        valorAnterior: { descricaoImagem: 'Diretoria na assembleia' },
+        valorNovo: { descricaoImagem: null },
+      },
+      {
+        acao: 'NOTICIA_IMAGEM_REMOVIDA',
+        usuarioId: basicoId,
+        valorAnterior: { imagem: 'foto.jpg', descricaoImagem: null },
+        valorNovo: null,
+      },
+    ]);
+  });
+
+  it('recusa arquivo que não é imagem, imagem grande e descrição longa', async () => {
+    const { id } = await publicar(tokenAdmin);
+
+    // Nome de imagem, conteúdo de PDF.
+    await enviarImagem(tokenAdmin, id, {
+      arquivo: Buffer.from('%PDF-1.4\n%%EOF\n'),
+      nome: 'foto.png',
+    }).expect(400);
+    await enviarImagem(tokenAdmin, id, {
+      arquivo: Buffer.alloc(4 * 1024 * 1024 + 1),
+    }).expect(413);
+    await enviarImagem(tokenAdmin, id, {
+      arquivo: PNG,
+      descricao: 'x'.repeat(151),
+    }).expect(400);
+    // Só a descrição, sem imagem na notícia.
+    await enviarImagem(tokenAdmin, id, { descricao: 'Foto' }).expect(400);
+    await http()
+      .delete(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .expect(404);
+    expect(arquivosDa(id)).toEqual([]);
+
+    // Notícia removida: a imagem deixa de abrir.
+    await enviarImagem(tokenAdmin, id, { arquivo: PNG }).expect(201);
+    await http()
+      .delete(`/noticias/${id}`)
+      .set('Authorization', `Bearer ${tokenAdmin}`)
+      .expect(200);
+    await http()
+      .get(`/noticias/${id}/imagem`)
+      .set('Authorization', `Bearer ${tokenAssociado}`)
+      .expect(404);
+    await enviarImagem(tokenAdmin, id, { arquivo: PNG }).expect(404);
   });
 });

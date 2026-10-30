@@ -37,13 +37,13 @@ O SMTP fica sem configurar, e o e-mail não sai enquanto não houver provedor (P
 
 Quando houver provedor, o envio depois da resposta precisa do `waitUntil` do `@vercel/functions`, para a função não ser suspensa antes de o e-mail sair. Ele ficou de fora por enquanto: sem e-mail não teria efeito, e hoje o pacote traz uma dependência com vulnerabilidade conhecida (`zod`, via `@vercel/oidc`).
 
-## PDFs das convenções (Vercel Blob)
+## PDFs das convenções e imagens das notícias (Vercel Blob)
 
-Os PDFs ficam num armazenamento Vercel Blob **privado**, ligado ao projeto `eloconnect-api` só no ambiente Production. Para criar: na aba Storage do projeto `eloconnect-api`, Create Storage → Blob → Continue, com o acesso **Private**. A Vercel cria a variável `BLOB_STORE_ID` e autentica a API sozinha, sem senha no painel (OIDC). Depois de ligar, faça um Redeploy da API.
+Os PDFs das convenções e as imagens das notícias ficam num armazenamento Vercel Blob **privado**, ligado ao projeto `eloconnect-api` só no ambiente Production. Para criar: na aba Storage do projeto `eloconnect-api`, Create Storage → Blob → Continue, com o acesso **Private**. A Vercel cria a variável `BLOB_STORE_ID` e autentica a API sozinha, sem senha no painel (OIDC). Depois de ligar, faça um Redeploy da API.
 
-Os arquivos não têm endereço público: a API lê o PDF e repassa só para quem pode abrir. Fora da Vercel, sem o Blob, a API guarda os PDFs na pasta `ARQUIVOS_DIR`, que serve só para desenvolvimento e testes. Na Vercel, sem o Blob, o envio responde 503.
+Os arquivos não têm endereço público: a API lê o arquivo e repassa só para quem pode abrir. Fora da Vercel, sem o Blob, a API guarda os arquivos na pasta `ARQUIVOS_DIR`, que serve só para desenvolvimento e testes. Na Vercel, sem o Blob, o envio responde 503.
 
-O plano grátis tem 1 GB. Cada PDF pode ter até 4 MB (P24).
+O plano grátis tem 1 GB. Cada PDF pode ter até 4 MB (P24), e cada imagem também.
 
 ## Variáveis do projeto `eloconnect`
 

@@ -28,6 +28,8 @@ export const ACOES_AUDITORIA = [
   'NOTICIA_PUBLICADA',
   'NOTICIA_EDITADA',
   'NOTICIA_REMOVIDA',
+  'NOTICIA_IMAGEM_ALTERADA',
+  'NOTICIA_IMAGEM_REMOVIDA',
   // Convenções coletivas (RF21)
   'CONVENCAO_CRIADA',
   'CONVENCAO_EDITADA',
@@ -57,6 +59,8 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   NOTICIA_PUBLICADA: 'Notícia publicada',
   NOTICIA_EDITADA: 'Notícia editada',
   NOTICIA_REMOVIDA: 'Notícia removida',
+  NOTICIA_IMAGEM_ALTERADA: 'Imagem da notícia alterada',
+  NOTICIA_IMAGEM_REMOVIDA: 'Imagem da notícia removida',
   CONVENCAO_CRIADA: 'Convenção cadastrada',
   CONVENCAO_EDITADA: 'Convenção editada',
   CONVENCAO_PUBLICADA: 'Convenção publicada',
