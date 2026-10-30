@@ -1,5 +1,3 @@
-import { Readable } from 'node:stream';
-import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import {
   Controller,
   Get,
@@ -44,14 +42,9 @@ export class AssociadosConvencoesController {
       tipo as TipoAnexoConvencao,
     );
 
-    return new StreamableFile(
-      Readable.fromWeb(
-        arquivo.stream as unknown as NodeReadableStream<Uint8Array>,
-      ),
-      {
-        type: arquivo.contentType,
-        disposition: `attachment; filename="${arquivo.nomeArquivo}"`,
-      },
-    );
+    return new StreamableFile(arquivo.stream, {
+      type: arquivo.contentType,
+      disposition: `attachment; filename="${arquivo.nomeArquivo}"`,
+    });
   }
 }

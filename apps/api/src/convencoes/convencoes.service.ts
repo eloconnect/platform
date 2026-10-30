@@ -1,4 +1,5 @@
-﻿import {
+﻿import type { Readable } from 'node:stream';
+import {
   BadRequestException,
   ForbiddenException,
   Injectable,
@@ -129,7 +130,7 @@ export class ConvencoesService {
     convencaoId: string,
     tipoSolicitado: TipoAnexoConvencao,
   ): Promise<{
-    stream: ReadableStream<Uint8Array>;
+    stream: Readable;
     contentType: string;
     nomeArquivo: string;
   }> {
