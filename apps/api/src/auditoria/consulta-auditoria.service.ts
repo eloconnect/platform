@@ -112,13 +112,17 @@ export class ConsultaAuditoriaService {
         ),
       ),
     ];
-    const [beneficios, noticias] = await Promise.all([
+    const [beneficios, noticias, convencoes] = await Promise.all([
       this.prisma.beneficio.findMany({
         where: { id: { in: idsDe('Beneficio') } },
         select: { id: true, titulo: true },
       }),
       this.prisma.noticia.findMany({
         where: { id: { in: idsDe('Noticia') } },
+        select: { id: true, titulo: true },
+      }),
+      this.prisma.convencao.findMany({
+        where: { id: { in: idsDe('Convencao') } },
         select: { id: true, titulo: true },
       }),
     ]);
@@ -128,6 +132,9 @@ export class ConsultaAuditoriaService {
     }
     for (const { id, titulo } of noticias) {
       nomes.set(`Noticia:${id}`, { tipo: 'Notícia', nome: titulo });
+    }
+    for (const { id, titulo } of convencoes) {
+      nomes.set(`Convencao:${id}`, { tipo: 'Convenção', nome: titulo });
     }
     return nomes;
   }

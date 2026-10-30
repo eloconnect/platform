@@ -190,6 +190,28 @@ describe('createApiClient', () => {
     ]);
   });
 
+  it('baixa o PDF da convenção para a sede', async () => {
+    const fetchFalso = vi.fn<Fetch>().mockResolvedValue(
+      new Response('%PDF-', {
+        headers: { 'Content-Type': 'application/pdf' },
+      }),
+    );
+    const cliente = createApiClient('/api', fetchFalso, {
+      obterToken: () => 'token',
+    });
+
+    const pdf = await cliente.baixarAnexoConvencao('id-01', 'INTEGRAL');
+
+    expect(await pdf.text()).toBe('%PDF-');
+    expect(fetchFalso).toHaveBeenCalledWith(
+      '/api/convencoes/id-01/anexos/INTEGRAL',
+      expect.objectContaining({
+        method: 'GET',
+        headers: { Authorization: 'Bearer token' },
+      }),
+    );
+  });
+
   it('consulta e altera o valor da contribuição', async () => {
     const fetchFalso = vi
       .fn<Fetch>()

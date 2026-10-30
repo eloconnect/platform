@@ -11,6 +11,9 @@ coverage/
 !.vscode/extensions.json
 *.tsbuildinfo
 
+# PDFs enviados em desenvolvimento, quando o Vercel Blob não está configurado.
+apps/api/arquivos/
+
 # Instruções de ferramentas de IA geradas por pacotes (ver docs/decisoes-tecnicas.md).
 # O CLI do Prisma oferece instalar essas skills no terminal.
 .agents/
