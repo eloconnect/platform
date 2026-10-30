@@ -452,13 +452,13 @@ export class ConvencoesService {
           acao: 'CONVENCAO_ANEXOS_ATUALIZADOS',
           entidade: ENTIDADE,
           entidadeId: id,
-          valorNovo: {
-            anexos: novosAnexos.map((anexo) => ({
-              tipo: anexo.tipo,
-              nomeArquivo: anexo.nomeArquivo,
-              tamanhoBytes: anexo.tamanhoBytes,
-            })),
-          },
+          // Um campo por PDF, com o nome do arquivo que a sede enviou.
+          valorNovo: Object.fromEntries(
+            enviados.map(({ tipo, arquivo }) => [
+              tipo === 'INTEGRAL' ? 'pdfIntegral' : 'pdfResumido',
+              nomeOriginal(arquivo.originalname),
+            ]),
+          ),
         });
 
         return resultado;
@@ -566,6 +566,14 @@ export class ConvencoesService {
 
     return convencao;
   }
+}
+
+/** Só o nome do arquivo enviado, sem pastas nem caracteres de controle. */
+function nomeOriginal(nome: string): string {
+  const limpo = (nome.split(/[\\/]/).pop() ?? '')
+    .replace(/\p{Cc}/gu, '')
+    .trim();
+  return limpo ? limpo.slice(-200) : 'arquivo.pdf';
 }
 
 /**

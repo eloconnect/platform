@@ -156,6 +156,28 @@ describe('PaginaLogAuditoria', () => {
     expect(linha).toHaveTextContent('Texto: Texto antigo. → Texto novo.');
   });
 
+  it('diz qual convenção a ação afetou e o PDF enviado', async () => {
+    vi.mocked(api.listarLogAuditoria).mockResolvedValue(
+      lista({
+        total: 1,
+        itens: [
+          item({
+            acao: 'CONVENCAO_ANEXOS_ATUALIZADOS',
+            associado: null,
+            registro: { tipo: 'Convenção', nome: 'Convenção Coletiva 2026' },
+            valorNovo: { pdfIntegral: 'Convenção completa.pdf' },
+          }),
+        ],
+      }),
+    );
+    abrir();
+
+    const [, linha] = await screen.findAllByRole('row');
+    expect(linha).toHaveTextContent('PDFs da convenção atualizados');
+    expect(linha).toHaveTextContent('Convenção: Convenção Coletiva 2026');
+    expect(linha).toHaveTextContent('PDF integral: Convenção completa.pdf');
+  });
+
   it('filtra por quem fez, ação, associado e período', async () => {
     abrir();
     await screen.findByText('Nenhuma ação encontrada.');

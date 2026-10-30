@@ -60,6 +60,8 @@ export class ConvencoesController {
           fileSize: TAMANHO_MAXIMO_PDF,
           files: 2,
         },
+        // Nomes de arquivo com acento chegam certos.
+        defParamCharset: 'utf8',
       },
     ),
   )
