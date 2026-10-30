@@ -1,4 +1,5 @@
 import type { ApiClient, Convencao } from '@eloconnect/shared';
+import { ApiError } from '@eloconnect/shared';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -206,6 +207,87 @@ describe('PaginaConvencoes', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Documentos enviados.',
+    );
+  });
+
+  it('avisa na janela quando não consegue salvar e quando falta o resumo', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(api.criarConvencao).mockRejectedValue(
+      new TypeError('Failed to fetch'),
+    );
+
+    await abrir();
+
+    await user.click(
+      screen.getByRole('button', { name: 'Cadastrar convenção' }),
+    );
+
+    const janela = screen.getByRole('dialog', {
+      name: 'Cadastrar convenção',
+    });
+
+    await user.type(
+      within(janela).getByLabelText(/Título da convenção/),
+      'Convenção nova',
+    );
+    await user.click(within(janela).getByRole('button', { name: 'Salvar' }));
+
+    expect(within(janela).getByText('Informe o resumo.')).toBeInTheDocument();
+    expect(api.criarConvencao).not.toHaveBeenCalled();
+
+    await user.type(within(janela).getByLabelText(/Resumo/), 'Resumo novo.');
+    await user.click(within(janela).getByRole('button', { name: 'Salvar' }));
+
+    expect(await within(janela).findByRole('alert')).toHaveTextContent(
+      'Não foi possível concluir a operação.',
+    );
+  });
+
+  it('explica o que falta no envio dos PDFs', async () => {
+    const user = userEvent.setup();
+    const pdf = (nome: string, tamanho = 10) =>
+      new File(['%PDF-'.padEnd(tamanho, ' ')], nome, {
+        type: 'application/pdf',
+      });
+
+    vi.mocked(api.listarConvencoes).mockResolvedValue([
+      { ...CONVENCAO, anexos: [] },
+    ]);
+    vi.mocked(api.atualizarAnexosConvencao).mockRejectedValue(
+      new ApiError(413, 'grande demais'),
+    );
+
+    await abrir();
+
+    await user.click(screen.getByRole('button', { name: 'Enviar PDFs' }));
+
+    const janela = screen.getByRole('dialog', { name: 'Enviar PDFs' });
+    const enviar = within(janela).getByRole('button', {
+      name: 'Enviar documentos',
+    });
+
+    await user.click(enviar);
+    expect(within(janela).getByRole('alert')).toHaveTextContent(
+      'Escolha pelo menos um PDF.',
+    );
+
+    await user.upload(
+      within(janela).getByLabelText(/Convenção resumida \(PDF\)/i),
+      pdf('resumida.pdf'),
+    );
+    await user.click(enviar);
+    expect(within(janela).getByRole('alert')).toHaveTextContent(
+      'Na primeira vez, envie os dois PDFs: o integral e o resumido.',
+    );
+
+    await user.upload(
+      within(janela).getByLabelText(/Convenção integral \(PDF\)/i),
+      pdf('integral.pdf'),
+    );
+    await user.click(enviar);
+    expect(await within(janela).findByRole('alert')).toHaveTextContent(
+      'Cada PDF pode ter até 4 MB.',
     );
   });
 

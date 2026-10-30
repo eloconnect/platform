@@ -3,6 +3,7 @@ import type {
   CriarConvencaoRequest,
   EditarConvencaoRequest,
 } from '@eloconnect/shared';
+import { ApiError } from '@eloconnect/shared';
 import { useEffect, useState, type FormEvent } from 'react';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
@@ -15,6 +16,12 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+
+/** A Vercel aceita no máximo 4,5 MB por requisição (P24). */
+const TAMANHO_MAXIMO_PDF = 4 * 1024 * 1024;
+
+const MENSAGEM_TAMANHO =
+  'Cada PDF pode ter até 4 MB. Diminua o arquivo e tente novamente.';
 
 type Estado =
   | { tipo: 'carregando' }
@@ -32,7 +39,6 @@ export function PaginaConvencoes() {
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' });
   const [janela, setJanela] = useState<Janela | null>(null);
   const [aviso, setAviso] = useState<string>();
-  const [erroAcao, setErroAcao] = useState(false);
   const [erroPublicacao, setErroPublicacao] = useState(false);
 
   async function carregar() {
@@ -121,7 +127,6 @@ export function PaginaConvencoes() {
             className="mb-4"
             onClick={() => {
               setAviso(undefined);
-              setErroAcao(false);
               setJanela({ tipo: 'cadastro' });
             }}
           >
@@ -169,7 +174,6 @@ export function PaginaConvencoes() {
                     <Botao
                       variant="outline-primary"
                       onClick={() => {
-                        setErroAcao(false);
                         setJanela({ tipo: 'edicao', convencao });
                       }}
                     >
@@ -179,7 +183,6 @@ export function PaginaConvencoes() {
                     <Botao
                       variant="outline-primary"
                       onClick={() => {
-                        setErroAcao(false);
                         setJanela({ tipo: 'anexos', convencao });
                       }}
                     >
@@ -208,11 +211,7 @@ export function PaginaConvencoes() {
             ? janela
             : null
         }
-        erro={erroAcao}
-        aoFechar={() => {
-          setJanela(null);
-          setErroAcao(false);
-        }}
+        aoFechar={() => setJanela(null)}
         aoSalvar={(salva, editando) => {
           setEstado((atual) => {
             if (atual.tipo !== 'ok') {
@@ -235,11 +234,7 @@ export function PaginaConvencoes() {
 
       <JanelaAnexos
         convencao={janela?.tipo === 'anexos' ? janela.convencao : null}
-        erro={erroAcao}
-        aoFechar={() => {
-          setJanela(null);
-          setErroAcao(false);
-        }}
+        aoFechar={() => setJanela(null)}
         aoSalvar={(salva) => {
           setEstado((atual) => ({
             tipo: 'ok',
@@ -260,18 +255,21 @@ export function PaginaConvencoes() {
 
 function JanelaConvencao({
   janela,
-  erro,
   aoFechar,
   aoSalvar,
 }: {
   janela:
     { tipo: 'cadastro' } | { tipo: 'edicao'; convencao: Convencao } | null;
-  erro: boolean;
   aoFechar: () => void;
   aoSalvar: (salva: Convencao, editando: boolean) => void;
 }) {
   const [enviando, setEnviando] = useState(false);
-  const [erros, setErros] = useState<{ titulo?: string; ano?: string }>({});
+  const [erro, setErro] = useState(false);
+  const [erros, setErros] = useState<{
+    titulo?: string;
+    ano?: string;
+    resumo?: string;
+  }>({});
   const [anoAtual] = useState(() => new Date().getFullYear());
 
   const editando = janela?.tipo === 'edicao' ? janela.convencao : null;
@@ -291,15 +289,17 @@ function JanelaConvencao({
         ano >= 1900 && ano <= 2100 && Number.isInteger(ano)
           ? undefined
           : 'Informe um ano válido.',
+      resumo: resumo ? undefined : 'Informe o resumo.',
     };
 
     setErros(novosErros);
 
-    if (novosErros.titulo || novosErros.ano || !resumo) return;
+    if (novosErros.titulo || novosErros.ano || novosErros.resumo) return;
 
     const dadosConvencao: CriarConvencaoRequest = { titulo, ano, resumo };
 
     setEnviando(true);
+    setErro(false);
 
     try {
       const salva = editando
@@ -311,16 +311,22 @@ function JanelaConvencao({
 
       aoSalvar(salva, editando !== null);
     } catch {
-      setErros((atual) => ({ ...atual }));
+      setErro(true);
     } finally {
       setEnviando(false);
     }
   }
 
+  function fechar() {
+    setErro(false);
+    setErros({});
+    aoFechar();
+  }
+
   return (
     <Modal
       show={janela !== null}
-      onHide={aoFechar}
+      onHide={fechar}
       centered
       aria-labelledby="titulo-form-convencao"
     >
@@ -375,11 +381,12 @@ function JanelaConvencao({
             maxLength={2000}
             obrigatorio
             defaultValue={editando?.resumo ?? ''}
+            erro={erros.resumo}
           />
         </Modal.Body>
 
         <Modal.Footer>
-          <Botao variant="outline-secondary" onClick={aoFechar}>
+          <Botao variant="outline-secondary" onClick={fechar}>
             Cancelar
           </Botao>
           <Botao type="submit" disabled={enviando}>
@@ -393,16 +400,20 @@ function JanelaConvencao({
 
 function JanelaAnexos({
   convencao,
-  erro,
   aoFechar,
   aoSalvar,
 }: {
   convencao: Convencao | null;
-  erro: boolean;
   aoFechar: () => void;
   aoSalvar: (salva: Convencao) => void;
 }) {
   const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string>();
+
+  function fechar() {
+    setErro(undefined);
+    aoFechar();
+  }
 
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -419,15 +430,28 @@ function JanelaAnexos({
 
     const integral = campoIntegral?.files?.[0];
     const resumida = campoResumida?.files?.[0];
+    const escolhidos = [integral, resumida].filter(
+      (arquivo): arquivo is File => arquivo !== undefined && arquivo.size > 0,
+    );
 
-    if (
-      (!integral || integral.size === 0) &&
-      (!resumida || resumida.size === 0)
-    ) {
+    if (escolhidos.length === 0) {
+      setErro('Escolha pelo menos um PDF.');
+      return;
+    }
+
+    // Na primeira vez, a API exige os dois PDFs.
+    if (convencao && convencao.anexos.length === 0 && escolhidos.length < 2) {
+      setErro('Na primeira vez, envie os dois PDFs: o integral e o resumido.');
+      return;
+    }
+
+    if (escolhidos.some((arquivo) => arquivo.size > TAMANHO_MAXIMO_PDF)) {
+      setErro(MENSAGEM_TAMANHO);
       return;
     }
 
     setEnviando(true);
+    setErro(undefined);
 
     try {
       const arquivos = new FormData();
@@ -443,8 +467,14 @@ function JanelaAnexos({
       const salva = await api.atualizarAnexosConvencao(convencao!.id, arquivos);
 
       aoSalvar(salva);
-    } catch {
-      // O estado de erro é tratado pelo componente pai.
+    } catch (e) {
+      setErro(
+        e instanceof ApiError && e.status === 413
+          ? MENSAGEM_TAMANHO
+          : e instanceof ApiError && e.status === 400
+            ? 'Os arquivos precisam ser PDFs. Confira e tente novamente.'
+            : 'Não foi possível enviar os documentos. Tente novamente.',
+      );
     } finally {
       setEnviando(false);
     }
@@ -453,7 +483,7 @@ function JanelaAnexos({
   return (
     <Modal
       show={convencao !== null}
-      onHide={aoFechar}
+      onHide={fechar}
       centered
       aria-labelledby="titulo-anexos-convencao"
     >
@@ -469,12 +499,7 @@ function JanelaAnexos({
             Convenção: <strong>{convencao?.titulo}</strong>
           </p>
 
-          {erro && (
-            <MensagemErro>
-              Não foi possível enviar os documentos. Verifique se são PDFs
-              válidos de até 4 MB e tente novamente.
-            </MensagemErro>
-          )}
+          {erro && <MensagemErro>{erro}</MensagemErro>}
 
           <Form.Group className="mb-3">
             <Form.Label htmlFor="pdf-integral">
@@ -504,7 +529,7 @@ function JanelaAnexos({
         </Modal.Body>
 
         <Modal.Footer>
-          <Botao variant="outline-secondary" onClick={aoFechar}>
+          <Botao variant="outline-secondary" onClick={fechar}>
             Cancelar
           </Botao>
           <Botao type="submit" disabled={enviando}>
