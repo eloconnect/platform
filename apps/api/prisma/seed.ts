@@ -133,12 +133,18 @@ async function main() {
       },
     });
 
-    // Valor vigente da contribuição
+    // Valor vigente da contribuição, alterado há dois meses: vale desde o
+    // lote do mês passado (RN15)
+    const hoje = new Date();
+    const valorAlteradoEm = new Date(
+      Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 2, 15, 12),
+    );
     await prisma.valorContribuicao.create({
       data: {
         valorMensal: VALOR_MENSAL,
         valorAnual: VALOR_ANUAL,
         alteradoPorId: admin.id,
+        criadoEm: valorAlteradoEm,
       },
     });
     await prisma.logAuditoria.create({
@@ -147,11 +153,11 @@ async function main() {
         acao: 'VALOR_ALTERADO',
         entidade: 'ValorContribuicao',
         valorNovo: { valorMensal: VALOR_MENSAL, valorAnual: VALOR_ANUAL },
+        ocorridoEm: valorAlteradoEm,
       },
     });
 
     // Lote do mês passado, gerado e enviado pelo sistema (RN04)
-    const hoje = new Date();
     const competencia = new Date(
       Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 1, 1),
     );
