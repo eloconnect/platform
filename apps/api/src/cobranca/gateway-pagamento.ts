@@ -56,6 +56,9 @@ export abstract class GatewayPagamento {
   /** O banco não cancela boleto pago. */
   abstract cancelar(nossoNumero: string): Promise<void>;
 
-  /** Lê a notificação de pagamento que o banco manda para a API. */
+  /**
+   * Lê a notificação de pagamento que o banco manda para a API.
+   * TODO(#40): conferir que ela veio mesmo do banco.
+   */
   abstract lerNotificacao(corpo: unknown): PagamentoConfirmado;
 }
