@@ -176,6 +176,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - O sindicato ainda não tem convênio de cobrança com o Sicredi (o contrato para emitir boletos) nem acesso à API de Cobrança. Os dois serão pedidos se necessário, depois de uma reunião do sindicato (respostas de 27/10/2026). Até lá, a cobrança funciona em **simulação**, com o mock do gateway (M3).
 
+- Contrato do gateway (#41): a API fala com o banco por uma interface, a `GatewayPagamento` (`apps/api/src/cobranca`), com quatro operações: emitir o boleto com Pix, consultar, cancelar e ler a notificação de pagamento. Enquanto não há convênio, ela usa o `GatewaySimulado`, que gera nosso número, linha digitável e Pix fictícios e guarda os boletos na memória do processo, o que serve para o desenvolvimento e os testes. Como simular o pagamento na demonstração é decisão da #48. O adaptador do Sicredi entra depois do estudo (#40), com as credenciais lidas das variáveis de ambiente da hospedagem, nunca do repositório (RNF04).
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.
