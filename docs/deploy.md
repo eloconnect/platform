@@ -32,10 +32,15 @@ Ficam só no painel da Vercel, nunca no repositório.
 | `JWT_SECRET` | Gerada na sua máquina com `openssl rand -base64 48` |
 | `WEB_URL` | `https://eloconnect.vercel.app` |
 | `EMAIL_SO_NO_LOG` | `true` |
+| `CRON_SECRET` | Gerada na sua máquina com `openssl rand -hex 32` |
 
 O SMTP fica sem configurar, e o e-mail não sai enquanto não houver provedor (P12). Com `EMAIL_SO_NO_LOG=true`, a API escreve cada e-mail no log, com os links, em vez de enviar. É assim que a equipe testa a criação de conta e a recuperação de senha na demonstração: faça o pedido nas telas e abra o log da função em Logs, no projeto `eloconnect-api`. Os e-mails do seed são fictícios (`@example.com`), e o log só a equipe vê. **Nunca ligue essa variável no sistema do cliente**: os links dão acesso às contas.
 
 Quando houver provedor, o envio depois da resposta precisa do `waitUntil` do `@vercel/functions`, para a função não ser suspensa antes de o e-mail sair. Ele ficou de fora por enquanto: sem e-mail não teria efeito, e hoje o pacote traz uma dependência com vulnerabilidade conhecida (`zod`, via `@vercel/oidc`).
+
+## Tarefas agendadas (Cron Jobs)
+
+O lote mensal de boletos roda pelo cron da Vercel, configurado no `apps/api/vercel.json`. A Vercel chama a API uma vez por dia, só no deploy de produção, e manda o `CRON_SECRET` em cada chamada. Sem essa variável, a API recusa a chamada e o lote não sai. Depois de criar a variável, faça um Redeploy da API. As execuções aparecem em Settings → Cron Jobs do projeto `eloconnect-api`, no botão View Logs. A Vercel não repete uma execução que falhou, mas a API recupera no dia seguinte o que ficou para trás.
 
 ## PDFs das convenções e imagens das notícias (Vercel Blob)
 

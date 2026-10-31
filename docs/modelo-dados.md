@@ -1,6 +1,6 @@
 # Elo Connect — Modelo de Dados (DER)
 
-Última atualização: 30/10/2026.
+Última atualização: 31/10/2026.
 
 Fonte da verdade do banco: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma). Este documento explica o modelo e as decisões; se os dois divergirem, vale o schema, e este documento deve ser corrigido no mesmo PR.
 
@@ -15,7 +15,6 @@ erDiagram
     Associado ||--o{ SolicitacaoCancelamento : "pede"
     Usuario |o--o{ SolicitacaoCancelamento : "decide"
     Usuario ||--o{ ValorContribuicao : "altera"
-    Usuario |o--o{ LoteMensal : "envia"
     LoteMensal |o--o{ Boleto : "contém"
     Associado ||--o{ Boleto : "recebe"
     Boleto ||--o{ Transacao : "gera"
@@ -80,7 +79,6 @@ erDiagram
         date competencia UK
         StatusLote status "RASCUNHO, ENVIADO"
         datetime enviadoEm
-        uuid enviadoPorId FK
     }
     Boleto {
         uuid id PK
@@ -182,7 +180,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Boleto vencido é calculado.** Não existe status VENCIDO: um boleto EM_ABERTO com `vencimento` no passado está vencido. Evita que um job precise atualizar boletos todo dia.
 
-**Lote mensal** agrupa os boletos MENSAL de uma competência, gerados e enviados sozinhos no primeiro dia útil, sem revisão (RN04). O status RASCUNHO vinha da revisão, que saiu (P20); se ele continua, é decisão da #44. Boletos avulsos e anuais ficam fora do lote até as pendências P10 e P04 serem respondidas.
+**Lote mensal** agrupa os boletos MENSAL de uma competência, gerados e enviados sozinhos no primeiro dia útil, sem revisão (RN04). Ninguém da sede envia o lote (P20): ele nasce em RASCUNHO, com os boletos ainda por emitir no banco, e passa a ENVIADO quando todos foram emitidos. Boletos avulsos e anuais ficam fora do lote até as pendências P10 e P04 serem respondidas.
 
 **Valor de cada boleto.** Uma alteração de valor vale a partir do boleto do mês seguinte (RN15). O boleto de uma competência usa o `ValorContribuicao` mais recente criado antes do primeiro dia desse mês, no horário de Cuiabá. Por isso, a data de início não precisa de coluna própria.
 

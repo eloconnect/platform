@@ -45,7 +45,7 @@ export interface Competencia {
 }
 
 /** Mato Grosso não tem horário de verão desde 2019: o fuso é sempre -04:00. */
-const FUSO_SEDE_HORAS = -4;
+export const FUSO_SEDE_HORAS = -4;
 
 /**
  * Primeiro boleto que usa um valor alterado em `data`: o do mês seguinte ao

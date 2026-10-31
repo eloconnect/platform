@@ -150,7 +150,7 @@ async function main() {
       },
     });
 
-    // Lote do mês passado, já enviado
+    // Lote do mês passado, gerado e enviado pelo sistema (RN04)
     const hoje = new Date();
     const competencia = new Date(
       Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() - 1, 1),
@@ -167,15 +167,6 @@ async function main() {
         status: 'ENVIADO',
         geradoEm: emitidoEm,
         enviadoEm: emitidoEm,
-        enviadoPorId: admin.id,
-      },
-    });
-    await prisma.logAuditoria.create({
-      data: {
-        usuarioId: admin.id,
-        acao: 'LOTE_ENVIADO',
-        entidade: 'LoteMensal',
-        entidadeId: lote.id,
       },
     });
 
@@ -212,12 +203,7 @@ async function main() {
         data: { ...base, evento: 'GERADO', ocorridoEm: emitidoEm },
       });
       await prisma.transacao.create({
-        data: {
-          ...base,
-          evento: 'EMITIDO',
-          usuarioId: admin.id,
-          ocorridoEm: emitidoEm,
-        },
+        data: { ...base, evento: 'EMITIDO', ocorridoEm: emitidoEm },
       });
       if (pagoEm) {
         await prisma.transacao.create({

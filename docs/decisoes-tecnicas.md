@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 30/10/2026.
+Última atualização: 31/10/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -177,6 +177,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 - O sindicato ainda não tem convênio de cobrança com o Sicredi (o contrato para emitir boletos) nem acesso à API de Cobrança. Os dois serão pedidos se necessário, depois de uma reunião do sindicato (respostas de 27/10/2026). Até lá, a cobrança funciona em **simulação**, com o mock do gateway (M3).
 
 - Contrato do gateway (#41): a API fala com o banco por uma interface, a `GatewayPagamento` (`apps/api/src/cobranca`), com quatro operações: emitir o boleto com Pix, consultar, cancelar e ler a notificação de pagamento. Enquanto não há convênio, ela usa o `GatewaySimulado`, que gera nosso número, linha digitável e Pix fictícios e guarda os boletos na memória do processo, o que serve para o desenvolvimento e os testes. Como simular o pagamento na demonstração é decisão da #48. O adaptador do Sicredi entra depois do estudo (#40), com as credenciais lidas das variáveis de ambiente da hospedagem, nunca do repositório (RNF04).
+
+- Lote mensal (#44): o cron da Vercel chama a API uma vez por dia (`apps/api/vercel.json`), às 7h de Mato Grosso, com até uma hora de atraso no plano grátis. A API só gera o lote a partir do primeiro dia útil do mês. Dia útil é de segunda a sexta, fora os feriados nacionais e a Sexta-feira Santa; Carnaval e Corpus Christi são ponto facultativo e contam como dia útil (decisão do grupo, 31/10/2026). Cada execução continua de onde a anterior parou: uma execução perdida é recuperada no dia seguinte, e uma repetida não gera nem emite boleto em dobro. O valor é o último alterado antes do dia 1 do mês, no horário de Mato Grosso (RN15). O associado inativado pela sede fica fora do lote até a resposta da P13. A rota só atende quem manda o `CRON_SECRET`, que fica nas variáveis da hospedagem ([deploy.md](deploy.md)).
 
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 

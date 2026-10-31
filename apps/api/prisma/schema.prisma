@@ -43,7 +43,6 @@ model Usuario {
   associado              Associado?                @relation(fields: [associadoId], references: [id], onDelete: Restrict)
   tokens                 TokenUsuario[]
   valoresAlterados       ValorContribuicao[]
-  lotesEnviados          LoteMensal[]
   transacoes             Transacao[]
   logs                   LogAuditoria[]
   convencoes             Convencao[]
@@ -168,23 +167,23 @@ model ValorContribuicao {
 }
 
 enum StatusLote {
+  /// Gerado, com boletos ainda por emitir no banco.
   RASCUNHO
+  /// Todos os boletos emitidos.
   ENVIADO
 }
 
-/// Lote mensal de boletos: gerado em rascunho, revisado e enviado pela sede
-/// com um botão (RN04, RF10, RF11).
+/// Lote mensal de boletos: gerado e enviado sozinho no primeiro dia útil, sem
+/// revisão da sede (RN04, RF10).
 model LoteMensal {
-  id           String     @id @default(uuid(7)) @db.Uuid
+  id          String     @id @default(uuid(7)) @db.Uuid
   /// Primeiro dia do mês de referência.
-  competencia  DateTime   @unique @db.Date
-  status       StatusLote @default(RASCUNHO)
-  geradoEm     DateTime   @default(now())
-  enviadoEm    DateTime?
-  enviadoPorId String?    @db.Uuid
+  competencia DateTime   @unique @db.Date
+  status      StatusLote @default(RASCUNHO)
+  geradoEm    DateTime   @default(now())
+  enviadoEm   DateTime?
 
-  enviadoPor Usuario? @relation(fields: [enviadoPorId], references: [id], onDelete: Restrict)
-  boletos    Boleto[]
+  boletos Boleto[]
 }
 
 enum TipoBoleto {
