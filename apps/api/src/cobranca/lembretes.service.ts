@@ -30,7 +30,7 @@ export interface ResultadoLembretes {
  * - Depois do vencimento: um por semana, 7, 14, 21 e 28 dias depois, até o
  *   último dia para pagar, 30 dias depois do vencimento (RF14, RN09). Se a
  *   execução de um desses dias falhar, o lembrete sai num dos dias seguintes
- *   da mesma semana (decisão do grupo, 02/11/2026).
+ *   da mesma semana (decisão do grupo, 01/11/2026).
  */
 export function lembreteDevido(
   boleto: { vencimento: Date; ultimoLembreteEm: Date | null },

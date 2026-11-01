@@ -55,7 +55,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN04 | Os boletos mensais são gerados e enviados automaticamente, sem revisão. A sede pode editar o boleto de um associado (o valor ou outro dado): a edição vale para o boleto do mês seguinte, e o associado recebe na hora um e-mail avisando que a cobrança vai mudar. | [Validado] — conversa de 28/10/2026 (P20); decisão do grupo (01/11/2026): a sede edita só o valor, e a edição feita num mês vale para o boleto do mês seguinte, podendo ser trocada ou desfeita até o mês virar |
 | RN05 | Boletos são enviados **somente a associados com contribuição ativa**, nunca a todos os cadastrados. | [Validado] |
 | RN06 | Pagamento por boleto ou Pix (QR Code). | [Validado] |
-| RN07 | Lembretes: um 48h antes do vencimento; depois do vencimento, um por semana, até o boleto expirar e o acesso ser bloqueado (RN09). | [Validado] — mudou em 28/10/2026 (resposta 15); antes, a cada 48h. Os semanais saem 7, 14, 21 e 28 dias depois do vencimento (decisão do grupo, 02/11/2026) |
+| RN07 | Lembretes: um 48h antes do vencimento; depois do vencimento, um por semana, até o boleto expirar e o acesso ser bloqueado (RN09). | [Validado] — mudou em 28/10/2026 (resposta 15); antes, a cada 48h. Os semanais saem 7, 14, 21 e 28 dias depois do vencimento (decisão do grupo, 01/11/2026) |
 | RN08 | Não há juros nem multa por atraso. | [Validado] |
 | RN09 | O bloqueio do acesso a benefícios e suporte é automático e acontece quando o boleto expira sem pagamento, 30 dias após o vencimento (perto do vencimento do boleto seguinte). Até lá, o acesso continua. | [Validado] — mudou em 27/10/2026; antes, o bloqueio era imediato |
 | RN10 | O desbloqueio é automático após a confirmação do pagamento. | [Validado] |
