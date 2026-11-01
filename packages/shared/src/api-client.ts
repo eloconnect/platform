@@ -4,9 +4,11 @@ import type {
   CriarAssociadoRequest,
   DefinirAcessoRequest,
   EditarAssociadoRequest,
+  EditarProximoBoletoRequest,
   FiltrosAssociados,
   ListaAssociados,
   MinhaConta,
+  ProximoBoleto,
 } from './associados.js';
 import type {
   FiltrosLogAuditoria,
@@ -251,6 +253,19 @@ export function createApiClient(
         'PUT',
         `/associados/${encodeURIComponent(id)}/acesso`,
         dados,
+      ),
+
+    editarProximoBoleto: (id: string, dados: EditarProximoBoletoRequest) =>
+      requisitar<ProximoBoleto>(
+        'PUT',
+        `/associados/${encodeURIComponent(id)}/proximo-boleto`,
+        dados,
+      ),
+
+    voltarAoValorNormal: (id: string) =>
+      requisitar<ProximoBoleto>(
+        'DELETE',
+        `/associados/${encodeURIComponent(id)}/proximo-boleto`,
       ),
 
     listarLogAuditoria: (filtros: FiltrosLogAuditoria = {}) =>

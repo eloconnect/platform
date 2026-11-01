@@ -118,6 +118,7 @@ model Associado {
   transacoes    Transacao[]
   logs          LogAuditoria[]
   cancelamentos SolicitacaoCancelamento[]
+  edicoesBoleto EdicaoBoleto[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -235,6 +236,24 @@ model Boleto {
 
   @@index([associadoId, competencia])
   @@index([status, vencimento])
+}
+
+/// Valor do boleto mensal de um associado mudado pela sede para um mês só
+/// (RN04, RF11). A edição feita num mês vale para o boleto do mês seguinte, e
+/// os outros meses seguem o valor da contribuição. Quem editou e quando ficam
+/// no log de auditoria; voltar ao valor normal apaga a edição.
+model EdicaoBoleto {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  associadoId  String   @db.Uuid
+  /// Primeiro dia do mês do boleto editado.
+  competencia  DateTime @db.Date
+  valor        Decimal  @db.Decimal(10, 2)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  associado Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+
+  @@unique([associadoId, competencia])
 }
 
 enum EventoTransacao {

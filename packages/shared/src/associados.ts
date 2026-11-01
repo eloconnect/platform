@@ -1,5 +1,6 @@
 import type { AcessoManualStatus, SituacaoAcesso } from './access-policy.js';
 import type { TextoSituacao } from './situacao.js';
+import type { Competencia } from './valores.js';
 
 /** Associado como a API devolve para a sede. Datas em texto ISO. */
 export interface Associado {
@@ -44,12 +45,32 @@ export interface ContaAcesso {
   confirmadaEm: string | null;
 }
 
+/**
+ * Boleto mensal do mês seguinte, cujo valor a sede pode mudar só para ele
+ * (RN04, RF11). Valores em reais, com ponto e duas casas (ex.: "130.00").
+ */
+export interface ProximoBoleto {
+  competencia: Competencia;
+  /** Valor da contribuição para o mês; nulo enquanto a sede não cadastrou. */
+  valorNormal: string | null;
+  /** Valor mudado pela sede só para este boleto; nulo se não mudou. */
+  valorEditado: string | null;
+}
+
 /** Perfil do associado para a sede (RF07). */
 export interface AssociadoDetalhe extends Associado {
   /** Da mais recente para a mais antiga. */
   cancelamentos: SolicitacaoCancelamento[];
   /** Nulo enquanto o associado não pediu a criação da conta. */
   conta: ContaAcesso | null;
+  /** Nulo para quem não recebe o boleto mensal. */
+  proximoBoleto: ProximoBoleto | null;
+}
+
+/** Novo valor do boleto do mês seguinte (RF11). */
+export interface EditarProximoBoletoRequest {
+  /** Em reais, com ponto e duas casas (ex.: "130.00"). */
+  valor: string;
 }
 
 /** Cadastro pela sede (RF08). O CNPJ pode vir com ou sem pontuação. */

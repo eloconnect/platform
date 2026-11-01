@@ -17,6 +17,7 @@ import {
   type MinhaConta,
   type StatusAssociado,
 } from '@eloconnect/shared';
+import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
 import { EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -83,6 +84,7 @@ export class AssociadosService {
     private readonly prisma: PrismaService,
     private readonly auditoria: AuditoriaService,
     private readonly email: EmailService,
+    private readonly edicoes: EdicaoBoletoService,
   ) {}
 
   /**
@@ -143,8 +145,8 @@ export class AssociadosService {
   }
 
   /**
-   * Perfil do associado, com as solicitações de cancelamento e a conta de
-   * acesso (RF07).
+   * Perfil do associado, com as solicitações de cancelamento, a conta de
+   * acesso (RF07) e o boleto do mês seguinte (RF11).
    */
   async buscar(id: string) {
     const associado = await this.prisma.associado.findUnique({
@@ -179,6 +181,7 @@ export class AssociadosService {
         criadaEm: usuario.criadoEm,
         confirmadaEm: usuario.emailConfirmadoEm,
       },
+      proximoBoleto: await this.edicoes.proximoBoleto(associado),
     };
   }
 

@@ -1,4 +1,8 @@
-import type { ApiClient, AssociadoDetalhe } from '@eloconnect/shared';
+import type {
+  ApiClient,
+  AssociadoDetalhe,
+  ProximoBoleto,
+} from '@eloconnect/shared';
 import { ApiError } from '@eloconnect/shared';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -14,8 +18,17 @@ vi.mock('../../api', () => ({
     inativarAssociado: vi.fn<ApiClient['inativarAssociado']>(),
     reativarAssociado: vi.fn<ApiClient['reativarAssociado']>(),
     definirAcesso: vi.fn<ApiClient['definirAcesso']>(),
+    editarProximoBoleto: vi.fn<ApiClient['editarProximoBoleto']>(),
+    voltarAoValorNormal: vi.fn<ApiClient['voltarAoValorNormal']>(),
   },
 }));
+
+const PROXIMO: ProximoBoleto = {
+  competencia: { ano: 2026, mes: 12 },
+  valorNormal: '120.00',
+  valorEditado: null,
+};
+const PROXIMO_EDITADO: ProximoBoleto = { ...PROXIMO, valorEditado: '100.00' };
 
 function associado(dados: Partial<AssociadoDetalhe> = {}): AssociadoDetalhe {
   return {
@@ -35,6 +48,7 @@ function associado(dados: Partial<AssociadoDetalhe> = {}): AssociadoDetalhe {
     atualizadoEm: '2026-10-01T12:00:00.000Z',
     cancelamentos: [],
     conta: null,
+    proximoBoleto: null,
     ...dados,
   };
 }
@@ -69,6 +83,8 @@ describe('PaginaPerfilAssociado', () => {
     vi.mocked(api.inativarAssociado).mockReset();
     vi.mocked(api.reativarAssociado).mockReset();
     vi.mocked(api.definirAcesso).mockReset();
+    vi.mocked(api.editarProximoBoleto).mockReset();
+    vi.mocked(api.voltarAoValorNormal).mockReset();
   });
 
   it('mostra a situação, os dados cadastrais e o espaço dos boletos', async () => {
@@ -134,12 +150,17 @@ describe('PaginaPerfilAssociado', () => {
 
   it('o perfil básico da sede vê o perfil sem os botões de alterar (RN33)', async () => {
     entrarComo('ADMIN_BASICO');
-    vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+    vi.mocked(api.buscarAssociado).mockResolvedValue(
+      associado({ proximoBoleto: PROXIMO_EDITADO }),
+    );
     abrir();
 
     await screen.findByRole('heading', { level: 1 });
     expect(secao('Acesso a benefícios e suporte')).toHaveTextContent(
       'Segue o pagamento. Hoje está liberado.',
+    );
+    expect(secao('Próximo boleto')).toHaveTextContent(
+      'Boleto de dezembro de 2026: R$ 100,00',
     );
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(
@@ -450,6 +471,258 @@ describe('PaginaPerfilAssociado', () => {
 
       expect(await within(janela).findByRole('alert')).toHaveTextContent(
         'Não foi possível mudar o acesso agora.',
+      );
+    });
+  });
+
+  describe('próximo boleto (RF11)', () => {
+    it('mostra o valor normal e o botão para mudar', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 1 });
+      const proximo = secao('Próximo boleto');
+      expect(proximo).toHaveTextContent(
+        'Boleto de dezembro de 2026: R$ 120,00, o valor normal da contribuição.',
+      );
+      expect(
+        within(proximo)
+          .getAllByRole('button')
+          .map((botao) => botao.textContent),
+      ).toEqual(['Mudar o valor']);
+    });
+
+    it('mostra o valor mudado pela sede e o botão para voltar ao normal', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO_EDITADO }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 1 });
+      const proximo = secao('Próximo boleto');
+      expect(proximo).toHaveTextContent(
+        'Boleto de dezembro de 2026: R$ 100,00, valor mudado pela sede só para este mês. O valor normal é R$ 120,00.',
+      );
+      expect(
+        within(proximo)
+          .getAllByRole('button')
+          .map((botao) => botao.textContent),
+      ).toEqual(['Mudar o valor', 'Voltar ao valor normal']);
+    });
+
+    it.each([
+      ['de quem não recebe o boleto mensal', { proximoBoleto: null }],
+      [
+        'do associado inativado',
+        { proximoBoleto: PROXIMO, inativadoEm: '2026-10-20T12:00:00.000Z' },
+      ],
+    ])('não aparece no perfil %s', async (_caso, dados) => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado(dados));
+      abrir();
+
+      await screen.findByRole('heading', { level: 1 });
+      expect(
+        screen.queryByRole('heading', { name: 'Próximo boleto' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('sem valor cadastrado, manda cadastrar e não mostra botões', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: { ...PROXIMO, valorNormal: null } }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 1 });
+      const proximo = secao('Próximo boleto');
+      expect(proximo).toHaveTextContent(
+        'O valor da contribuição ainda não foi cadastrado.',
+      );
+      expect(within(proximo).queryByRole('button')).not.toBeInTheDocument();
+    });
+
+    it('muda o valor e avisa que o associado recebe o e-mail', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO }),
+      );
+      vi.mocked(api.editarProximoBoleto).mockResolvedValue(PROXIMO_EDITADO);
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Mudar o valor' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Mudar o valor do boleto de dezembro de 2026',
+      });
+      expect(janela).toHaveTextContent(
+        'Farmácia Exemplo 01 Ltda recebe agora um e-mail avisando da mudança.',
+      );
+      await userEvent.type(
+        within(janela).getByLabelText(/^Novo valor do boleto/),
+        '100',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Salvar o novo valor' }),
+      );
+
+      expect(api.editarProximoBoleto).toHaveBeenCalledWith('id-01', {
+        valor: '100.00',
+      });
+      expect(
+        await screen.findByText(
+          'Valor do boleto de dezembro de 2026 mudado. O associado vai receber um e-mail com o aviso.',
+        ),
+      ).toBeInTheDocument();
+      expect(secao('Próximo boleto')).toHaveTextContent(
+        'R$ 100,00, valor mudado pela sede',
+      );
+    });
+
+    it.each([
+      ['um texto que não é valor', 'cem', 'Digite o valor em reais'],
+      ['zero', '0', 'O valor precisa ser maior que zero.'],
+      [
+        'o valor que o boleto já tem',
+        '100,00',
+        'O boleto já está com este valor.',
+      ],
+      [
+        'o valor normal',
+        '120',
+        'Este é o valor normal da contribuição. Para voltar a ele, use "Voltar ao valor normal".',
+      ],
+    ])('não envia %s', async (_caso, texto, erro) => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO_EDITADO }),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Mudar o valor' }),
+      );
+      const janela = await screen.findByRole('dialog');
+      const campo = within(janela).getByLabelText(/^Novo valor do boleto/);
+      await userEvent.type(campo, texto);
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Salvar o novo valor' }),
+      );
+
+      expect(campo).toHaveAccessibleDescription(new RegExp(erro));
+      expect(api.editarProximoBoleto).not.toHaveBeenCalled();
+    });
+
+    it('mostra no campo o erro de valor que a API devolve', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO }),
+      );
+      vi.mocked(api.editarProximoBoleto).mockRejectedValue(
+        new ApiError(400, 'O boleto já está com este valor.', 'valor'),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Mudar o valor' }),
+      );
+      const janela = await screen.findByRole('dialog');
+      const campo = within(janela).getByLabelText(/^Novo valor do boleto/);
+      await userEvent.type(campo, '90');
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Salvar o novo valor' }),
+      );
+
+      await vi.waitFor(() =>
+        expect(campo).toHaveAccessibleDescription(
+          /O boleto já está com este valor\./,
+        ),
+      );
+    });
+
+    it('volta ao valor normal depois de confirmar', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO_EDITADO }),
+      );
+      vi.mocked(api.voltarAoValorNormal).mockResolvedValue(PROXIMO);
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Voltar ao valor normal' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Voltar ao valor normal?',
+      });
+      expect(janela).toHaveTextContent(
+        'O boleto de dezembro de 2026 volta para R$ 120,00',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', {
+          name: 'Sim, voltar ao valor normal',
+        }),
+      );
+
+      expect(api.voltarAoValorNormal).toHaveBeenCalledWith('id-01');
+      expect(
+        await screen.findByText(
+          'O boleto de dezembro de 2026 voltou ao valor normal. O associado vai receber um e-mail com o aviso.',
+        ),
+      ).toBeInTheDocument();
+      expect(secao('Próximo boleto')).toHaveTextContent(
+        'R$ 120,00, o valor normal da contribuição.',
+      );
+    });
+
+    it('avisa quando o associado não tem e-mail para receber o aviso', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ email: null, proximoBoleto: PROXIMO }),
+      );
+      vi.mocked(api.editarProximoBoleto).mockResolvedValue(PROXIMO_EDITADO);
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Mudar o valor' }),
+      );
+      const janela = await screen.findByRole('dialog');
+      expect(janela).toHaveTextContent(
+        'Este associado não tem e-mail no cadastro, então não recebe o aviso.',
+      );
+      await userEvent.type(
+        within(janela).getByLabelText(/^Novo valor do boleto/),
+        '100',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Salvar o novo valor' }),
+      );
+
+      expect(
+        await screen.findByText(
+          'Valor do boleto de dezembro de 2026 mudado. O associado não tem e-mail no cadastro, então não recebe aviso.',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('avisa na janela quando não consegue mudar o valor', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ proximoBoleto: PROXIMO }),
+      );
+      vi.mocked(api.editarProximoBoleto).mockRejectedValue(
+        new ApiError(500, 'erro'),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Mudar o valor' }),
+      );
+      const janela = await screen.findByRole('dialog');
+      await userEvent.type(
+        within(janela).getByLabelText(/^Novo valor do boleto/),
+        '90',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Salvar o novo valor' }),
+      );
+
+      expect(await within(janela).findByRole('alert')).toHaveTextContent(
+        'Não foi possível mudar o valor agora.',
       );
     });
   });

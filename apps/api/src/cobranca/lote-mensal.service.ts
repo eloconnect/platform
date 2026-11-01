@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { primeiroDiaUtil } from './dia-util.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
 import { TransacoesService } from './transacoes.service.js';
+import { valorDoMes } from './valor-do-mes.js';
 
 const UM_DIA = 24 * 60 * 60 * 1000;
 const UMA_HORA = 60 * 60 * 1000;
@@ -106,18 +107,9 @@ export class LoteMensalService {
    * não cria nada.
    */
   private gerar(competencia: Date): Promise<LoteMensal> {
-    // Meia-noite do dia 1 em Mato Grosso.
-    const inicioDoMes = new Date(
-      competencia.getTime() - FUSO_SEDE_HORAS * UMA_HORA,
-    );
     return this.prisma.$transaction(
       async (tx) => {
-        // O valor alterado vale a partir do boleto do mês seguinte (RN15).
-        const valor = await tx.valorContribuicao.findFirst({
-          where: { criadoEm: { lt: inicioDoMes } },
-          orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }],
-          select: { valorMensal: true },
-        });
+        const valor = await valorDoMes(tx, competencia);
         if (!valor) {
           throw new Error(
             'A sede ainda não cadastrou o valor da contribuição.',
@@ -135,19 +127,21 @@ export class LoteMensalService {
               none: { competencia, status: { not: 'CANCELADO' } },
             },
           },
-          select: { id: true },
+          select: {
+            id: true,
+            // Valor que a sede mudou só para o boleto deste mês (RN04).
+            edicoesBoleto: { where: { competencia }, select: { valor: true } },
+          },
         });
 
         const lote = await tx.loteMensal.create({ data: { competencia } });
-        for (const { id } of associados) {
-          // TODO(#45): usar a edição que a sede fez para o boleto deste mês
-          // (RN04).
+        for (const { id, edicoesBoleto } of associados) {
           await this.transacoes.criarBoleto(tx, {
             associadoId: id,
             loteId: lote.id,
             tipo: 'MENSAL',
             competencia,
-            valor: valor.valorMensal,
+            valor: edicoesBoleto[0]?.valor ?? valor,
             // Dia 10 (RN02).
             vencimento: new Date(competencia.getTime() + 9 * UM_DIA),
           });

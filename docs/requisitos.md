@@ -1,6 +1,6 @@
 # Elo Connect — Requisitos (v7)
 
-Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 31/10/2026.
+Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 01/11/2026.
 
 **Legenda de status**
 
@@ -52,7 +52,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN01 | O valor da contribuição é o mesmo para todos os associados. | [Validado] |
 | RN02 | Vencimento fixo, até o dia 10 de cada mês. Os boletos mensais são enviados no primeiro dia útil do mês. | [Validado] — dia do envio: resposta 16; dia útil: de segunda a sexta, sem feriado nacional (decisão do grupo, 31/10/2026) |
 | RN03 | Boleto com validade de 30 dias, contados a partir do vencimento. Depois disso, o boleto expira. | [Validado] — lembretes depois da expiração em P01 |
-| RN04 | Os boletos mensais são gerados e enviados automaticamente, sem revisão. A sede pode editar o boleto de um associado (o valor ou outro dado): a edição vale para o boleto do mês seguinte, e o associado recebe na hora um e-mail avisando que a cobrança vai mudar. | [Validado] — conversa de 28/10/2026 (P20); quais dados podem ser editados e até quando: decisão do grupo na M3 |
+| RN04 | Os boletos mensais são gerados e enviados automaticamente, sem revisão. A sede pode editar o boleto de um associado (o valor ou outro dado): a edição vale para o boleto do mês seguinte, e o associado recebe na hora um e-mail avisando que a cobrança vai mudar. | [Validado] — conversa de 28/10/2026 (P20); decisão do grupo (01/11/2026): a sede edita só o valor, e a edição feita num mês vale para o boleto do mês seguinte, podendo ser trocada ou desfeita até o mês virar |
 | RN05 | Boletos são enviados **somente a associados com contribuição ativa**, nunca a todos os cadastrados. | [Validado] |
 | RN06 | Pagamento por boleto ou Pix (QR Code). | [Validado] |
 | RN07 | Lembretes: um 48h antes do vencimento; depois do vencimento, um por semana, até o boleto expirar e o acesso ser bloqueado (RN09). | [Validado] — mudou em 28/10/2026 (resposta 15); antes, a cada 48h |
@@ -112,7 +112,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
 | RF10 | Gerar e enviar automaticamente, no primeiro dia útil do mês, o lote de boletos (com Pix QR Code) de todos os associados com contribuição ativa, sem revisão (RN04). | Must | [Validado] — conversa de 28/10/2026 (P20) |
-| RF11 | A sede edita o boleto de um associado (o valor ou outro dado). A edição vale para o boleto do mês seguinte, e o associado recebe um e-mail na hora (RN04). | Must | [Validado] — quais dados e até quando: decisão do grupo na M3 |
+| RF11 | A sede edita o boleto de um associado (o valor ou outro dado). A edição vale para o boleto do mês seguinte, e o associado recebe um e-mail na hora (RN04). | Must | [Validado] — só o valor, até o fim do mês anterior ao do boleto (decisão do grupo, 01/11/2026) |
 | RF12 | Enviar o boleto por e-mail e disponibilizá-lo no app (boleto + Pix QR Code). | Must | [Validado] |
 | RF13 | Enviar lembrete automático 48h antes do vencimento. | Must | [Validado] |
 | RF14 | Enviar lembrete automático uma vez por semana após o vencimento, até o boleto expirar (RN07). | Must | [Validado] |

@@ -1,6 +1,6 @@
 # Elo Connect — Modelo de Dados (DER)
 
-Última atualização: 31/10/2026.
+Última atualização: 01/11/2026.
 
 Fonte da verdade do banco: [`apps/api/prisma/schema.prisma`](../apps/api/prisma/schema.prisma). Este documento explica o modelo e as decisões; se os dois divergirem, vale o schema, e este documento deve ser corrigido no mesmo PR.
 
@@ -17,6 +17,7 @@ erDiagram
     Usuario ||--o{ ValorContribuicao : "altera"
     LoteMensal |o--o{ Boleto : "contém"
     Associado ||--o{ Boleto : "recebe"
+    Associado ||--o{ EdicaoBoleto : "tem"
     Boleto ||--o{ Transacao : "gera"
     Associado ||--o{ Transacao : "tem"
     Usuario |o--o{ Transacao : "registra"
@@ -94,6 +95,12 @@ erDiagram
         string pixCopiaECola
         datetime pagoEm
         datetime ultimoLembreteEm
+    }
+    EdicaoBoleto {
+        uuid id PK
+        uuid associadoId FK "UK com competencia"
+        date competencia
+        decimal valor
     }
     Transacao {
         uuid id PK
@@ -184,6 +191,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Valor de cada boleto.** Uma alteração de valor vale a partir do boleto do mês seguinte (RN15). O boleto de uma competência usa o `ValorContribuicao` mais recente criado antes do primeiro dia desse mês, no horário de Cuiabá. Por isso, a data de início não precisa de coluna própria.
 
+**Edição do boleto do mês seguinte** (RN04, RF11). A sede muda só o valor do boleto mensal de um associado, e só para um mês (decisão do grupo, 01/11/2026). Como o boleto ainda não existe, a edição fica numa tabela à parte, a `EdicaoBoleto`, com uma linha por associado e competência. A edição feita num mês vale para o boleto do mês seguinte, no horário de Mato Grosso, como a mudança de valor (RN15), e pode ser trocada ou desfeita até o mês virar. Desfazer apaga a linha. Quem editou, quando e os valores de antes e depois ficam no log de auditoria. O lote mensal usa o valor da edição no lugar do valor da contribuição.
+
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 
 **Histórico de cada boleto (RN17, RF30).** Todo código que cria ou muda um boleto usa o `TransacoesService` (`apps/api/src/cobranca`). Ele grava a linha da `Transacao` na mesma transação do banco da mudança: se uma das duas falhar, nenhuma entra. A linha guarda uma cópia do valor e do nosso número daquele momento, a forma de pagamento (só no `PAGO`) e quem da sede fez a mudança (nulo quando foi o sistema). Linhas gravadas na mesma transação do banco ficam com a mesma data e hora.
@@ -234,7 +243,6 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
 | Boleto AVULSO e boleto único dos meses em aberto (RN24, RN30) | P10 (em parte) | O tipo AVULSO existe. O pedido que passa pela sede (boleto dos meses em aberto e segundo avulso do mês) precisa de um registro de pedido, com aprovação ou recusa. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita. Tabelas novas, desenhadas com a #63. |
 | Aceite do termo de adesão (RN23) | P21 | **Fora do modelo** até a #43: data, hora e versão do termo aceito. |
-| Edição do boleto do mês seguinte (RN04, RF11) | — | Quais dados podem ser editados, até quando e como a edição é guardada: decisão do grupo na M3 (#44, #45). |
 | Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |
 | Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
