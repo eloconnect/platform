@@ -186,6 +186,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Boletos no site (#47): em "Meus boletos", o associado vê os boletos em aberto, em dia ou não, com o valor e o vencimento em destaque, o QR Code do Pix, os botões de copiar o código Pix e a linha digitável e o PDF do boleto. O boleto vencido mostra até quando ainda dá para pagar (RN03). O QR Code é gerado no navegador, com a mesma biblioteca da API, e o PDF vem do banco pela API, só para o dono do boleto.
 
+- Bloqueio automático (#49): um segundo cron da Vercel chama a API todo dia (`/api/tarefas/bloqueio`). O boleto em aberto que passou do último dia para pagar, 30 dias depois do vencimento no horário de Mato Grosso, vira EXPIRADO, e o associado passa a inadimplente, o que bloqueia benefícios e suporte (RN09). Notícias e o PDF resumido das convenções continuam abertos. A liberação ou o bloqueio manual da sede (RN11) continuam valendo sobre a situação.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.

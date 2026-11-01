@@ -203,8 +203,9 @@ enum StatusBoleto {
   EM_ABERTO
   PAGO
   CANCELADO
-  // TODO(P01): o que acontece depois dos 30 dias de validade pode exigir
-  // um status a mais (ex.: EXPIRADO).
+  /// Passou da validade de 30 dias depois do vencimento sem pagamento
+  /// (RN03, RN09). O banco não recebe mais este boleto.
+  EXPIRADO
 }
 
 model Boleto {
@@ -265,6 +266,7 @@ enum EventoTransacao {
   EMITIDO
   PAGO
   CANCELADO
+  EXPIRADO
 }
 
 enum FormaPagamento {

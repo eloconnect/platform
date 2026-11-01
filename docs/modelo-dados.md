@@ -89,7 +89,7 @@ erDiagram
         date competencia
         decimal valor
         date vencimento
-        StatusBoleto status "RASCUNHO, EM_ABERTO, PAGO, CANCELADO"
+        StatusBoleto status "RASCUNHO, EM_ABERTO, PAGO, CANCELADO, EXPIRADO"
         string sicrediNossoNumero UK
         string linhaDigitavel
         string pixCopiaECola
@@ -188,6 +188,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Boleto vencido é calculado.** Não existe status VENCIDO: um boleto EM_ABERTO com `vencimento` no passado está vencido. Evita que um job precise atualizar boletos todo dia.
 
+**Boleto expirado é guardado** (RN03, RN09, RF16). O boleto vale até 30 dias depois do vencimento. No dia seguinte, o job diário do bloqueio marca o boleto EM_ABERTO como EXPIRADO, com o evento EXPIRADO no histórico, e torna o associado INADIMPLENTE. A decisão manual da sede (`acessoManual`) não muda. O banco não recebe mais o boleto expirado.
+
 **Lote mensal** agrupa os boletos MENSAL de uma competência, gerados e enviados sozinhos no primeiro dia útil, sem revisão (RN04). Ninguém da sede envia o lote (P20): ele nasce em RASCUNHO, com os boletos ainda por emitir no banco, e passa a ENVIADO quando todos foram emitidos. Boletos avulsos e anuais ficam fora do lote até as pendências P10 e P04 serem respondidas.
 
 **Valor de cada boleto.** Uma alteração de valor vale a partir do boleto do mês seguinte (RN15). O boleto de uma competência usa o `ValorContribuicao` mais recente criado antes do primeiro dia desse mês, no horário de Cuiabá. Por isso, a data de início não precisa de coluna própria.
@@ -213,7 +215,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 | Tabela | Regra | O que guarda |
 | --- | --- | --- |
 | `ValorContribuicao` | RN16, RF20 | Cada alteração de valor é um registro novo, com o mensal digitado pela sede e o anual calculado (P23). O valor atual é o mais recente; o anterior é o de antes. |
-| `Transacao` | RN17, RF30 | Cada evento de um boleto (gerado, editado, emitido, pago, cancelado), com cópia do valor e do nosso número no momento do evento. |
+| `Transacao` | RN17, RF30 | Cada evento de um boleto (gerado, editado, emitido, pago, cancelado, expirado), com cópia do valor e do nosso número no momento do evento. |
 | `LogAuditoria` | RN26, RF39 | Cada ação de um usuário da sede, com valor anterior e novo. |
 
 A imutabilidade é garantida **pelo próprio banco**: triggers recusam UPDATE, DELETE e TRUNCATE nessas tabelas (migration `init`), mesmo que o código da API tenha um erro. O teste `apps/api/test/imutabilidade.e2e-spec.ts` confere isso. Para corrigir um registro errado, inclua um registro novo; nunca altere o antigo.
@@ -242,7 +244,6 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Ponto do modelo | Pendência | Situação atual |
 | --- | --- | --- |
 | Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, RF42 | Conjunto mínimo provisório. Não existe lista atual dos associados (P09, respondida), então a planilha modelo da carga inicial parte deste conjunto. Novos campos entram por migration. |
-| Boleto depois dos 30 dias de validade | RN03, RN09 e P01 (em parte) | O boleto expira 30 dias após o vencimento, e a expiração bloqueia o acesso. Deve entrar um status EXPIRADO junto com o bloqueio automático (#49). Os lembretes param na expiração (resposta 15). |
 | Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
 | Boleto AVULSO e boleto único dos meses em aberto (RN24, RN30) | P10 (em parte) | O tipo AVULSO existe. O pedido que passa pela sede (boleto dos meses em aberto e segundo avulso do mês) precisa de um registro de pedido, com aprovação ou recusa. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita. Tabelas novas, desenhadas com a #63. |
 | Aceite do termo de adesão (RN23) | P21 | **Fora do modelo** até a #43: data, hora e versão do termo aceito. |

@@ -3,6 +3,7 @@ import { AuditoriaModule } from '../auditoria/auditoria.module.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { EmailModule } from '../email/email.module.js';
 import { AssociadoBoletosController } from './associado-boletos.controller.js';
+import { BloqueioService } from './bloqueio.service.js';
 import { BoletosAssociadoService } from './boletos-associado.service.js';
 import { EdicaoBoletoService } from './edicao-boleto.service.js';
 import { EmailBoletoService } from './email-boleto.service.js';
@@ -22,6 +23,7 @@ import { TransacoesService } from './transacoes.service.js';
     EdicaoBoletoService,
     EmailBoletoService,
     BoletosAssociadoService,
+    BloqueioService,
     // TODO(#40): o adaptador do Sicredi entra aqui quando houver o convênio.
     { provide: GatewayPagamento, useClass: GatewaySimulado },
   ],
