@@ -23,6 +23,7 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+import { SecaoHistoricoBoletos } from './SecaoHistoricoBoletos';
 import { SecaoProximoBoleto } from './SecaoProximoBoleto';
 import { textosSituacao } from './situacaoAssociado';
 
@@ -72,8 +73,8 @@ const DECISOES_ACESSO: {
 ];
 
 /**
- * Perfil do associado para a sede (US07, RF07): situação, dados cadastrais e
- * solicitações de cancelamento. O histórico de boletos entra com a cobrança.
+ * Perfil do associado para a sede (US07, RF07): situação, dados cadastrais,
+ * solicitações de cancelamento e o histórico de boletos e pagamentos.
  * Daqui a sede edita, inativa e reativa o associado (US08, RF08), bloqueia ou
  * libera o acesso a benefícios e suporte (US09, RF09) e muda o valor do
  * próximo boleto (US11, RF11).
@@ -313,10 +314,12 @@ function Perfil({
         }
       />
 
-      <section className="mt-4">
-        <h2>Histórico de boletos e pagamentos</h2>
-        <p>Em construção.</p>
-      </section>
+      <SecaoHistoricoBoletos
+        associado={associado}
+        aoPagar={(desbloqueado, mensagem) =>
+          aoAtualizar(desbloqueado ? { situacao: 'ADIMPLENTE' } : {}, mensagem)
+        }
+      />
     </>
   );
 }

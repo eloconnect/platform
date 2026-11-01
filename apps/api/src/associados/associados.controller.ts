@@ -17,6 +17,7 @@ import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { EditarProximoBoletoDto } from '../cobranca/dto/editar-proximo-boleto.dto.js';
 import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
+import { HistoricoBoletosService } from '../cobranca/historico-boletos.service.js';
 import { AssociadosService } from './associados.service.js';
 import {
   CriarAssociadoDto,
@@ -26,8 +27,9 @@ import {
 import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
 /**
- * Gestão de associados pela sede (US06, US08, US09, US11: RF06, RF08, RF09,
- * RF11). Só o chave mestre altera; o perfil básico só consulta (RN33).
+ * Gestão de associados pela sede (US06, US07, US08, US09, US11: RF06, RF07,
+ * RF08, RF09, RF11). Só o chave mestre altera; o perfil básico só consulta
+ * (RN33).
  */
 @Controller('associados')
 @UseGuards(RolesGuard)
@@ -36,6 +38,7 @@ export class AssociadosController {
   constructor(
     private readonly associados: AssociadosService,
     private readonly edicoes: EdicaoBoletoService,
+    private readonly historico: HistoricoBoletosService,
   ) {}
 
   @Get()
@@ -89,6 +92,13 @@ export class AssociadosController {
     @Body() dados: DefinirAcessoDto,
   ) {
     return this.associados.definirAcesso(usuarioId, id, dados);
+  }
+
+  /** Histórico de boletos e pagamentos no perfil (RF07). */
+  @Get(':id/boletos')
+  @Roles('ADMIN', 'ADMIN_BASICO')
+  listarBoletos(@Param('id', ParseUUIDPipe) id: string) {
+    return this.historico.listar(id);
   }
 
   /** Muda o valor do boleto do mês seguinte (RF11, RN04). */

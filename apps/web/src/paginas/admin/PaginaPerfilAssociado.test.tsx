@@ -1,6 +1,7 @@
 import type {
   ApiClient,
   AssociadoDetalhe,
+  BoletoHistorico,
   ProximoBoleto,
 } from '@eloconnect/shared';
 import { ApiError } from '@eloconnect/shared';
@@ -20,6 +21,8 @@ vi.mock('../../api', () => ({
     definirAcesso: vi.fn<ApiClient['definirAcesso']>(),
     editarProximoBoleto: vi.fn<ApiClient['editarProximoBoleto']>(),
     voltarAoValorNormal: vi.fn<ApiClient['voltarAoValorNormal']>(),
+    listarBoletosAssociado: vi.fn<ApiClient['listarBoletosAssociado']>(),
+    simularPagamento: vi.fn<ApiClient['simularPagamento']>(),
   },
 }));
 
@@ -80,6 +83,48 @@ function secao(titulo: string): HTMLElement {
   return elemento;
 }
 
+const boleto = (
+  dados: Partial<BoletoHistorico> & Pick<BoletoHistorico, 'id' | 'status'>,
+): BoletoHistorico => ({
+  competencia: { ano: 2026, mes: 11 },
+  tipo: 'MENSAL',
+  valor: '120.00',
+  vencimento: '2026-11-10',
+  vencido: false,
+  pagoEm: null,
+  formaPagamento: null,
+  ...dados,
+});
+const BOLETOS: BoletoHistorico[] = [
+  boleto({
+    id: 'b-12',
+    status: 'RASCUNHO',
+    competencia: { ano: 2026, mes: 12 },
+    vencimento: '2026-12-10',
+  }),
+  boleto({ id: 'b-11', status: 'EM_ABERTO', vencido: true }),
+  boleto({
+    id: 'b-10',
+    status: 'PAGO',
+    competencia: { ano: 2026, mes: 10 },
+    vencimento: '2026-10-10',
+    pagoEm: '2026-10-08T15:00:00.000Z',
+    formaPagamento: 'PIX',
+  }),
+  boleto({
+    id: 'b-09',
+    status: 'EXPIRADO',
+    tipo: 'AVULSO',
+    competencia: { ano: 2026, mes: 9 },
+    vencimento: '2026-09-10',
+  }),
+];
+const linhas = async () => {
+  await screen.findByRole('heading', { level: 2, name: 'Situação' });
+  const historico = secao('Histórico de boletos e pagamentos');
+  return (await within(historico).findAllByRole('row')).slice(1);
+};
+
 describe('PaginaPerfilAssociado', () => {
   beforeEach(() => {
     entrarComo('ADMIN');
@@ -89,6 +134,11 @@ describe('PaginaPerfilAssociado', () => {
     vi.mocked(api.definirAcesso).mockReset();
     vi.mocked(api.editarProximoBoleto).mockReset();
     vi.mocked(api.voltarAoValorNormal).mockReset();
+    vi.mocked(api.listarBoletosAssociado).mockResolvedValue({
+      boletos: [],
+      simulacao: false,
+    });
+    vi.mocked(api.simularPagamento).mockReset();
   });
 
   it('mostra a situação, os dados cadastrais e o espaço dos boletos', async () => {
@@ -117,9 +167,11 @@ describe('PaginaPerfilAssociado', () => {
     expect(secao('Solicitações de cancelamento')).toHaveTextContent(
       'Nenhuma solicitação.',
     );
-    expect(secao('Histórico de boletos e pagamentos')).toHaveTextContent(
-      'Em construção.',
-    );
+    expect(
+      await within(secao('Histórico de boletos e pagamentos')).findByText(
+        'Nenhum boleto ainda.',
+      ),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Voltar para a lista de associados' }),
     ).toHaveAttribute('href', '/admin/associados');
@@ -265,7 +317,12 @@ describe('PaginaPerfilAssociado', () => {
     expect(
       await screen.findByRole('link', { name: 'Editar dados' }),
     ).toHaveAttribute('href', '/admin/associados/id-01/editar');
-    expect(screen.getByRole('status')).toHaveTextContent('Dados salvos.');
+    // O histórico de boletos também tem um aviso de carregamento.
+    expect(
+      screen
+        .getAllByRole('status')
+        .some((aviso) => aviso.textContent === 'Dados salvos.'),
+    ).toBe(true);
   });
 
   it('inativa depois de confirmar', async () => {
@@ -728,6 +785,118 @@ describe('PaginaPerfilAssociado', () => {
       expect(await within(janela).findByRole('alert')).toHaveTextContent(
         'Não foi possível mudar o valor agora.',
       );
+    });
+  });
+
+  describe('histórico de boletos (RF07)', () => {
+    it('mostra cada boleto com mês, valor, vencimento e situação', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.listarBoletosAssociado).mockResolvedValue({
+        boletos: BOLETOS,
+        simulacao: false,
+      });
+      abrir();
+
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
+      const [dezembro, novembro, outubro, setembro] = await linhas();
+      expect(api.listarBoletosAssociado).toHaveBeenCalledWith('id-01');
+      expect(dezembro).toHaveTextContent('dezembro de 2026');
+      expect(dezembro).toHaveTextContent('Em emissão');
+      expect(novembro).toHaveTextContent(/R\$\s120,00/);
+      expect(novembro).toHaveTextContent('10/11/2026');
+      expect(novembro).toHaveTextContent('Vencido');
+      expect(outubro).toHaveTextContent('Pago em 08/10/2026, com Pix');
+      expect(setembro).toHaveTextContent('setembro de 2026 (avulso)');
+      expect(setembro).toHaveTextContent('Expirado, sem pagamento');
+      // Sem o banco simulado, não há o que simular.
+      expect(
+        screen.queryByRole('button', { name: /Simular o pagamento/ }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('na demonstração, o chave mestre simula o pagamento e o acesso volta', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ situacao: 'INADIMPLENTE' }),
+      );
+      vi.mocked(api.listarBoletosAssociado).mockResolvedValue({
+        boletos: BOLETOS,
+        simulacao: true,
+      });
+      vi.mocked(api.simularPagamento).mockResolvedValue({
+        boletoId: 'b-09',
+        jaEstavaPago: false,
+        desbloqueado: true,
+      });
+      abrir();
+
+      await linhas();
+      // Só os boletos em aberto ou expirados podem ser pagos.
+      expect(
+        screen
+          .getAllByRole('button', { name: /^Simular o pagamento do boleto/ })
+          .map((botao) => botao.getAttribute('aria-label')),
+      ).toEqual([
+        'Simular o pagamento do boleto de novembro de 2026',
+        'Simular o pagamento do boleto de setembro de 2026',
+      ]);
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'Simular o pagamento do boleto de setembro de 2026',
+        }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Simular o pagamento do boleto de setembro de 2026?',
+      });
+      await userEvent.click(within(janela).getByLabelText('Boleto'));
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Simular o pagamento' }),
+      );
+
+      expect(api.simularPagamento).toHaveBeenCalledWith('b-09', {
+        formaPagamento: 'BOLETO',
+      });
+      expect(
+        await screen.findByText(
+          'Pagamento do boleto de setembro de 2026 simulado. O acesso a benefícios e suporte foi liberado.',
+        ),
+      ).toBeInTheDocument();
+      expect(secao('Situação')).toHaveTextContent('Adimplente');
+      // O histórico é carregado de novo.
+      expect(api.listarBoletosAssociado).toHaveBeenCalledTimes(2);
+    });
+
+    it('o perfil básico não simula pagamento (RN33)', async () => {
+      entrarComo('ADMIN_BASICO');
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.listarBoletosAssociado).mockResolvedValue({
+        boletos: BOLETOS,
+        simulacao: true,
+      });
+      abrir();
+
+      expect(await linhas()).toHaveLength(4);
+      expect(
+        screen.queryByRole('button', { name: /Simular o pagamento/ }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('avisa quando não consegue carregar os boletos', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.listarBoletosAssociado).mockRejectedValue(
+        new TypeError('Failed to fetch'),
+      );
+      abrir();
+
+      expect(
+        await within(
+          await screen
+            .findByRole('heading', {
+              level: 2,
+              name: 'Histórico de boletos e pagamentos',
+            })
+            .then((titulo) => titulo.closest('section') ?? document.body),
+        ).findByRole('alert'),
+      ).toHaveTextContent('Não foi possível carregar os boletos agora.');
     });
   });
 });

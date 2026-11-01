@@ -22,6 +22,35 @@ export interface BoletoEmAberto {
 /** Como o associado pagou (RF30). */
 export type FormaPagamento = 'BOLETO' | 'PIX';
 
+export type StatusBoleto =
+  'RASCUNHO' | 'EM_ABERTO' | 'PAGO' | 'CANCELADO' | 'EXPIRADO';
+
+export type TipoBoleto = 'MENSAL' | 'AVULSO' | 'ANUAL';
+
+/** Boleto no histórico do perfil do associado, para a sede (RF07). */
+export interface BoletoHistorico {
+  id: string;
+  competencia: Competencia;
+  tipo: TipoBoleto;
+  valor: string;
+  /** "AAAA-MM-DD". */
+  vencimento: string;
+  status: StatusBoleto;
+  /** Em aberto com o vencimento já passado, no horário de Mato Grosso. */
+  vencido: boolean;
+  /** Data e hora ISO do pagamento. */
+  pagoEm: string | null;
+  formaPagamento: FormaPagamento | null;
+}
+
+/** Histórico de boletos e pagamentos de um associado (RF07). */
+export interface HistoricoBoletos {
+  /** Do mês mais novo para o mais antigo. */
+  boletos: BoletoHistorico[];
+  /** A API usa o banco simulado, e o chave mestre pode simular pagamentos. */
+  simulacao: boolean;
+}
+
 /** Pagamento de mentira, feito pela sede, só com o banco simulado. */
 export interface SimularPagamentoRequest {
   formaPagamento: FormaPagamento;

@@ -190,6 +190,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Baixa do pagamento (#48): quando o banco confirma o pagamento, o boleto vira PAGO, com o evento no histórico, e o associado volta a adimplente, o que desbloqueia benefícios e suporte (RN10). Se ele ainda tiver outro boleto expirado, continua inadimplente, porque os meses em aberto se pagam num boleto só, que passa pela sede (RN30). Um aviso repetido do banco não muda nada, e o valor pago fica no histórico quando é diferente do valor do boleto. O canal da confirmação (notificação do banco ou consulta) depende do estudo (#40). Até lá, na demonstração, o chave mestre simula o pagamento de um boleto (`POST /api/boletos/:id/pagamento-simulado`, com Pix ou boleto), o que fica no histórico e no log de auditoria. A simulação só existe com o banco simulado: com o banco de verdade, a rota responde 404.
 
+- Histórico de boletos no perfil (#52): o perfil do associado, na área da sede, mostra os boletos do mês mais novo para o mais antigo, com o valor, o vencimento e a situação (em emissão, em aberto, vencido, pago, com a data e a forma de pagamento, cancelado ou expirado). Os dois perfis da sede consultam (RN33). Com o banco simulado, o chave mestre vê o botão "Simular pagamento" nos boletos em aberto ou expirados.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.

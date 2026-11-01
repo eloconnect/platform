@@ -12,6 +12,7 @@ import type {
 } from './associados.js';
 import type {
   BoletoEmAberto,
+  HistoricoBoletos,
   ResultadoPagamento,
   SimularPagamentoRequest,
 } from './boletos.js';
@@ -382,6 +383,13 @@ export function createApiClient(
 
     baixarPdfMeuBoleto: (id: string) =>
       requisitarArquivo(`/associado/boletos/${encodeURIComponent(id)}/pdf`),
+
+    /** Histórico de boletos e pagamentos no perfil do associado (RF07). */
+    listarBoletosAssociado: (id: string) =>
+      requisitar<HistoricoBoletos>(
+        'GET',
+        `/associados/${encodeURIComponent(id)}/boletos`,
+      ),
 
     /** Pagamento de mentira, só com o banco simulado (demonstração). */
     simularPagamento: (id: string, dados: SimularPagamentoRequest) =>
