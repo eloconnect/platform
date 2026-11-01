@@ -192,6 +192,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Histórico de boletos no perfil (#52): o perfil do associado, na área da sede, mostra os boletos do mês mais novo para o mais antigo, com o valor, o vencimento e a situação (em emissão, em aberto, vencido, pago, com a data e a forma de pagamento, cancelado ou expirado). Os dois perfis da sede consultam (RN33). Com o banco simulado, o chave mestre vê o botão "Simular pagamento" nos boletos em aberto ou expirados.
 
+- Lembretes (#50): um terceiro cron da Vercel chama a API todo dia (`/api/tarefas/lembretes`). O associado com contribuição ativa e e-mail no cadastro recebe um lembrete 2 dias antes do vencimento (48h, RF13) e, depois do vencimento, um por semana, 7, 14, 21 e 28 dias depois, até o último dia para pagar (RF14, RN07). Os dias da semana do lembrete são decisão do grupo (01/11/2026): a regra do cliente diz "um por semana", sem dizer o dia. Se a execução de um dia falhar, o lembrete sai num dos dias seguintes, sem repetir. Os lembretes param quando o boleto é pago ou expira. Cada lembrete traz o mesmo conteúdo do e-mail do boleto (QR Code, código Pix, linha digitável e PDF), e todos esses e-mails trazem o endereço da página "Meus boletos" no site.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.

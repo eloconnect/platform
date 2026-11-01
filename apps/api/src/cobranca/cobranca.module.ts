@@ -11,6 +11,7 @@ import { EmailBoletoService } from './email-boleto.service.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
 import { GatewaySimulado } from './gateway-simulado.js';
 import { HistoricoBoletosService } from './historico-boletos.service.js';
+import { LembretesService } from './lembretes.service.js';
 import { LoteMensalService } from './lote-mensal.service.js';
 import { PagamentosService } from './pagamentos.service.js';
 import { TarefasController } from './tarefas.controller.js';
@@ -33,6 +34,7 @@ import { TransacoesService } from './transacoes.service.js';
     BloqueioService,
     PagamentosService,
     HistoricoBoletosService,
+    LembretesService,
     // TODO(#40): o adaptador do Sicredi entra aqui quando houver o convênio.
     { provide: GatewayPagamento, useClass: GatewaySimulado },
   ],

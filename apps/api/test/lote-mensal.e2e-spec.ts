@@ -6,6 +6,7 @@
 import 'dotenv/config';
 import { jest } from '@jest/globals';
 import { INestApplication, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { PrismaPg } from '@prisma/adapter-pg';
 import request from 'supertest';
@@ -88,9 +89,12 @@ async function desfazendoNoFim(
               banco,
               new TransacoesService(),
               gateway,
-              new EmailBoletoService(banco, gateway, {
-                send,
-              } as unknown as EmailService),
+              new EmailBoletoService(
+                banco,
+                gateway,
+                { send } as unknown as EmailService,
+                new ConfigService(),
+              ),
             ),
         );
         throw new Desfazer();
