@@ -11,6 +11,7 @@ import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
 import { PaginaNoticias } from './paginas/admin/PaginaNoticias';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
+import { PaginaAdesaoAssociado } from './paginas/associado/PaginaAdesaoAssociado';
 import { PaginaBoletosAssociado } from './paginas/associado/PaginaBoletosAssociado';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaConvencoesAssociado } from './paginas/associado/PaginaConvencoesAssociado';
@@ -61,6 +62,8 @@ export const rotas: RouteObject[] = [
       { path: 'convencoes', element: <PaginaConvencoesAssociado /> },
       // Em dia ou não, o associado vê os boletos em aberto para pagar (RF12).
       { path: 'boletos', element: <PaginaBoletosAssociado /> },
+      // Adesão à cobrança recorrente, sem aprovação da sede (RN23).
+      { path: 'adesao', element: <PaginaAdesaoAssociado /> },
     ],
   },
   {

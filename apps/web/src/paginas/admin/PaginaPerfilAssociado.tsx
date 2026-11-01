@@ -19,6 +19,7 @@ import { api } from '../../api';
 import { ehChaveMestre } from '../../sessao';
 import {
   AvisoSucesso,
+  lerAviso,
   Botao,
   CampoTexto,
   MensagemErro,
@@ -570,16 +571,6 @@ function textoInterrupcao(associado: AssociadoDetalhe): string {
   return associado.situacao === 'ADIMPLENTE'
     ? `${quando} O acesso a benefícios e suporte continua até ${formatarDia(interrupcao.acessoAte)}.`
     : quando;
-}
-
-/** Aviso deixado pela página anterior (ex.: "Dados salvos." depois de editar). */
-function lerAviso(estado: unknown): string | null {
-  return typeof estado === 'object' &&
-    estado !== null &&
-    'aviso' in estado &&
-    typeof estado.aviso === 'string'
-    ? estado.aviso
-    : null;
 }
 
 /** A conta é criada pelo próprio associado, pelo CNPJ (RF05). */

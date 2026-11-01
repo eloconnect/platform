@@ -18,6 +18,8 @@ erDiagram
     LoteMensal |o--o{ Boleto : "contém"
     Associado ||--o{ Boleto : "recebe"
     Associado ||--o{ EdicaoBoleto : "tem"
+    Associado ||--o{ AdesaoCobranca : "adere"
+    Usuario ||--o{ AdesaoCobranca : "aceita o termo"
     Boleto ||--o{ Transacao : "gera"
     Associado ||--o{ Transacao : "tem"
     Usuario |o--o{ Transacao : "registra"
@@ -104,6 +106,13 @@ erDiagram
         date competencia
         decimal valor
     }
+    AdesaoCobranca {
+        uuid id PK
+        uuid associadoId FK
+        uuid usuarioId FK
+        string versaoTermo
+        datetime aceitaEm
+    }
     Transacao {
         uuid id PK
         uuid boletoId FK
@@ -187,6 +196,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Contribuição ativa** (`contribuicaoAtiva`) define quem entra no lote mensal e recebe lembretes (RN05, RN22). É ligada pelo próprio associado (RN23) e desligada por cancelamento aprovado ou pela sede (RN25).
 
+**Adesão pelo associado** (RN23, RF36). Liga a `contribuicaoAtiva`, sem aprovação da sede, e grava a `AdesaoCobranca` com a versão do termo aceito. Na mesma transação, gera o boleto MENSAL do mês, sem lote, com o valor cheio, e o emite no banco. Se o banco falhar, nada fica gravado. Quem já tem o boleto do mês não recebe outro, e o lote mensal não gera um segundo boleto para quem aderiu.
+
 **Interrupção da cobrança pela sede** (RN25, RF38). Desliga a `contribuicaoAtiva` e guarda o instante em `cobrancaInterrompidaEm`. Quem estava em dia mantém a situação ADIMPLENTE por mais 30 dias: o último dia com acesso é o dia da interrupção, no horário de Mato Grosso, mais 30. No dia seguinte, o job diário do bloqueio o torna INADIMPLENTE. Quando a cobrança é ativada de novo, o campo volta a nulo. O motivo fica só no log de auditoria.
 
 **Boleto vencido é calculado.** Não existe status VENCIDO: um boleto EM_ABERTO com `vencimento` no passado está vencido. Evita que um job precise atualizar boletos todo dia.
@@ -220,6 +231,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 | `ValorContribuicao` | RN16, RF20 | Cada alteração de valor é um registro novo, com o mensal digitado pela sede e o anual calculado (P23). O valor atual é o mais recente; o anterior é o de antes. |
 | `Transacao` | RN17, RF30 | Cada evento de um boleto (gerado, editado, emitido, pago, cancelado, expirado), com cópia do valor e do nosso número no momento do evento. |
 | `LogAuditoria` | RN26, RF39 | Cada ação de um usuário da sede, com valor anterior e novo. |
+| `AdesaoCobranca` | RN23, RF36 | Cada adesão do associado à cobrança recorrente, com a conta que aceitou o termo, a versão do termo e a data e a hora (resposta 19). |
 
 A imutabilidade é garantida **pelo próprio banco**: triggers recusam UPDATE, DELETE e TRUNCATE nessas tabelas (migration `init`), mesmo que o código da API tenha um erro. O teste `apps/api/test/imutabilidade.e2e-spec.ts` confere isso. Para corrigir um registro errado, inclua um registro novo; nunca altere o antigo.
 
@@ -249,7 +261,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, RF42 | Conjunto mínimo provisório. Não existe lista atual dos associados (P09, respondida), então a planilha modelo da carga inicial parte deste conjunto. Novos campos entram por migration. |
 | Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
 | Boleto AVULSO e boleto único dos meses em aberto (RN24, RN30) | P10 (em parte) | O tipo AVULSO existe. O pedido que passa pela sede (boleto dos meses em aberto e segundo avulso do mês) precisa de um registro de pedido, com aprovação ou recusa. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita. Tabelas novas, desenhadas com a #63. |
-| Aceite do termo de adesão (RN23) | P21 | **Fora do modelo** até a #43: data, hora e versão do termo aceito. |
+| Termo de adesão e vencimento do primeiro boleto (RN23) | P21, P16 | O aceite fica na `AdesaoCobranca`. O texto do termo (`TERMO_ADESAO`, no `packages/shared`) e o vencimento do boleto da adesão, 10 dias depois dela, são provisórios. |
 | Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |
 | Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |

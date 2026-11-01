@@ -62,6 +62,12 @@ export {
 } from './noticias.js';
 export type * from './convencoes.js';
 export {
+  TERMO_ADESAO,
+  type AderirRequest,
+  type AdesaoFeita,
+  type SituacaoAdesao,
+} from './adesao.js';
+export {
   formatarDia,
   type BoletoEmAberto,
   type BoletoHistorico,

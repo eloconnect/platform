@@ -48,6 +48,7 @@ model Usuario {
   convencoes             Convencao[]
   noticias               Noticia[]
   cancelamentosDecididos SolicitacaoCancelamento[]
+  adesoes                AdesaoCobranca[]
 }
 
 enum TipoToken {
@@ -123,6 +124,7 @@ model Associado {
   logs          LogAuditoria[]
   cancelamentos SolicitacaoCancelamento[]
   edicoesBoleto EdicaoBoleto[]
+  adesoes       AdesaoCobranca[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -250,6 +252,23 @@ model Boleto {
 /// (RN04, RF11). A edição feita num mês vale para o boleto do mês seguinte, e
 /// os outros meses seguem o valor da contribuição. Quem editou e quando ficam
 /// no log de auditoria; voltar ao valor normal apaga a edição.
+/// Adesão à cobrança recorrente pelo próprio associado (RN23), com o aceite
+/// do termo: a data, a hora e a versão do termo aceito (resposta 19).
+/// Imutável, como prova do aceite (trigger da migration adesao_cobranca).
+model AdesaoCobranca {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  associadoId String   @db.Uuid
+  /// A conta que aceitou. O contador entra com a conta do associado (RN29).
+  usuarioId   String   @db.Uuid
+  versaoTermo String
+  aceitaEm    DateTime @default(now())
+
+  associado Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([associadoId, aceitaEm])
+}
+
 model EdicaoBoleto {
   id           String   @id @default(uuid(7)) @db.Uuid
   associadoId  String   @db.Uuid

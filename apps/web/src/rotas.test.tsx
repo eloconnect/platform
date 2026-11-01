@@ -20,6 +20,7 @@ vi.mock('./api', () => ({
     listarConvencoes: vi.fn<ApiClient['listarConvencoes']>(),
     listarConvencoesAssociado: vi.fn<ApiClient['listarConvencoesAssociado']>(),
     listarMeusBoletos: vi.fn<ApiClient['listarMeusBoletos']>(),
+    situacaoAdesao: vi.fn<ApiClient['situacaoAdesao']>(),
   },
 }));
 
@@ -120,11 +121,16 @@ describe('Áreas logadas', () => {
     vi.mocked(api.listarConvencoes).mockResolvedValue([]);
     vi.mocked(api.listarConvencoesAssociado).mockResolvedValue([]);
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([]);
+    vi.mocked(api.situacaoAdesao).mockResolvedValue({
+      recebeBoletoMensal: false,
+      valorMensal: '120.00',
+    });
 
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Farmácia Teste',
       situacao: 'Adimplente',
       acessoLiberadoAte: null,
+      recebeBoletoMensal: true,
     });
 
     vi.mocked(api.listarAssociados).mockResolvedValue({
@@ -169,6 +175,7 @@ describe('Áreas logadas', () => {
     ['/associado/noticias', 'ASSOCIADO', 'Notícias'],
     ['/associado/convencoes', 'ASSOCIADO', 'Convenções coletivas'],
     ['/associado/boletos', 'ASSOCIADO', 'Meus boletos'],
+    ['/associado/adesao', 'ASSOCIADO', 'Receber o boleto todo mês'],
   ] as const)('%s abre para o perfil %s', async (caminho, perfil, titulo) => {
     entrarComo(perfil);
     abrir(caminho);

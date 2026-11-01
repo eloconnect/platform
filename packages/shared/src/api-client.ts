@@ -11,6 +11,7 @@ import type {
   MinhaConta,
   ProximoBoleto,
 } from './associados.js';
+import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type {
   BoletoEmAberto,
   HistoricoBoletos,
@@ -385,6 +386,14 @@ export function createApiClient(
         'POST',
         `/convencoes/${encodeURIComponent(id)}/publicar`,
       ),
+
+    /** Se a farmácia já recebe o boleto todo mês, e o valor (RN23). */
+    situacaoAdesao: () =>
+      requisitar<SituacaoAdesao>('GET', '/associado/adesao'),
+
+    /** Adesão à cobrança recorrente, com o termo aceito (RN23). */
+    aderir: (dados: AderirRequest) =>
+      requisitar<AdesaoFeita>('POST', '/associado/adesao', dados),
 
     /** Boletos em aberto do associado logado (RF12). */
     listarMeusBoletos: () =>

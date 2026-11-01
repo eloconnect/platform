@@ -1,12 +1,14 @@
 import type { MinhaConta } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
 import Alert from 'react-bootstrap/Alert';
+import { Link } from 'react-router';
 import { api } from '../../api';
 import { MensagemErro, useTituloPagina } from '../../componentes';
 
 /**
- * Início da área do associado: a situação dele e, quando a sede liberou o
- * acesso, o aviso com a data de fim da liberação (RN11, RN22).
+ * Início da área do associado: a situação dele, quando a sede liberou o
+ * acesso, o aviso com a data de fim da liberação (RN11, RN22), e o convite
+ * para receber o boleto todo mês, para quem ainda não recebe (RN23).
  */
 export function PaginaInicioAssociado() {
   useTituloPagina('Área do associado');
@@ -50,6 +52,17 @@ export function PaginaInicioAssociado() {
                 dia.
               </p>
             </Alert>
+          )}
+          {!conta.recebeBoletoMensal && (
+            <section className="mt-4">
+              <h2 className="h4">Boleto mensal</h2>
+              <p>
+                A farmácia ainda não recebe o boleto da contribuição todo mês.
+              </p>
+              <Link className="btn btn-primary btn-lg" to="/associado/adesao">
+                Quero receber o boleto todo mês
+              </Link>
+            </section>
           )}
         </>
       )}

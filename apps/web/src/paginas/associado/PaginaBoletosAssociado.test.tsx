@@ -1,6 +1,7 @@
 import type { ApiClient, BoletoEmAberto } from '@eloconnect/shared';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../api';
 import { PaginaBoletosAssociado } from './PaginaBoletosAssociado';
@@ -32,6 +33,14 @@ const NOVEMBRO: BoletoEmAberto = {
   vencido: true,
 };
 
+function abrir(state?: unknown) {
+  render(
+    <MemoryRouter initialEntries={[{ pathname: '/associado/boletos', state }]}>
+      <PaginaBoletosAssociado />
+    </MemoryRouter>,
+  );
+}
+
 describe('PaginaBoletosAssociado', () => {
   beforeEach(() => {
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([NOVEMBRO, DEZEMBRO]);
@@ -43,7 +52,7 @@ describe('PaginaBoletosAssociado', () => {
   });
 
   it('mostra cada boleto com valor, vencimento, situação, QR Code e códigos', async () => {
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     const [novembro, dezembro] = await screen.findAllByRole('article');
     expect(
@@ -71,7 +80,7 @@ describe('PaginaBoletosAssociado', () => {
   it('copia o código Pix e a linha digitável', async () => {
     const usuario = userEvent.setup();
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([DEZEMBRO]);
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     await usuario.click(
       await screen.findByRole('button', { name: 'Copiar o código Pix' }),
@@ -94,7 +103,7 @@ describe('PaginaBoletosAssociado', () => {
       new Error('Sem permissão'),
     );
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([DEZEMBRO]);
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     await usuario.click(
       await screen.findByRole('button', { name: 'Copiar o código Pix' }),
@@ -116,7 +125,7 @@ describe('PaginaBoletosAssociado', () => {
     });
     const abrirJanela = vi.fn<typeof window.open>(() => window);
     vi.stubGlobal('open', abrirJanela);
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     await userEvent.click(
       await screen.findByRole('button', { name: 'Baixar o PDF do boleto' }),
@@ -132,7 +141,7 @@ describe('PaginaBoletosAssociado', () => {
       new TypeError('Failed to fetch'),
     );
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([DEZEMBRO]);
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     await userEvent.click(
       await screen.findByRole('button', { name: 'Baixar o PDF do boleto' }),
@@ -145,7 +154,7 @@ describe('PaginaBoletosAssociado', () => {
 
   it('avisa quando não há boleto em aberto', async () => {
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([]);
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     expect(
       await screen.findByText('Você não tem boleto em aberto.'),
@@ -156,10 +165,23 @@ describe('PaginaBoletosAssociado', () => {
     vi.mocked(api.listarMeusBoletos).mockRejectedValue(
       new TypeError('Failed to fetch'),
     );
-    render(<PaginaBoletosAssociado />);
+    abrir();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível carregar os boletos agora.',
     );
+  });
+
+  it('mostra o aviso da adesão, que traz o associado para cá', async () => {
+    abrir({
+      aviso: 'Pronto! A partir de agora, a farmácia recebe o boleto todo mês.',
+    });
+
+    await screen.findAllByRole('article');
+    expect(
+      screen
+        .getAllByRole('status')
+        .some((aviso) => aviso.textContent?.startsWith('Pronto!')),
+    ).toBe(true);
   });
 });
