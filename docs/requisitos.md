@@ -116,7 +116,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RF12 | Enviar o boleto por e-mail e disponibilizá-lo no app (boleto + Pix QR Code). | Must | [Validado] — o e-mail leva o QR Code e o código do Pix, a linha digitável e o PDF do boleto anexado (decisão do grupo, 01/11/2026) |
 | RF13 | Enviar lembrete automático 48h antes do vencimento. | Must | [Validado] |
 | RF14 | Enviar lembrete automático uma vez por semana após o vencimento, até o boleto expirar (RN07). | Must | [Validado] |
-| RF15 | Registrar automaticamente o pagamento (baixa) e atualizar o status do associado. | Must | [Validado] — técnica a definir (O2) |
+| RF15 | Registrar automaticamente o pagamento (baixa) e atualizar o status do associado. | Must | [Validado] — baixa feita; o canal (notificação do banco ou consulta) depende do estudo do Sicredi (O2, #40) |
 | RF16 | Bloquear automaticamente o acesso a benefícios quando o boleto expira sem pagamento, 30 dias após o vencimento (RN09). | Must | [Validado] |
 | RF17 | Permitir ao associado optar pelo plano anual à vista com 20% de desconto. | Should | [Validado] — ver P04 e P15 |
 | RF36 | Tela de adesão: associado pede pelo app a cobrança recorrente; a contribuição ativa é ativada automaticamente, sem aprovação da sede, e o boleto do mês é gerado na hora, com o valor cheio. Antes de confirmar, o associado aceita o termo de adesão, e o sistema guarda a data, a hora e a versão do termo aceito (RN23). | Must | [Validado] — vencimento do primeiro boleto em P16; texto do termo em P21 |

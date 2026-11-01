@@ -48,6 +48,7 @@ const NOMES_CAMPOS: Record<string, string> = {
   valorAnual: 'Valor anual',
   competencia: 'Mês do boleto',
   valor: 'Valor do boleto',
+  formaPagamento: 'Forma de pagamento',
   titulo: 'Título',
   descricao: 'Descrição',
   grupo: 'Grupo',
@@ -335,6 +336,9 @@ function textoValor(campo: string, valor: ValorCampoLog): string {
   if (campo === 'competencia' && typeof valor === 'string' && MES.test(valor)) {
     const [ano, mes] = valor.split('-').map(Number);
     return textoCompetencia({ ano, mes });
+  }
+  if (campo === 'formaPagamento' && (valor === 'PIX' || valor === 'BOLETO')) {
+    return valor === 'PIX' ? 'Pix' : 'Boleto';
   }
   if (campo === 'acessoManual') {
     if (valor === 'BLOQUEADO') return 'Bloqueado pela sede';
