@@ -13,6 +13,7 @@ import {
   TEXTO_ACAO_AUDITORIA,
   TEXTO_GRUPO_BENEFICIO,
   textoAcaoAuditoria,
+  textoCompetencia,
 } from '@eloconnect/shared';
 import { useEffect, useState, type FormEvent } from 'react';
 import Col from 'react-bootstrap/Col';
@@ -45,6 +46,8 @@ const NOMES_CAMPOS: Record<string, string> = {
   motivo: 'Motivo',
   valorMensal: 'Valor mensal',
   valorAnual: 'Valor anual',
+  competencia: 'Mês do boleto',
+  valor: 'Valor do boleto',
   titulo: 'Título',
   descricao: 'Descrição',
   grupo: 'Grupo',
@@ -60,6 +63,7 @@ const NOMES_CAMPOS: Record<string, string> = {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DIA = /^\d{4}-\d{2}-\d{2}$/;
+const MES = /^\d{4}-\d{2}$/;
 const DATA_HORA_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
 
 type Resultado = { tipo: 'ok'; lista: ListaLogAuditoria } | { tipo: 'erro' };
@@ -327,6 +331,10 @@ function textoValor(campo: string, valor: ValorCampoLog): string {
     ehGrupoBeneficio(valor)
   ) {
     return TEXTO_GRUPO_BENEFICIO[valor];
+  }
+  if (campo === 'competencia' && typeof valor === 'string' && MES.test(valor)) {
+    const [ano, mes] = valor.split('-').map(Number);
+    return textoCompetencia({ ano, mes });
   }
   if (campo === 'acessoManual') {
     if (valor === 'BLOQUEADO') return 'Bloqueado pela sede';

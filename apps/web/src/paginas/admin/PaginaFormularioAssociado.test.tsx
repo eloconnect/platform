@@ -32,6 +32,7 @@ const ASSOCIADO: AssociadoDetalhe = {
   atualizadoEm: '2026-10-01T12:00:00.000Z',
   cancelamentos: [],
   conta: null,
+  proximoBoleto: null,
 };
 
 /** No lugar do perfil: mostra o aviso que o formulário deixou. */

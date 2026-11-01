@@ -194,6 +194,24 @@ describe('Lote mensal (e2e)', () => {
         },
       });
 
+      // A sede mudou o valor só do boleto de junho (RN04). A edição de julho
+      // não vale para junho.
+      const editado = await criarAssociado(tx, { contribuicaoAtiva: true });
+      await tx.edicaoBoleto.create({
+        data: {
+          associadoId: editado.id,
+          competencia: COMPETENCIA,
+          valor: '80.00',
+        },
+      });
+      await tx.edicaoBoleto.create({
+        data: {
+          associadoId: ativo.id,
+          competencia: new Date('2099-07-01'),
+          valor: '70.00',
+        },
+      });
+
       const resultado = await lote().executar(DIA_DO_LOTE);
 
       expect(resultado).toMatchObject({
@@ -235,6 +253,8 @@ describe('Lote mensal (e2e)', () => {
       expect(await loteDe(semContribuicao.id)).toHaveLength(0);
       expect(await loteDe(inativado.id)).toHaveLength(0);
       expect(await loteDe(aderiu.id)).toHaveLength(0);
+      const [boletoEditado] = await loteDe(editado.id);
+      expect(boletoEditado.valor.toFixed(2)).toBe('80.00');
 
       // Rodar de novo, no mesmo dia ou depois, não gera nem emite nada.
       for (const dia of [DIA_DO_LOTE, new Date('2099-06-15T12:00:00Z')]) {

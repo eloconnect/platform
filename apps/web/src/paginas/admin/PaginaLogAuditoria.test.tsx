@@ -156,6 +156,28 @@ describe('PaginaLogAuditoria', () => {
     expect(linha).toHaveTextContent('Texto: Texto antigo. → Texto novo.');
   });
 
+  it('diz o mês e o valor do boleto mudado pela sede', async () => {
+    vi.mocked(api.listarLogAuditoria).mockResolvedValue(
+      lista({
+        total: 1,
+        itens: [
+          item({
+            acao: 'BOLETO_VALOR_EDITADO',
+            valorAnterior: { valor: '120.00' },
+            valorNovo: { competencia: '2026-12', valor: '100.00' },
+          }),
+        ],
+      }),
+    );
+    abrir();
+
+    const [, linha] = await screen.findAllByRole('row');
+    expect(linha).toHaveTextContent('Valor do próximo boleto mudado');
+    expect(linha).toHaveTextContent('Farmácia Exemplo 01 Ltda');
+    expect(linha).toHaveTextContent('Mês do boleto: dezembro de 2026');
+    expect(linha).toHaveTextContent('Valor do boleto: 120.00 → 100.00');
+  });
+
   it('diz qual convenção a ação afetou e o PDF enviado', async () => {
     vi.mocked(api.listarLogAuditoria).mockResolvedValue(
       lista({

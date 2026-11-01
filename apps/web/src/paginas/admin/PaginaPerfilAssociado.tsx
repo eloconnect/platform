@@ -23,6 +23,7 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+import { SecaoProximoBoleto } from './SecaoProximoBoleto';
 import { textosSituacao } from './situacaoAssociado';
 
 type Resultado =
@@ -73,8 +74,9 @@ const DECISOES_ACESSO: {
 /**
  * Perfil do associado para a sede (US07, RF07): situação, dados cadastrais e
  * solicitações de cancelamento. O histórico de boletos entra com a cobrança.
- * Daqui a sede edita, inativa e reativa o associado (US08, RF08) e bloqueia ou
- * libera o acesso a benefícios e suporte (US09, RF09).
+ * Daqui a sede edita, inativa e reativa o associado (US08, RF08), bloqueia ou
+ * libera o acesso a benefícios e suporte (US09, RF09) e muda o valor do
+ * próximo boleto (US11, RF11).
  */
 export function PaginaPerfilAssociado() {
   const { id = '' } = useParams();
@@ -155,7 +157,7 @@ function Perfil({
   aoAtualizar,
 }: {
   associado: AssociadoDetalhe;
-  aoAtualizar: (atualizado: Associado, aviso: string) => void;
+  aoAtualizar: (atualizado: Partial<AssociadoDetalhe>, aviso: string) => void;
 }) {
   // O perfil básico da sede só consulta (RN33).
   const chaveMestre = ehChaveMestre();
@@ -303,6 +305,13 @@ function Perfil({
           </ul>
         )}
       </section>
+
+      <SecaoProximoBoleto
+        associado={associado}
+        aoAtualizar={(proximoBoleto, mensagem) =>
+          aoAtualizar({ proximoBoleto }, mensagem)
+        }
+      />
 
       <section className="mt-4">
         <h2>Histórico de boletos e pagamentos</h2>

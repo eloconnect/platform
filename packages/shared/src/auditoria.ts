@@ -19,6 +19,9 @@ export const ACOES_AUDITORIA = [
   'ACESSO_AUTOMATICO',
   // Cobrança
   'VALOR_ALTERADO',
+  // Valor do boleto do mês seguinte de um associado (RN04, RF11)
+  'BOLETO_VALOR_EDITADO',
+  'BOLETO_VALOR_NORMAL',
   // Benefícios (RF24)
   'BENEFICIO_CRIADO',
   'BENEFICIO_EDITADO',
@@ -51,6 +54,8 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   ACESSO_LIBERADO: 'Acesso liberado',
   ACESSO_AUTOMATICO: 'Acesso voltou a seguir o pagamento',
   VALOR_ALTERADO: 'Valor da contribuição alterado',
+  BOLETO_VALOR_EDITADO: 'Valor do próximo boleto mudado',
+  BOLETO_VALOR_NORMAL: 'Próximo boleto voltou ao valor normal',
   BENEFICIO_CRIADO: 'Benefício cadastrado',
   BENEFICIO_EDITADO: 'Benefício editado',
   BENEFICIO_REMOVIDO: 'Benefício removido',
