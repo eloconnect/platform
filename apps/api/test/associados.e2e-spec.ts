@@ -367,8 +367,12 @@ describe('Associados (e2e)', () => {
         contribuicaoAtiva: true,
       })
       .expect(200);
+    // Interromper a cobrança tem rota própria, com motivo e aviso (RN25).
     await comoAdmin(http().patch(`/associados/${id}`))
       .send({ contribuicaoAtiva: false })
+      .expect(400);
+    await comoAdmin(http().post(`/associados/${id}/interromper-cobranca`))
+      .send({ motivo: 'Teste' })
       .expect(200);
     // Sem mudança: não grava nada.
     await comoAdmin(http().patch(`/associados/${id}`))

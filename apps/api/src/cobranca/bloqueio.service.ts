@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { TransacoesService } from './transacoes.service.js';
-import { hojeEmMatoGrosso, textoDia } from './valor-do-mes.js';
+import {
+  hojeEmMatoGrosso,
+  inicioDoDiaEmMatoGrosso,
+  textoDia,
+} from './valor-do-mes.js';
 
 const UM_DIA = 24 * 60 * 60 * 1000;
 
@@ -13,6 +17,11 @@ export interface ResultadoBloqueio {
   expirados: number;
   /** Associados que estavam adimplentes e foram bloqueados. */
   bloqueados: number;
+  /**
+   * Associados em dia cuja cobrança a sede interrompeu há mais de 30 dias e
+   * que perderam o acesso nesta execução (RN25).
+   */
+  fimDoAcesso: number;
 }
 
 /**
@@ -21,6 +30,9 @@ export interface ResultadoBloqueio {
  * do vencimento, vira EXPIRADO, e o associado passa a inadimplente, o que
  * bloqueia benefícios e suporte. Até lá, o acesso continua. A decisão manual
  * da sede (RN11) não muda: ela continua valendo sobre a situação.
+ *
+ * Também bloqueia quem estava em dia quando a sede interrompeu a cobrança
+ * recorrente, depois dos 30 dias de acesso que restam (RN25).
  */
 @Injectable()
 export class BloqueioService {
@@ -57,7 +69,16 @@ export class BloqueioService {
         );
       }
     }
-    return { dia: textoDia(hoje), expirados, bloqueados };
+    // O último dia com acesso é o dia da interrupção mais 30 dias.
+    const { count: fimDoAcesso } = await this.prisma.associado.updateMany({
+      where: {
+        contribuicaoAtiva: false,
+        situacao: 'ADIMPLENTE',
+        cobrancaInterrompidaEm: { lt: inicioDoDiaEmMatoGrosso(limite) },
+      },
+      data: { situacao: 'INADIMPLENTE' },
+    });
+    return { dia: textoDia(hoje), expirados, bloqueados, fimDoAcesso };
   }
 
   /**

@@ -23,13 +23,14 @@ import {
   CriarAssociadoDto,
   DefinirAcessoDto,
   EditarAssociadoDto,
+  InterromperCobrancaDto,
 } from './dto/associado.dto.js';
 import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
 /**
- * Gestão de associados pela sede (US06, US07, US08, US09, US11: RF06, RF07,
- * RF08, RF09, RF11). Só o chave mestre altera; o perfil básico só consulta
- * (RN33).
+ * Gestão de associados pela sede (US06, US07, US08, US09, US11, US35: RF06,
+ * RF07, RF08, RF09, RF11, RF38). Só o chave mestre altera; o perfil básico
+ * só consulta (RN33).
  */
 @Controller('associados')
 @UseGuards(RolesGuard)
@@ -92,6 +93,17 @@ export class AssociadosController {
     @Body() dados: DefinirAcessoDto,
   ) {
     return this.associados.definirAcesso(usuarioId, id, dados);
+  }
+
+  /** Interrompe a cobrança recorrente, com aviso ao associado (RF38, RN25). */
+  @Post(':id/interromper-cobranca')
+  @HttpCode(200)
+  interromperCobranca(
+    @UsuarioAtual() usuarioId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dados: InterromperCobrancaDto,
+  ) {
+    return this.associados.interromperCobranca(usuarioId, id, dados.motivo);
   }
 
   /** Histórico de boletos e pagamentos no perfil (RF07). */

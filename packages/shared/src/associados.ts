@@ -65,6 +65,22 @@ export interface AssociadoDetalhe extends Associado {
   conta: ContaAcesso | null;
   /** Nulo para quem não recebe o boleto mensal. */
   proximoBoleto: ProximoBoleto | null;
+  /** Nulo se a sede não interrompeu a cobrança, ou se ela foi ativada de novo. */
+  interrupcaoCobranca: InterrupcaoCobranca | null;
+}
+
+/** Cobrança recorrente interrompida pela sede (RF38, RN25). */
+export interface InterrupcaoCobranca {
+  /** Data e hora ISO. */
+  interrompidaEm: string;
+  /** Último dia com acesso, se o associado estava em dia ("AAAA-MM-DD"). */
+  acessoAte: string;
+}
+
+/** Pedido da sede para interromper a cobrança recorrente (RF38). */
+export interface InterromperCobrancaRequest {
+  /** Fica só no log de auditoria. */
+  motivo: string;
 }
 
 /** Novo valor do boleto do mês seguinte (RF11). */

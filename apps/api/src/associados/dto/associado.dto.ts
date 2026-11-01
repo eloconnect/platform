@@ -4,6 +4,7 @@ import type {
   CriarAssociadoRequest,
   DefinirAcessoRequest,
   EditarAssociadoRequest,
+  InterromperCobrancaRequest,
 } from '@eloconnect/shared';
 import { Transform } from 'class-transformer';
 import {
@@ -120,6 +121,15 @@ export class EditarAssociadoDto implements EditarAssociadoRequest {
 }
 
 /** Bloquear, liberar ou devolver ao automático o acesso (RF09, RN11). */
+/** Interrupção da cobrança recorrente pela sede (RF38, RN25). */
+export class InterromperCobrancaDto implements InterromperCobrancaRequest {
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsString()
+  @IsNotEmpty({ message: 'Escreva o motivo.' })
+  @MaxLength(500)
+  motivo!: string;
+}
+
 export class DefinirAcessoDto implements DefinirAcessoRequest {
   @IsIn(['LIBERADO', 'BLOQUEADO', null])
   acessoManual!: AcessoManualStatus;

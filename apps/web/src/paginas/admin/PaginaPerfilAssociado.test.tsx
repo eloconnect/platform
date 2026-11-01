@@ -23,6 +23,7 @@ vi.mock('../../api', () => ({
     voltarAoValorNormal: vi.fn<ApiClient['voltarAoValorNormal']>(),
     listarBoletosAssociado: vi.fn<ApiClient['listarBoletosAssociado']>(),
     simularPagamento: vi.fn<ApiClient['simularPagamento']>(),
+    interromperCobranca: vi.fn<ApiClient['interromperCobranca']>(),
   },
 }));
 
@@ -52,6 +53,7 @@ function associado(dados: Partial<AssociadoDetalhe> = {}): AssociadoDetalhe {
     cancelamentos: [],
     conta: null,
     proximoBoleto: null,
+    interrupcaoCobranca: null,
     ...dados,
   };
 }
@@ -139,6 +141,7 @@ describe('PaginaPerfilAssociado', () => {
       simulacao: false,
     });
     vi.mocked(api.simularPagamento).mockReset();
+    vi.mocked(api.interromperCobranca).mockReset();
   });
 
   it('mostra a situação, os dados cadastrais e o espaço dos boletos', async () => {
@@ -317,7 +320,12 @@ describe('PaginaPerfilAssociado', () => {
     expect(
       await screen.findByRole('link', { name: 'Editar dados' }),
     ).toHaveAttribute('href', '/admin/associados/id-01/editar');
-    expect(screen.getByRole('status')).toHaveTextContent('Dados salvos.');
+    // O histórico de boletos também tem um aviso de carregamento.
+    expect(
+      screen
+        .getAllByRole('status')
+        .some((aviso) => aviso.textContent === 'Dados salvos.'),
+    ).toBe(true);
   });
 
   it('inativa depois de confirmar', async () => {
@@ -892,6 +900,102 @@ describe('PaginaPerfilAssociado', () => {
             .then((titulo) => titulo.closest('section') ?? document.body),
         ).findByRole('alert'),
       ).toHaveTextContent('Não foi possível carregar os boletos agora.');
+    });
+  });
+
+  describe('interromper a cobrança mensal (RF38, RN25)', () => {
+    it('o chave mestre interrompe com o motivo, e o perfil mostra até quando vai o acesso', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.interromperCobranca).mockResolvedValue(
+        associado({
+          contribuicaoAtiva: false,
+          interrupcaoCobranca: {
+            interrompidaEm: '2026-11-02T15:00:00.000Z',
+            acessoAte: '2026-12-02',
+          },
+        }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Interromper a cobrança mensal' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Interromper a cobrança mensal?',
+      });
+      expect(janela).toHaveTextContent(
+        'O associado recebe agora um e-mail avisando da interrupção.',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Sim, interromper' }),
+      );
+      expect(
+        await within(janela).findByText('Escreva o motivo.'),
+      ).toBeVisible();
+      expect(api.interromperCobranca).not.toHaveBeenCalled();
+
+      await userEvent.type(
+        within(janela).getByLabelText(/^Motivo/),
+        'A farmácia pediu.',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Sim, interromper' }),
+      );
+
+      expect(api.interromperCobranca).toHaveBeenCalledWith('id-01', {
+        motivo: 'A farmácia pediu.',
+      });
+      expect(
+        await screen.findByText(
+          'Cobrança mensal interrompida. O associado vai receber um e-mail com o aviso.',
+        ),
+      ).toBeInTheDocument();
+      const situacao = secao('Situação');
+      expect(situacao).toHaveTextContent('Recebe boleto mensal: Não');
+      expect(situacao).toHaveTextContent(
+        'Cobrança mensal interrompida pela sede em 02/11/2026. O acesso a benefícios e suporte continua até 02/12/2026.',
+      );
+      expect(
+        screen.queryByRole('button', { name: 'Interromper a cobrança mensal' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('depois dos 30 dias, mostra só a data da interrupção', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({
+          contribuicaoAtiva: false,
+          situacao: 'INADIMPLENTE',
+          interrupcaoCobranca: {
+            interrompidaEm: '2026-11-02T15:00:00.000Z',
+            acessoAte: '2026-12-02',
+          },
+        }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
+      const situacao = secao('Situação');
+      expect(situacao).toHaveTextContent(
+        'Cobrança mensal interrompida pela sede em 02/11/2026.',
+      );
+      expect(situacao).not.toHaveTextContent('continua até');
+    });
+
+    it.each([
+      ['o perfil básico', 'ADMIN_BASICO' as const, true],
+      ['quem não recebe o boleto', 'ADMIN' as const, false],
+    ])('não aparece para %s', async (_caso, perfil, contribuicaoAtiva) => {
+      entrarComo(perfil);
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ contribuicaoAtiva }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
+      expect(
+        screen.queryByRole('button', { name: 'Interromper a cobrança mensal' }),
+      ).not.toBeInTheDocument();
     });
   });
 });
