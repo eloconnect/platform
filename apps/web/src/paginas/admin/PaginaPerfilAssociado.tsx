@@ -8,6 +8,7 @@ import {
   acessoManualEmVigor,
   ApiError,
   formatarCnpj,
+  formatarDia,
   podeAcessarRecursoRestrito,
 } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
@@ -23,6 +24,7 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+import { JanelaInterromperCobranca } from './JanelaInterromperCobranca';
 import { SecaoHistoricoBoletos } from './SecaoHistoricoBoletos';
 import { SecaoProximoBoleto } from './SecaoProximoBoleto';
 import { textosSituacao } from './situacaoAssociado';
@@ -76,8 +78,8 @@ const DECISOES_ACESSO: {
  * Perfil do associado para a sede (US07, RF07): situação, dados cadastrais,
  * solicitações de cancelamento e o histórico de boletos e pagamentos.
  * Daqui a sede edita, inativa e reativa o associado (US08, RF08), bloqueia ou
- * libera o acesso a benefícios e suporte (US09, RF09) e muda o valor do
- * próximo boleto (US11, RF11).
+ * libera o acesso a benefícios e suporte (US09, RF09), muda o valor do
+ * próximo boleto (US11, RF11) e interrompe a cobrança recorrente (US35, RF38).
  */
 export function PaginaPerfilAssociado() {
   const { id = '' } = useParams();
@@ -163,6 +165,7 @@ function Perfil({
   // O perfil básico da sede só consulta (RN33).
   const chaveMestre = ehChaveMestre();
   const [confirmando, setConfirmando] = useState(false);
+  const [interrompendo, setInterrompendo] = useState(false);
   const [decisaoAcesso, setDecisaoAcesso] = useState<
     (typeof DECISOES_ACESSO)[number] | null
   >(null);
@@ -225,7 +228,27 @@ function Perfil({
           <li>
             Recebe boleto mensal: {associado.contribuicaoAtiva ? 'Sim' : 'Não'}
           </li>
+          {associado.interrupcaoCobranca && (
+            <li>{textoInterrupcao(associado)}</li>
+          )}
         </ul>
+        {chaveMestre && associado.contribuicaoAtiva && (
+          <Botao
+            variant="outline-danger"
+            onClick={() => setInterrompendo(true)}
+          >
+            Interromper a cobrança mensal
+          </Botao>
+        )}
+        <JanelaInterromperCobranca
+          associado={associado}
+          aberta={interrompendo}
+          aoFechar={() => setInterrompendo(false)}
+          aoConcluir={(atualizado, mensagem) => {
+            setInterrompendo(false);
+            aoAtualizar(atualizado, mensagem);
+          }}
+        />
       </section>
 
       <section className="mt-4">
@@ -533,6 +556,20 @@ function textoAcesso(associado: AssociadoDetalhe): string {
   return podeAcessarRecursoRestrito(associado.situacao, null)
     ? 'Segue o pagamento. Hoje está liberado.'
     : 'Segue o pagamento. Hoje está bloqueado.';
+}
+
+/**
+ * A interrupção da cobrança pela sede (RN25). Enquanto o associado continua
+ * adimplente, mostra até quando vai o acesso; depois, o bloqueio automático
+ * o torna inadimplente.
+ */
+function textoInterrupcao(associado: AssociadoDetalhe): string {
+  const interrupcao = associado.interrupcaoCobranca;
+  if (!interrupcao) return '';
+  const quando = `Cobrança mensal interrompida pela sede em ${formatarData(interrupcao.interrompidaEm)}.`;
+  return associado.situacao === 'ADIMPLENTE'
+    ? `${quando} O acesso a benefícios e suporte continua até ${formatarDia(interrupcao.acessoAte)}.`
+    : quando;
 }
 
 /** Aviso deixado pela página anterior (ex.: "Dados salvos." depois de editar). */

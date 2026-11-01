@@ -12,12 +12,16 @@ import {
 import {
   acessoManualEmVigor,
   DIAS_LIBERACAO_MANUAL,
+  formatarDia,
+  podeAcessarRecursoRestrito,
   textoSituacao,
   type AcaoAuditoria,
+  type InterrupcaoCobranca,
   type MinhaConta,
   type StatusAssociado,
 } from '@eloconnect/shared';
 import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
+import { hojeEmMatoGrosso, textoDia } from '../cobranca/valor-do-mes.js';
 import { EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -49,6 +53,38 @@ const CAMPOS = {
 
 const ENTIDADE = 'Associado';
 const POR_PAGINA = 20;
+const UM_DIA = 24 * 60 * 60 * 1000;
+/** Quem estava em dia mantém o acesso por mais 30 dias (RN25). */
+const DIAS_ACESSO_APOS_INTERRUPCAO = 30;
+
+/**
+ * Último dia com acesso depois da interrupção ("AAAA-MM-DD"): o dia da
+ * interrupção, no horário de Mato Grosso, mais 30 dias.
+ */
+function ultimoDiaComAcesso(interrompidaEm: Date): string {
+  const dia = hojeEmMatoGrosso(interrompidaEm);
+  return textoDia(
+    new Date(dia.getTime() + DIAS_ACESSO_APOS_INTERRUPCAO * UM_DIA),
+  );
+}
+
+/**
+ * A interrupção da cobrança, enquanto ela não foi desfeita. Sem anotar o
+ * retorno: no lint do CI, que roda sem o shared compilado, um tipo do shared
+ * numa união vira erro.
+ */
+function interrupcao(associado: {
+  contribuicaoAtiva: boolean;
+  cobrancaInterrompidaEm: Date | null;
+}) {
+  if (associado.contribuicaoAtiva || !associado.cobrancaInterrompidaEm) {
+    return null;
+  }
+  return {
+    interrompidaEm: associado.cobrancaInterrompidaEm.toISOString(),
+    acessoAte: ultimoDiaComAcesso(associado.cobrancaInterrompidaEm),
+  } satisfies InterrupcaoCobranca;
+}
 
 /** Como cada opção do filtro de status vira condição no banco (RN22). */
 const FILTRO_STATUS: Record<StatusAssociado, Prisma.AssociadoWhereInput> = {
@@ -153,6 +189,7 @@ export class AssociadosService {
       where: { id },
       select: {
         ...CAMPOS,
+        cobrancaInterrompidaEm: true,
         usuario: {
           select: { email: true, criadoEm: true, emailConfirmadoEm: true },
         },
@@ -173,9 +210,13 @@ export class AssociadosService {
     if (!associado) {
       throw new NotFoundException('Associado não encontrado.');
     }
-    const { usuario, ...dados } = associado;
+    const { usuario, cobrancaInterrompidaEm, ...dados } = associado;
     return {
       ...dados,
+      interrupcaoCobranca: interrupcao({
+        contribuicaoAtiva: associado.contribuicaoAtiva,
+        cobrancaInterrompidaEm,
+      }),
       conta: usuario && {
         email: usuario.email,
         criadaEm: usuario.criadoEm,
@@ -223,12 +264,28 @@ export class AssociadosService {
         if (!antes) {
           throw new NotFoundException('Associado não encontrado.');
         }
+        // Interromper tem ação própria, com motivo, aviso e os 30 dias de
+        // acesso (RN25).
+        if (antes.contribuicaoAtiva && dados.contribuicaoAtiva === false) {
+          throw new BadRequestException({
+            message:
+              'Para interromper a cobrança mensal, use "Interromper a cobrança mensal" no perfil do associado.',
+            campo: 'contribuicaoAtiva',
+          });
+        }
         const trocaDeEmail = await this.trocarEmailDaConta(
           tx,
           usuarioId,
           id,
           dados.email,
         );
+        // Ativada de novo, a interrupção deixa de valer.
+        if (dados.contribuicaoAtiva && antes.cobrancaInterrompidaEm) {
+          await tx.associado.update({
+            where: { id },
+            data: { cobrancaInterrompidaEm: null },
+          });
+        }
         const associado = await tx.associado.update({
           where: { id },
           data: dados,
@@ -418,6 +475,77 @@ export class AssociadosService {
       });
       return associado;
     });
+  }
+
+  /**
+   * Interrompe a cobrança recorrente (US35: RF38, RN25). O associado deixa de
+   * receber o boleto mensal e os lembretes e recebe um aviso por e-mail. Quem
+   * estava em dia mantém o acesso por mais 30 dias, e depois o bloqueio
+   * automático o torna inadimplente. Os boletos já emitidos continuam valendo.
+   */
+  async interromperCobranca(
+    usuarioId: string,
+    id: string,
+    motivo: string,
+    agora = new Date(),
+  ) {
+    const associado = await this.prisma.$transaction(async (tx) => {
+      const antes = await tx.associado.findUnique({ where: { id } });
+      if (!antes) {
+        throw new NotFoundException('Associado não encontrado.');
+      }
+      if (!antes.contribuicaoAtiva) {
+        throw new BadRequestException(
+          'Este associado não recebe o boleto mensal.',
+        );
+      }
+      await tx.associado.update({
+        where: { id },
+        data: { contribuicaoAtiva: false, cobrancaInterrompidaEm: agora },
+      });
+      await this.auditoria.registrar(tx, {
+        usuarioId,
+        acao: 'CONTRIBUICAO_INTERROMPIDA',
+        entidade: ENTIDADE,
+        entidadeId: id,
+        associadoId: id,
+        valorAnterior: { contribuicaoAtiva: true },
+        valorNovo: { contribuicaoAtiva: false, motivo },
+      });
+      return antes;
+    });
+
+    if (associado.email) {
+      const comAcesso = podeAcessarRecursoRestrito(
+        associado.situacao,
+        acessoManualEmVigor(associado.acessoManual, associado.acessoManualAte),
+      );
+      void this.email
+        .send({
+          to: associado.email,
+          subject: 'A cobrança mensal foi interrompida - Elo Connect',
+          text: [
+            `Olá, ${associado.nomeFantasia ?? associado.razaoSocial}.`,
+            '',
+            'A sede do sindicato interrompeu a cobrança mensal da sua contribuição. Você não vai mais receber o boleto todo mês.',
+            ...(comAcesso
+              ? [
+                  '',
+                  `O seu acesso a benefícios e suporte continua até ${formatarDia(ultimoDiaComAcesso(agora))}.`,
+                ]
+              : []),
+            '',
+            'Se tiver dúvidas, fale com a sede do sindicato.',
+          ].join('\n'),
+        })
+        .catch((error: unknown) => {
+          this.logger.error(
+            'Falha ao enviar o aviso de interrupção da cobrança.',
+            error instanceof Error ? error.stack : undefined,
+          );
+        });
+    }
+    return this.buscar(id);
   }
 
   /**

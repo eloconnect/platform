@@ -194,6 +194,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Lembretes (#50): um terceiro cron da Vercel chama a API todo dia (`/api/tarefas/lembretes`). O associado com contribuição ativa e e-mail no cadastro recebe um lembrete 2 dias antes do vencimento (48h, RF13) e, depois do vencimento, um por semana, 7, 14, 21 e 28 dias depois, até o último dia para pagar (RF14, RN07). Os dias da semana do lembrete são decisão do grupo (01/11/2026): a regra do cliente diz "um por semana", sem dizer o dia. Se a execução de um dia falhar, o lembrete sai num dos dias seguintes, sem repetir. Os lembretes param quando o boleto é pago ou expira. Cada lembrete traz o mesmo conteúdo do e-mail do boleto (QR Code, código Pix, linha digitável e PDF), e todos esses e-mails trazem o endereço da página "Meus boletos" no site.
 
+- Interromper a cobrança (#51): o chave mestre interrompe a cobrança recorrente pelo perfil do associado, com o motivo, que fica só no log de auditoria. O associado deixa de receber o boleto mensal e os lembretes e recebe um e-mail. Se estava em dia, mantém o acesso a benefícios e suporte por mais 30 dias (RN25), e o perfil mostra até quando. Depois disso, o job diário do bloqueio o torna inadimplente. Os boletos que já saíram continuam valendo. Para haver um caminho só, o formulário de edição não interrompe mais a cobrança: ele indica a ação do perfil (decisão do grupo, 01/11/2026). Passar a receber o boleto pelo formulário continua possível e desfaz a interrupção.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.

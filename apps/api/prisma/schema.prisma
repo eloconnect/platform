@@ -88,30 +88,34 @@ enum AcessoManual {
 /// Farmácia ou drogaria do universo do sindicato (~2.000). Pode existir sem
 /// conta de acesso (ex.: importada para a cobrança formal).
 model Associado {
-  id                String            @id @default(uuid(7)) @db.Uuid
+  id                     String            @id @default(uuid(7)) @db.Uuid
   /// Só dígitos, sem máscara.
-  cnpj              String            @unique @db.Char(14)
+  cnpj                   String            @unique @db.Char(14)
   // Campos cadastrais provisórios: dependem do arquivo da JUCEMAT (P02) e da
   // planilha da carga inicial (RF42). Novos campos entram por migration.
-  razaoSocial       String
-  nomeFantasia      String?
-  email             String?
-  telefone          String?
-  municipio         String?
+  razaoSocial            String
+  nomeFantasia           String?
+  email                  String?
+  telefone               String?
+  municipio              String?
   /// "Recebe boleto mensal: sim/não" no painel da sede (RN22, RN23, RN25).
-  contribuicaoAtiva Boolean           @default(false)
+  contribuicaoAtiva      Boolean           @default(false)
+  /// Quando a sede interrompeu a cobrança recorrente (RN25). O associado em
+  /// dia mantém o acesso por mais 30 dias. Volta a nulo quando a cobrança
+  /// é ativada de novo.
+  cobrancaInterrompidaEm DateTime?
   /// Situação automática: o pagamento torna ADIMPLENTE, o vencimento sem
   /// pagamento torna INADIMPLENTE (RN09, RN10).
-  situacao          SituacaoAssociado @default(INADIMPLENTE)
+  situacao               SituacaoAssociado @default(INADIMPLENTE)
   /// Nulo = segue a situação automática (RN11).
-  acessoManual      AcessoManual?
+  acessoManual           AcessoManual?
   /// Fim da liberação manual, 7 dias depois dela (RN11). Nulo no bloqueio,
   /// que vale até a sede mudar. Conferido na hora, sem job.
-  acessoManualAte   DateTime?
+  acessoManualAte        DateTime?
   /// Inativação manual pela sede (RF08). Não há exclusão de associado.
-  inativadoEm       DateTime?
-  criadoEm          DateTime          @default(now())
-  atualizadoEm      DateTime          @updatedAt
+  inativadoEm            DateTime?
+  criadoEm               DateTime          @default(now())
+  atualizadoEm           DateTime          @updatedAt
 
   usuario       Usuario?
   boletos       Boleto[]

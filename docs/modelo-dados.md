@@ -54,6 +54,7 @@ erDiagram
         string telefone
         string municipio
         boolean contribuicaoAtiva
+        datetime cobrancaInterrompidaEm
         SituacaoAssociado situacao "ADIMPLENTE, INADIMPLENTE"
         AcessoManual acessoManual "LIBERADO, BLOQUEADO, nulo"
         datetime acessoManualAte "fim da liberação (7 dias)"
@@ -185,6 +186,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 - "Cancelamento solicitado" (RF06) não é um terceiro valor de situação: é o associado ter uma `SolicitacaoCancelamento` PENDENTE.
 
 **Contribuição ativa** (`contribuicaoAtiva`) define quem entra no lote mensal e recebe lembretes (RN05, RN22). É ligada pelo próprio associado (RN23) e desligada por cancelamento aprovado ou pela sede (RN25).
+
+**Interrupção da cobrança pela sede** (RN25, RF38). Desliga a `contribuicaoAtiva` e guarda o instante em `cobrancaInterrompidaEm`. Quem estava em dia mantém a situação ADIMPLENTE por mais 30 dias: o último dia com acesso é o dia da interrupção, no horário de Mato Grosso, mais 30. No dia seguinte, o job diário do bloqueio o torna INADIMPLENTE. Quando a cobrança é ativada de novo, o campo volta a nulo. O motivo fica só no log de auditoria.
 
 **Boleto vencido é calculado.** Não existe status VENCIDO: um boleto EM_ABERTO com `vencimento` no passado está vencido. Evita que um job precise atualizar boletos todo dia.
 

@@ -6,6 +6,7 @@ import type {
   EditarAssociadoRequest,
   EditarProximoBoletoRequest,
   FiltrosAssociados,
+  InterromperCobrancaRequest,
   ListaAssociados,
   MinhaConta,
   ProximoBoleto,
@@ -258,6 +259,14 @@ export function createApiClient(
       requisitar<Associado>(
         'PUT',
         `/associados/${encodeURIComponent(id)}/acesso`,
+        dados,
+      ),
+
+    /** Interrompe a cobrança recorrente (RF38, RN25). */
+    interromperCobranca: (id: string, dados: InterromperCobrancaRequest) =>
+      requisitar<AssociadoDetalhe>(
+        'POST',
+        `/associados/${encodeURIComponent(id)}/interromper-cobranca`,
         dados,
       ),
 

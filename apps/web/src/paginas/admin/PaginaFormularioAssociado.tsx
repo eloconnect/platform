@@ -246,27 +246,36 @@ function Formulario({
             {...texto('municipio')}
           />
 
-          <Form.Group as="fieldset" className="mb-4">
-            <Form.Label as="legend" className="fs-6">
-              Recebe boleto mensal
-            </Form.Label>
-            {[true, false].map((valor) => (
-              <Form.Check
-                key={String(valor)}
-                type="radio"
-                id={`recebe-boleto-${valor ? 'sim' : 'nao'}`}
-                name="contribuicaoAtiva"
-                label={valor ? 'Sim' : 'Não'}
-                checked={campos.contribuicaoAtiva === valor}
-                onChange={() =>
-                  setCampos((atuais) => ({
-                    ...atuais,
-                    contribuicaoAtiva: valor,
-                  }))
-                }
-              />
-            ))}
-          </Form.Group>
+          {id && inicial.contribuicaoAtiva ? (
+            // Interromper tem ação própria, com motivo, aviso e os 30 dias
+            // de acesso (RN25).
+            <p className="mb-4">
+              Recebe boleto mensal: Sim. Para interromper, use &quot;Interromper
+              a cobrança mensal&quot; no perfil do associado.
+            </p>
+          ) : (
+            <Form.Group as="fieldset" className="mb-4">
+              <Form.Label as="legend" className="fs-6">
+                Recebe boleto mensal
+              </Form.Label>
+              {[true, false].map((valor) => (
+                <Form.Check
+                  key={String(valor)}
+                  type="radio"
+                  id={`recebe-boleto-${valor ? 'sim' : 'nao'}`}
+                  name="contribuicaoAtiva"
+                  label={valor ? 'Sim' : 'Não'}
+                  checked={campos.contribuicaoAtiva === valor}
+                  onChange={() =>
+                    setCampos((atuais) => ({
+                      ...atuais,
+                      contribuicaoAtiva: valor,
+                    }))
+                  }
+                />
+              ))}
+            </Form.Group>
+          )}
 
           <div className="d-flex flex-wrap align-items-center gap-3">
             <Botao type="submit" disabled={enviando}>

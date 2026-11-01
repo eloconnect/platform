@@ -178,7 +178,49 @@ describe('Bloqueio automático (e2e)', () => {
       // Rodar de novo não muda nada.
       await expect(
         bloqueio.executar(new Date('2099-06-10T12:00:00Z')),
-      ).resolves.toEqual({ dia: '2099-06-10', expirados: 0, bloqueados: 0 });
+      ).resolves.toEqual({
+        dia: '2099-06-10',
+        expirados: 0,
+        bloqueados: 0,
+        fimDoAcesso: 0,
+      });
+    });
+  });
+
+  it('quem estava em dia perde o acesso 30 dias depois da interrupção da cobrança (RN25)', async () => {
+    await desfazendoNoFim(async (tx, bloqueio) => {
+      // Interrompida em 1º de maio de 2099, 15h em Mato Grosso: o acesso
+      // vale até 31 de maio.
+      const interrompido = await tx.associado.create({
+        data: {
+          cnpj: crypto
+            .randomUUID()
+            .replace(/\D/g, '')
+            .padEnd(14, '0')
+            .slice(0, 14),
+          razaoSocial: 'Farmácia Interrompida Ltda',
+          situacao: 'ADIMPLENTE',
+          contribuicaoAtiva: false,
+          cobrancaInterrompidaEm: new Date('2099-05-01T19:00:00Z'),
+        },
+      });
+      const situacao = async () =>
+        (
+          await tx.associado.findUniqueOrThrow({
+            where: { id: interrompido.id },
+          })
+        ).situacao;
+
+      // 31 de maio, 23h30 em Mato Grosso: ainda tem acesso.
+      await bloqueio.executar(new Date('2099-06-01T03:30:00Z'));
+      expect(await situacao()).toBe('ADIMPLENTE');
+
+      // 1º de junho, 0h30 em Mato Grosso: perde o acesso.
+      const resultado = await bloqueio.executar(
+        new Date('2099-06-01T04:30:00Z'),
+      );
+      expect(resultado.fimDoAcesso).toBeGreaterThanOrEqual(1);
+      expect(await situacao()).toBe('INADIMPLENTE');
     });
   });
 });

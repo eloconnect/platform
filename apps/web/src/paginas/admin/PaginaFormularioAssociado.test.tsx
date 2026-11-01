@@ -33,6 +33,7 @@ const ASSOCIADO: AssociadoDetalhe = {
   cancelamentos: [],
   conta: null,
   proximoBoleto: null,
+  interrupcaoCobranca: null,
 };
 
 /** No lugar do perfil: mostra o aviso que o formulário deixou. */
@@ -152,14 +153,17 @@ describe('PaginaFormularioAssociado', () => {
     );
     expect(campo(/^Razão social/)).toHaveValue('Farmácia Exemplo 01 Ltda');
     expect(campo(/^Telefone/)).toHaveValue('');
-    expect(screen.getByLabelText('Sim')).toBeChecked();
+    // Quem recebe o boleto só deixa de receber pela ação do perfil (RN25).
+    expect(screen.queryByLabelText('Não')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Recebe boleto mensal: Sim\. Para interromper, use/),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Cancelar' })).toHaveAttribute(
       'href',
       '/admin/associados/id-01',
     );
 
     await userEvent.clear(campo(/^E-mail/));
-    await userEvent.click(screen.getByLabelText('Não'));
     await salvar();
 
     expect(api.editarAssociado).toHaveBeenCalledWith('id-01', {
@@ -169,10 +173,26 @@ describe('PaginaFormularioAssociado', () => {
       email: '',
       telefone: '',
       municipio: 'Cuiabá',
-      contribuicaoAtiva: false,
+      contribuicaoAtiva: true,
     });
     expect(await screen.findByText(/Perfil aberto/)).toHaveTextContent(
       'Dados salvos.',
+    );
+  });
+
+  it('quem não recebe o boleto pode passar a receber', async () => {
+    const SEM_BOLETO = { ...ASSOCIADO, contribuicaoAtiva: false };
+    vi.mocked(api.buscarAssociado).mockResolvedValue(SEM_BOLETO);
+    vi.mocked(api.editarAssociado).mockResolvedValue(SEM_BOLETO);
+    abrir('/admin/associados/id-01/editar');
+
+    expect(await screen.findByLabelText('Não')).toBeChecked();
+    await userEvent.click(screen.getByLabelText('Sim'));
+    await salvar();
+
+    expect(api.editarAssociado).toHaveBeenCalledWith(
+      'id-01',
+      expect.objectContaining({ contribuicaoAtiva: true }),
     );
   });
 
