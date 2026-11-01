@@ -101,6 +101,39 @@ describe('GatewaySimulado', () => {
     );
   });
 
+  it('gera o PDF do boleto mesmo sem ter o boleto na memória', async () => {
+    const emitido = await new GatewaySimulado().emitir(PEDIDO);
+
+    const pdf = (
+      await gateway.pdf({
+        ...PEDIDO,
+        pagador: { ...PEDIDO.pagador, nome: 'Farmácia (Matriz) – Ltda' },
+        ...emitido,
+      })
+    ).toString('latin1');
+
+    expect(pdf.startsWith('%PDF-1.4\n')).toBe(true);
+    expect(pdf.endsWith('%%EOF\n')).toBe(true);
+    expect(pdf).toContain('(BOLETO SIMULADO - NÃO PAGUE)');
+    // Parênteses escapados; o que fica fora do Latin-1 vira "?".
+    expect(pdf).toContain('(Pagador: Farmácia \\(Matriz\\) ? Ltda)');
+    expect(pdf).toContain('(Valor: R$ 120,00)');
+    expect(pdf).toContain('(Vencimento: 10/11/2026)');
+    expect(pdf).toContain(`(${emitido.linhaDigitavel})`);
+    expect(pdf).toContain(`(${emitido.pixCopiaECola})`);
+    // Cada posição da tabela xref aponta para o começo do seu objeto.
+    const xref = Number(/startxref\n(\d+)/.exec(pdf)?.[1]);
+    const posicoes = pdf
+      .slice(xref)
+      .split('\n')
+      .filter((linha) => linha.endsWith(' 00000 n '))
+      .map((linha) => Number(linha.slice(0, 10)));
+    expect(posicoes).toHaveLength(7);
+    posicoes.forEach((posicao, indice) => {
+      expect(pdf.startsWith(`${indice + 1} 0 obj\n`, posicao)).toBe(true);
+    });
+  });
+
   const VALIDA = {
     nossoNumero: 'SIM000000000001',
     formaPagamento: 'BOLETO',

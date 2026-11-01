@@ -1,4 +1,5 @@
-// Lote mensal de boletos (US10: RF10, RN02 a RN05, RN15). Roda no banco de
+// Lote mensal de boletos (US10: RF10, RN02 a RN05, RN15), com o e-mail de cada
+// boleto (US12: RF12). Roda no banco de
 // teste (preparar-banco.mjs). O histórico dos boletos não pode ser apagado,
 // então cada teste roda numa transação desfeita no fim, e o lote de junho de
 // 2099 nunca fica no banco.
@@ -10,6 +11,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module.js';
+import { EmailBoletoService } from '../src/cobranca/email-boleto.service.js';
 import type {
   BoletoEmitido,
   GatewayPagamento,
@@ -18,6 +20,7 @@ import type {
 import { GatewaySimulado } from '../src/cobranca/gateway-simulado.js';
 import { LoteMensalService } from '../src/cobranca/lote-mensal.service.js';
 import { TransacoesService } from '../src/cobranca/transacoes.service.js';
+import type { EmailMessage, EmailService } from '../src/email/email.service.js';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import type { PrismaService } from '../src/prisma/prisma.service.js';
 
@@ -35,6 +38,26 @@ const prisma = new PrismaClient({
 const DIA_DO_LOTE = new Date('2099-06-01T12:00:00Z');
 const COMPETENCIA = new Date('2099-06-01');
 
+/** Envio de e-mail que guarda as mensagens, no lugar do SMTP. */
+type Envio = (mensagem: EmailMessage) => Promise<void>;
+
+/** E-mails "enviados" pelo lote. */
+const enviados: EmailMessage[] = [];
+const guardar: Envio = (mensagem) => {
+  enviados.push(mensagem);
+  return Promise.resolve();
+};
+const enviadosPara = (endereco: string) =>
+  enviados.filter(({ to }) => to === endereco);
+
+/** Provedor que recusa os e-mails de um endereço e guarda os outros. */
+const recusando =
+  (endereco: string): Envio =>
+  (mensagem) =>
+    mensagem.to === endereco
+      ? Promise.reject(new Error('Limite diário do provedor.'))
+      : guardar(mensagem);
+
 /**
  * Roda o teste numa transação desfeita no fim. O serviço usa essa mesma
  * transação no lugar do banco, inclusive nas transações dele.
@@ -42,7 +65,7 @@ const COMPETENCIA = new Date('2099-06-01');
 async function desfazendoNoFim(
   teste: (
     tx: Tx,
-    lote: (gateway?: GatewayPagamento) => LoteMensalService,
+    lote: (gateway?: GatewayPagamento, send?: Envio) => LoteMensalService,
   ) => Promise<void>,
 ) {
   await prisma
@@ -56,8 +79,15 @@ async function desfazendoNoFim(
         }) as unknown as PrismaService;
         await teste(
           tx,
-          (gateway = new GatewaySimulado()) =>
-            new LoteMensalService(banco, new TransacoesService(), gateway),
+          (gateway = new GatewaySimulado(), send = guardar) =>
+            new LoteMensalService(
+              banco,
+              new TransacoesService(),
+              gateway,
+              new EmailBoletoService(banco, gateway, {
+                send,
+              } as unknown as EmailService),
+            ),
         );
         throw new Desfazer();
       },
@@ -70,7 +100,7 @@ async function desfazendoNoFim(
 
 function criarAssociado(
   tx: Tx,
-  dados: { contribuicaoAtiva: boolean; inativadoEm?: Date },
+  dados: { contribuicaoAtiva: boolean; inativadoEm?: Date; email?: string },
 ) {
   return tx.associado.create({
     data: {
@@ -139,8 +169,13 @@ class GatewayInstavel extends GatewaySimulado {
 
 describe('Lote mensal (e2e)', () => {
   beforeAll(() => {
-    // O erro do banco fora do ar vai para o log de propósito.
+    // Os erros do banco fora do ar e do e-mail que não sai vão para o log de
+    // propósito.
     jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
+  });
+
+  beforeEach(() => {
+    enviados.length = 0;
   });
 
   afterAll(() => prisma.$disconnect());
@@ -161,7 +196,10 @@ describe('Lote mensal (e2e)', () => {
   it('gera e emite o boleto de quem tem contribuição ativa, com o valor em vigor', async () => {
     await desfazendoNoFim(async (tx, lote) => {
       await criarValores(tx);
-      const ativo = await criarAssociado(tx, { contribuicaoAtiva: true });
+      const ativo = await criarAssociado(tx, {
+        contribuicaoAtiva: true,
+        email: 'lote-ativo@example.com',
+      });
       const semContribuicao = await criarAssociado(tx, {
         contribuicaoAtiva: false,
       });
@@ -218,6 +256,7 @@ describe('Lote mensal (e2e)', () => {
         situacao: 'ENVIADO',
         competencia: '2099-06',
         pendentes: 0,
+        emailsPendentes: 0,
       });
       const registro = await tx.loteMensal.findUniqueOrThrow({
         where: { competencia: COMPETENCIA },
@@ -237,7 +276,9 @@ describe('Lote mensal (e2e)', () => {
       expect(boleto.linhaDigitavel).toBeTruthy();
       expect(boleto.pixCopiaECola).toBeTruthy();
       expect(boleto.emitidoEm).toBeInstanceOf(Date);
-      // Feito pelo sistema, sem ninguém da sede.
+      expect(boleto.emailEnviadoEm).toBeInstanceOf(Date);
+      // O e-mail não entra no histórico de transações. Feito pelo sistema,
+      // sem ninguém da sede.
       expect(
         boleto.transacoes.map(({ evento, usuarioId }) => [evento, usuarioId]),
       ).toEqual([
@@ -255,6 +296,23 @@ describe('Lote mensal (e2e)', () => {
       expect(await loteDe(aderiu.id)).toHaveLength(0);
       const [boletoEditado] = await loteDe(editado.id);
       expect(boletoEditado.valor.toFixed(2)).toBe('80.00');
+      // Sem e-mail no cadastro, o associado não recebe o e-mail e não segura
+      // o lote.
+      expect(boletoEditado.emailEnviadoEm).toBeNull();
+
+      // O e-mail do boleto de junho, com o PDF e o QR Code do Pix.
+      expect(enviadosPara('lote-ativo@example.com')).toHaveLength(1);
+      const [mensagem] = enviadosPara('lote-ativo@example.com');
+      expect(mensagem.subject).toBe(
+        'Seu boleto de junho de 2099 - Elo Connect',
+      );
+      expect(mensagem.text).toContain('Vencimento: 10/06/2099');
+      expect(mensagem.text).toContain(boleto.pixCopiaECola);
+      expect(mensagem.text).toContain(boleto.linhaDigitavel);
+      expect(mensagem.attachments?.map(({ filename }) => filename)).toEqual([
+        'boleto-2099-06.pdf',
+        'qr-code-pix.gif',
+      ]);
 
       // Rodar de novo, no mesmo dia ou depois, não gera nem emite nada.
       for (const dia of [DIA_DO_LOTE, new Date('2099-06-15T12:00:00Z')]) {
@@ -263,9 +321,12 @@ describe('Lote mensal (e2e)', () => {
           competencia: '2099-06',
           emitidos: 0,
           pendentes: 0,
+          emails: 0,
+          emailsPendentes: 0,
         });
       }
       expect(await boletosDoMes(tx, ativo.id)).toHaveLength(1);
+      expect(enviadosPara('lote-ativo@example.com')).toHaveLength(1);
     });
   });
 
@@ -298,9 +359,62 @@ describe('Lote mensal (e2e)', () => {
         competencia: '2099-06',
         emitidos: 1,
         pendentes: 0,
+        emails: 0,
+        emailsPendentes: 0,
       });
       [boleto] = await boletosDoMes(tx, associado.id);
       expect(boleto.status).toBe('EM_ABERTO');
+    });
+  });
+
+  it('se o e-mail não sai, a execução do dia seguinte manda o que faltou', async () => {
+    await desfazendoNoFim(async (tx, lote) => {
+      await criarValores(tx);
+      const associado = await criarAssociado(tx, {
+        contribuicaoAtiva: true,
+        email: 'lote-email@example.com',
+      });
+      const gateway = new GatewaySimulado();
+
+      // O provedor recusa só o e-mail deste associado.
+      await expect(
+        lote(gateway, recusando('lote-email@example.com')).executar(
+          DIA_DO_LOTE,
+        ),
+      ).resolves.toMatchObject({
+        situacao: 'INCOMPLETO',
+        pendentes: 0,
+        emailsPendentes: 1,
+      });
+      let [boleto] = await boletosDoMes(tx, associado.id);
+      expect(boleto.status).toBe('EM_ABERTO');
+      expect(boleto.emailEnviadoEm).toBeNull();
+      expect(
+        (
+          await tx.loteMensal.findUniqueOrThrow({
+            where: { competencia: COMPETENCIA },
+          })
+        ).status,
+      ).toBe('RASCUNHO');
+
+      // No dia seguinte, o e-mail sai, sem emitir o boleto de novo.
+      await expect(
+        lote(gateway).executar(new Date('2099-06-02T12:00:00Z')),
+      ).resolves.toEqual({
+        situacao: 'ENVIADO',
+        competencia: '2099-06',
+        emitidos: 0,
+        pendentes: 0,
+        emails: 1,
+        emailsPendentes: 0,
+      });
+      [boleto] = await boletosDoMes(tx, associado.id);
+      expect(boleto.emailEnviadoEm).toBeInstanceOf(Date);
+      expect(boleto.transacoes.map(({ evento }) => evento)).toEqual([
+        'GERADO',
+        'EMITIDO',
+      ]);
+      expect(enviadosPara('lote-email@example.com')).toHaveLength(1);
     });
   });
 

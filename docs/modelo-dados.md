@@ -93,6 +93,7 @@ erDiagram
         string sicrediNossoNumero UK
         string linhaDigitavel
         string pixCopiaECola
+        datetime emailEnviadoEm
         datetime pagoEm
         datetime ultimoLembreteEm
     }
@@ -192,6 +193,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 **Valor de cada boleto.** Uma alteração de valor vale a partir do boleto do mês seguinte (RN15). O boleto de uma competência usa o `ValorContribuicao` mais recente criado antes do primeiro dia desse mês, no horário de Cuiabá. Por isso, a data de início não precisa de coluna própria.
 
 **Edição do boleto do mês seguinte** (RN04, RF11). A sede muda só o valor do boleto mensal de um associado, e só para um mês (decisão do grupo, 01/11/2026). Como o boleto ainda não existe, a edição fica numa tabela à parte, a `EdicaoBoleto`, com uma linha por associado e competência. A edição feita num mês vale para o boleto do mês seguinte, no horário de Mato Grosso, como a mudança de valor (RN15), e pode ser trocada ou desfeita até o mês virar. Desfazer apaga a linha. Quem editou, quando e os valores de antes e depois ficam no log de auditoria. O lote mensal usa o valor da edição no lugar do valor da contribuição.
+
+**E-mail do boleto** (RF12). `emailEnviadoEm` guarda quando o e-mail com o boleto saiu para o associado. Num boleto emitido, nulo quer dizer que o e-mail ainda não saiu, e a próxima execução do lote tenta de novo. Como o `ultimoLembreteEm`, é um controle do envio: não muda o boleto e não entra no histórico de transações.
 
 **Dinheiro em `Decimal(10,2)`**, nunca em ponto flutuante.
 

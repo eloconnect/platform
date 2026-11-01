@@ -8,6 +8,11 @@ export function dataDaCompetencia({ ano, mes }: Competencia): Date {
   return new Date(Date.UTC(ano, mes - 1, 1));
 }
 
+/** O contrário de `dataDaCompetencia`. */
+export function competenciaDaData(data: Date): Competencia {
+  return { ano: data.getUTCFullYear(), mes: data.getUTCMonth() + 1 };
+}
+
 /**
  * Valor da contribuição para o boleto de um mês: o último alterado antes do
  * dia 1 desse mês, no horário de Mato Grosso (RN15). Nulo enquanto a sede não

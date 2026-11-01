@@ -15,6 +15,7 @@ const BOLETO: Boleto = {
   linhaDigitavel: null,
   pixCopiaECola: null,
   emitidoEm: null,
+  emailEnviadoEm: null,
   pagoEm: null,
   ultimoLembreteEm: null,
   criadoEm: new Date('2026-11-01T12:00:00.000Z'),
