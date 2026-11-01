@@ -8,7 +8,7 @@
  * versão.
  */
 export const TERMO_ADESAO = {
-  versao: 'provisorio-2026-11-02',
+  versao: 'provisorio-2026-11-01',
   paragrafos: [
     'Texto provisório. O termo definitivo será escrito pelos advogados do sindicato.',
     'Ao aderir, a farmácia passa a receber todo mês, por e-mail e no site, o boleto da contribuição ao sindicato, com Pix e vencimento no dia 10.',
