@@ -167,4 +167,6 @@ export interface MinhaConta {
   situacao: TextoSituacao;
   /** Data de fim da liberação manual em vigor; nulo sem liberação (RN11). */
   acessoLiberadoAte: string | null;
+  /** A farmácia recebe o boleto todo mês (contribuição ativa, RN23). */
+  recebeBoletoMensal: boolean;
 }

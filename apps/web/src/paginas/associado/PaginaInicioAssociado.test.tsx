@@ -1,6 +1,7 @@
 import type { ApiClient } from '@eloconnect/shared';
 import { ApiError } from '@eloconnect/shared';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../api';
 import { PaginaInicioAssociado } from './PaginaInicioAssociado';
@@ -8,6 +9,14 @@ import { PaginaInicioAssociado } from './PaginaInicioAssociado';
 vi.mock('../../api', () => ({
   api: { minhaConta: vi.fn<ApiClient['minhaConta']>() },
 }));
+
+function abrir() {
+  render(
+    <MemoryRouter>
+      <PaginaInicioAssociado />
+    </MemoryRouter>,
+  );
+}
 
 describe('PaginaInicioAssociado', () => {
   beforeEach(() => {
@@ -19,8 +28,9 @@ describe('PaginaInicioAssociado', () => {
       nome: 'Drogaria Exemplo',
       situacao: 'Sem contribuição ativa',
       acessoLiberadoAte: null,
+      recebeBoletoMensal: false,
     });
-    render(<PaginaInicioAssociado />);
+    abrir();
 
     expect(await screen.findByText('Drogaria Exemplo')).toBeInTheDocument();
     expect(
@@ -29,6 +39,10 @@ describe('PaginaInicioAssociado', () => {
     expect(
       screen.queryByRole('heading', { name: /Acesso liberado/ }),
     ).not.toBeInTheDocument();
+    // Quem não recebe o boleto vê o convite para aderir (RN23).
+    expect(
+      screen.getByRole('link', { name: 'Quero receber o boleto todo mês' }),
+    ).toHaveAttribute('href', '/associado/adesao');
   });
 
   it('com a liberação da sede em vigor, avisa até quando ela vale (RN11)', async () => {
@@ -36,8 +50,9 @@ describe('PaginaInicioAssociado', () => {
       nome: 'Drogaria Exemplo',
       situacao: 'Inadimplente',
       acessoLiberadoAte: '2026-11-04T12:00:00.000Z',
+      recebeBoletoMensal: true,
     });
-    render(<PaginaInicioAssociado />);
+    abrir();
 
     expect(
       await screen.findByRole('heading', {
@@ -47,11 +62,14 @@ describe('PaginaInicioAssociado', () => {
     expect(
       screen.getByText(/o acesso volta a depender do pagamento em dia/),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Quero receber o boleto todo mês' }),
+    ).not.toBeInTheDocument();
   });
 
   it('avisa quando a API não responde', async () => {
     vi.mocked(api.minhaConta).mockRejectedValue(new ApiError(500, 'erro'));
-    render(<PaginaInicioAssociado />);
+    abrir();
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível carregar os seus dados agora.',

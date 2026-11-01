@@ -7,9 +7,16 @@ import {
 import qrcodeGenerator from 'qrcode-generator';
 import { useEffect, useMemo, useState } from 'react';
 import Card from 'react-bootstrap/Card';
+import { useLocation } from 'react-router';
 import { api } from '../../api';
 import { abrirArquivo } from '../../arquivos';
-import { Botao, MensagemErro, useTituloPagina } from '../../componentes';
+import {
+  AvisoSucesso,
+  Botao,
+  lerAviso,
+  MensagemErro,
+  useTituloPagina,
+} from '../../componentes';
 
 type Estado =
   | { tipo: 'carregando' }
@@ -23,6 +30,8 @@ type Estado =
  */
 export function PaginaBoletosAssociado() {
   useTituloPagina('Meus boletos');
+  // Aviso da adesão, que traz o associado para cá (RN23).
+  const aviso = lerAviso(useLocation().state);
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' });
 
   useEffect(() => {
@@ -39,6 +48,7 @@ export function PaginaBoletosAssociado() {
   return (
     <>
       <h1>Meus boletos</h1>
+      {aviso && <AvisoSucesso>{aviso}</AvisoSucesso>}
       {estado.tipo === 'carregando' && (
         <p role="status">Carregando os boletos...</p>
       )}

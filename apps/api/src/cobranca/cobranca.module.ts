@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AuditoriaModule } from '../auditoria/auditoria.module.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { AdesaoService } from './adesao.service.js';
+import { AssociadoAdesaoController } from './associado-adesao.controller.js';
 import { EmailModule } from '../email/email.module.js';
 import { AssociadoBoletosController } from './associado-boletos.controller.js';
 import { BloqueioService } from './bloqueio.service.js';
@@ -24,6 +26,7 @@ import { TransacoesService } from './transacoes.service.js';
     TarefasController,
     AssociadoBoletosController,
     BoletosController,
+    AssociadoAdesaoController,
   ],
   providers: [
     TransacoesService,
@@ -35,6 +38,7 @@ import { TransacoesService } from './transacoes.service.js';
     PagamentosService,
     HistoricoBoletosService,
     LembretesService,
+    AdesaoService,
     // TODO(#40): o adaptador do Sicredi entra aqui quando houver o convênio.
     { provide: GatewayPagamento, useClass: GatewaySimulado },
   ],

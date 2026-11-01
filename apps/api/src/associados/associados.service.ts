@@ -581,6 +581,7 @@ export class AssociadosService {
       acessoLiberadoAte: liberado
         ? (associado.acessoManualAte?.toISOString() ?? null)
         : null,
+      recebeBoletoMensal: associado.contribuicaoAtiva,
     };
   }
 

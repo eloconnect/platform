@@ -196,6 +196,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Interromper a cobrança (#51): o chave mestre interrompe a cobrança recorrente pelo perfil do associado, com o motivo, que fica só no log de auditoria. O associado deixa de receber o boleto mensal e os lembretes e recebe um e-mail. Se estava em dia, mantém o acesso a benefícios e suporte por mais 30 dias (RN25), e o perfil mostra até quando. Depois disso, o job diário do bloqueio o torna inadimplente. Os boletos que já saíram continuam valendo. Para haver um caminho só, o formulário de edição não interrompe mais a cobrança: ele indica a ação do perfil (decisão do grupo, 01/11/2026). Passar a receber o boleto pelo formulário continua possível e desfaz a interrupção.
 
+- Adesão pelo associado (#43): na tela inicial, quem ainda não recebe o boleto vê o convite "Quero receber o boleto todo mês". A página de adesão mostra o valor do mês e o termo, e o associado marca que leu e aceita. A contribuição ativa liga na hora, sem aprovação da sede, e o aceite fica guardado com a data, a hora e a versão do termo, numa tabela que só aceita inclusão. O boleto do mês sai na hora, com o valor cheio, já emitido no banco, e vai por e-mail. Se o banco falhar, a adesão é desfeita e o associado tenta de novo. Provisórios: o texto do termo, até o texto dos advogados (P21), e o vencimento do boleto da adesão, 10 dias depois dela (P16).
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.

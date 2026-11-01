@@ -4,7 +4,8 @@ import type { LoteMensal, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { primeiroDiaUtil } from './dia-util.js';
 import { EmailBoletoService } from './email-boleto.service.js';
-import { GatewayPagamento, validoAte } from './gateway-pagamento.js';
+import { emitirBoleto } from './emissao.js';
+import { GatewayPagamento } from './gateway-pagamento.js';
 import { TransacoesService } from './transacoes.service.js';
 import { valorDoMes } from './valor-do-mes.js';
 
@@ -218,35 +219,7 @@ export class LoteMensalService {
         });
         if (count === 0) return false;
 
-        const boleto = await tx.boleto.findUniqueOrThrow({
-          where: { id },
-          include: { associado: { select: { cnpj: true, razaoSocial: true } } },
-        });
-        const emitido = await this.gateway.emitir({
-          boletoId: id,
-          valor: boleto.valor,
-          vencimento: boleto.vencimento,
-          validoAte: validoAte(boleto.vencimento),
-          pagador: {
-            cnpj: boleto.associado.cnpj,
-            nome: boleto.associado.razaoSocial,
-          },
-        });
-        // TODO(#40): se a gravação falhar depois da emissão, a próxima
-        // execução emite o boleto de novo. O estudo diz se o Sicredi recusa
-        // um segundo boleto com o mesmo id.
-        await this.transacoes.alterarBoleto(
-          tx,
-          id,
-          {
-            status: 'EM_ABERTO',
-            sicrediNossoNumero: emitido.nossoNumero,
-            linhaDigitavel: emitido.linhaDigitavel,
-            pixCopiaECola: emitido.pixCopiaECola,
-            emitidoEm: new Date(),
-          },
-          { evento: 'EMITIDO' },
-        );
+        await emitirBoleto(tx, this.gateway, this.transacoes, id);
         return true;
       },
       { timeout: 30_000 },
