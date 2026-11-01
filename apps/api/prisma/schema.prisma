@@ -235,7 +235,8 @@ model Boleto {
   /// enquanto não saiu: a próxima execução do lote tenta de novo.
   emailEnviadoEm     DateTime?
   pagoEm             DateTime?
-  /// Controle dos lembretes a cada 48h (RN07).
+  /// Quando saiu o último lembrete: 2 dias antes do vencimento e, depois
+  /// dele, um por semana (RF13, RF14, RN07).
   ultimoLembreteEm   DateTime?
   criadoEm           DateTime     @default(now())
   atualizadoEm       DateTime     @updatedAt
@@ -248,10 +249,6 @@ model Boleto {
   @@index([status, vencimento])
 }
 
-/// Valor do boleto mensal de um associado mudado pela sede para um mês só
-/// (RN04, RF11). A edição feita num mês vale para o boleto do mês seguinte, e
-/// os outros meses seguem o valor da contribuição. Quem editou e quando ficam
-/// no log de auditoria; voltar ao valor normal apaga a edição.
 /// Adesão à cobrança recorrente pelo próprio associado (RN23), com o aceite
 /// do termo: a data, a hora e a versão do termo aceito (resposta 19).
 /// Imutável, como prova do aceite (trigger da migration adesao_cobranca).
@@ -269,6 +266,10 @@ model AdesaoCobranca {
   @@index([associadoId, aceitaEm])
 }
 
+/// Valor do boleto mensal de um associado mudado pela sede para um mês só
+/// (RN04, RF11). A edição feita num mês vale para o boleto do mês seguinte, e
+/// os outros meses seguem o valor da contribuição. Quem editou e quando ficam
+/// no log de auditoria; voltar ao valor normal apaga a edição.
 model EdicaoBoleto {
   id           String   @id @default(uuid(7)) @db.Uuid
   associadoId  String   @db.Uuid
