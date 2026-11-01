@@ -135,9 +135,12 @@ describe('GatewaySimulado', () => {
 
 describe('CobrancaModule', () => {
   it('usa o gateway simulado enquanto não há convênio com o Sicredi', async () => {
+    // O banco e as configurações vêm de módulos globais, fora deste teste.
     const modulo = await Test.createTestingModule({
       imports: [CobrancaModule],
-    }).compile();
+    })
+      .useMocker(() => ({}))
+      .compile();
 
     expect(modulo.get(GatewayPagamento)).toBeInstanceOf(GatewaySimulado);
   });

@@ -34,6 +34,7 @@ export {
   DESCONTO_PLANO_ANUAL,
   FORMATO_VALOR,
   formatarReais,
+  FUSO_SEDE_HORAS,
   lerValorEmReais,
   textoCompetencia,
   type AlterarValorRequest,

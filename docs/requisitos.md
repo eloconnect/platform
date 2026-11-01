@@ -1,6 +1,6 @@
 # Elo Connect — Requisitos (v7)
 
-Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 29/10/2026.
+Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 31/10/2026.
 
 **Legenda de status**
 
@@ -50,7 +50,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | **ID** | **Regra** | **Status** |
 | --- | --- | --- |
 | RN01 | O valor da contribuição é o mesmo para todos os associados. | [Validado] |
-| RN02 | Vencimento fixo, até o dia 10 de cada mês. Os boletos mensais são enviados no primeiro dia útil do mês. | [Validado] — dia do envio: resposta 16 |
+| RN02 | Vencimento fixo, até o dia 10 de cada mês. Os boletos mensais são enviados no primeiro dia útil do mês. | [Validado] — dia do envio: resposta 16; dia útil: de segunda a sexta, sem feriado nacional (decisão do grupo, 31/10/2026) |
 | RN03 | Boleto com validade de 30 dias, contados a partir do vencimento. Depois disso, o boleto expira. | [Validado] — lembretes depois da expiração em P01 |
 | RN04 | Os boletos mensais são gerados e enviados automaticamente, sem revisão. A sede pode editar o boleto de um associado (o valor ou outro dado): a edição vale para o boleto do mês seguinte, e o associado recebe na hora um e-mail avisando que a cobrança vai mudar. | [Validado] — conversa de 28/10/2026 (P20); quais dados podem ser editados e até quando: decisão do grupo na M3 |
 | RN05 | Boletos são enviados **somente a associados com contribuição ativa**, nunca a todos os cadastrados. | [Validado] |

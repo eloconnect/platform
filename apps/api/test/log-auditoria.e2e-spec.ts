@@ -226,8 +226,8 @@ describe('Log de auditoria (e2e)', () => {
     await prisma.logAuditoria.createMany({
       data: Array.from({ length: 21 }, (_, i) => ({
         usuarioId: davi.id,
-        acao: 'LOTE_ENVIADO',
-        entidade: 'LoteMensal',
+        acao: 'VALOR_ALTERADO',
+        entidade: 'ValorContribuicao',
         ocorridoEm: new Date(Date.UTC(2026, 0, 1, 12, i)),
       })),
     });

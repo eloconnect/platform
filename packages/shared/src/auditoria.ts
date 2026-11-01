@@ -17,9 +17,8 @@ export const ACOES_AUDITORIA = [
   'ACESSO_BLOQUEADO',
   'ACESSO_LIBERADO',
   'ACESSO_AUTOMATICO',
-  // Cobrança (o lote mensal vem na M3)
+  // Cobrança
   'VALOR_ALTERADO',
-  'LOTE_ENVIADO',
   // Benefícios (RF24)
   'BENEFICIO_CRIADO',
   'BENEFICIO_EDITADO',
@@ -52,7 +51,6 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   ACESSO_LIBERADO: 'Acesso liberado',
   ACESSO_AUTOMATICO: 'Acesso voltou a seguir o pagamento',
   VALOR_ALTERADO: 'Valor da contribuição alterado',
-  LOTE_ENVIADO: 'Lote mensal enviado',
   BENEFICIO_CRIADO: 'Benefício cadastrado',
   BENEFICIO_EDITADO: 'Benefício editado',
   BENEFICIO_REMOVIDO: 'Benefício removido',
