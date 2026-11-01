@@ -68,6 +68,10 @@ function abrir(state?: unknown) {
   );
 }
 
+/**
+ * Seção do perfil já carregado. Espere antes pela seção "Situação": o título
+ * da página aparece ainda durante o carregamento.
+ */
 function secao(titulo: string): HTMLElement {
   const elemento = screen
     .getByRole('heading', { level: 2, name: titulo })
@@ -144,7 +148,7 @@ describe('PaginaPerfilAssociado', () => {
     );
     abrir();
 
-    await screen.findByRole('heading', { level: 1 });
+    await screen.findByRole('heading', { level: 2, name: 'Situação' });
     expect(secao('Conta de acesso')).toHaveTextContent(texto);
   });
 
@@ -155,7 +159,7 @@ describe('PaginaPerfilAssociado', () => {
     );
     abrir();
 
-    await screen.findByRole('heading', { level: 1 });
+    await screen.findByRole('heading', { level: 2, name: 'Situação' });
     expect(secao('Acesso a benefícios e suporte')).toHaveTextContent(
       'Segue o pagamento. Hoje está liberado.',
     );
@@ -199,7 +203,7 @@ describe('PaginaPerfilAssociado', () => {
     );
     abrir();
 
-    await screen.findByRole('heading', { level: 1 });
+    await screen.findByRole('heading', { level: 2, name: 'Situação' });
     const situacao = secao('Situação');
     for (const texto of [
       'Sem contribuição ativa',
@@ -388,7 +392,7 @@ describe('PaginaPerfilAssociado', () => {
         vi.mocked(api.buscarAssociado).mockResolvedValue(associado(dados));
         abrir();
 
-        await screen.findByRole('heading', { level: 1 });
+        await screen.findByRole('heading', { level: 2, name: 'Situação' });
         const acesso = secao('Acesso a benefícios e suporte');
         expect(acesso).toHaveTextContent(texto);
         expect(
@@ -482,7 +486,7 @@ describe('PaginaPerfilAssociado', () => {
       );
       abrir();
 
-      await screen.findByRole('heading', { level: 1 });
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
       const proximo = secao('Próximo boleto');
       expect(proximo).toHaveTextContent(
         'Boleto de dezembro de 2026: R$ 120,00, o valor normal da contribuição.',
@@ -500,7 +504,7 @@ describe('PaginaPerfilAssociado', () => {
       );
       abrir();
 
-      await screen.findByRole('heading', { level: 1 });
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
       const proximo = secao('Próximo boleto');
       expect(proximo).toHaveTextContent(
         'Boleto de dezembro de 2026: R$ 100,00, valor mudado pela sede só para este mês. O valor normal é R$ 120,00.',
@@ -522,7 +526,7 @@ describe('PaginaPerfilAssociado', () => {
       vi.mocked(api.buscarAssociado).mockResolvedValue(associado(dados));
       abrir();
 
-      await screen.findByRole('heading', { level: 1 });
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
       expect(
         screen.queryByRole('heading', { name: 'Próximo boleto' }),
       ).not.toBeInTheDocument();
@@ -534,7 +538,7 @@ describe('PaginaPerfilAssociado', () => {
       );
       abrir();
 
-      await screen.findByRole('heading', { level: 1 });
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
       const proximo = secao('Próximo boleto');
       expect(proximo).toHaveTextContent(
         'O valor da contribuição ainda não foi cadastrado.',
