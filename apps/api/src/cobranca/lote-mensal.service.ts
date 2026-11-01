@@ -1,9 +1,10 @@
 import { FUSO_SEDE_HORAS } from '@eloconnect/shared';
 import { Injectable, Logger } from '@nestjs/common';
-import type { LoteMensal } from '../generated/prisma/client.js';
+import type { LoteMensal, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { primeiroDiaUtil } from './dia-util.js';
-import { GatewayPagamento } from './gateway-pagamento.js';
+import { EmailBoletoService } from './email-boleto.service.js';
+import { GatewayPagamento, validoAte } from './gateway-pagamento.js';
 import { TransacoesService } from './transacoes.service.js';
 import { valorDoMes } from './valor-do-mes.js';
 
@@ -20,7 +21,24 @@ export type ResultadoLote =
       emitidos: number;
       /** Boletos que o banco não emitiu; a próxima execução tenta de novo. */
       pendentes: number;
+      /** E-mails com o boleto enviados nesta execução. */
+      emails: number;
+      /** E-mails que não saíram; a próxima execução tenta de novo. */
+      emailsPendentes: number;
     };
+
+/**
+ * Boletos emitidos do lote que ainda não foram por e-mail. Quem não tem
+ * e-mail no cadastro fica de fora.
+ */
+function semEmail(loteId: string) {
+  return {
+    loteId,
+    status: 'EM_ABERTO',
+    emailEnviadoEm: null,
+    associado: { email: { not: null } },
+  } satisfies Prisma.BoletoWhereInput;
+}
 
 /**
  * Lote mensal de boletos (RF10): gerado e enviado sozinho no primeiro dia útil
@@ -29,9 +47,12 @@ export type ResultadoLote =
  *
  * O cron chama `executar` todo dia, e cada execução continua de onde a
  * anterior parou: cria o lote e os boletos em RASCUNHO, emite no banco os que
- * ainda estão em RASCUNHO e marca o lote como ENVIADO quando não sobra nenhum.
- * Assim, uma execução perdida ou que caiu no meio é recuperada no dia
- * seguinte, e uma execução repetida não gera nada de novo.
+ * ainda estão em RASCUNHO, manda o e-mail de cada boleto emitido que ainda
+ * não foi (RF12) e marca o lote como ENVIADO quando não sobra nada. Assim,
+ * uma execução perdida ou que caiu no meio é recuperada no dia seguinte, e
+ * uma execução repetida não gera nada de novo. Se a execução cai entre o
+ * envio de um e-mail e o registro dele, esse associado recebe o e-mail duas
+ * vezes.
  */
 @Injectable()
 export class LoteMensalService {
@@ -41,6 +62,7 @@ export class LoteMensalService {
     private readonly prisma: PrismaService,
     private readonly transacoes: TransacoesService,
     private readonly gateway: GatewayPagamento,
+    private readonly emailBoleto: EmailBoletoService,
   ) {}
 
   async executar(agora = new Date()): Promise<ResultadoLote> {
@@ -63,6 +85,8 @@ export class LoteMensalService {
         competencia: texto,
         emitidos: 0,
         pendentes: 0,
+        emails: 0,
+        emailsPendentes: 0,
       };
     }
 
@@ -82,22 +106,47 @@ export class LoteMensalService {
         );
       }
     }
-    // TODO(#46): mandar a cada associado o e-mail com o boleto e o Pix.
+
+    // Um e-mail de cada vez, aguardando cada envio: na Vercel, o que não é
+    // aguardado pode ser cortado quando a resposta sai.
+    const paraEnviar = await this.prisma.boleto.findMany({
+      where: semEmail(lote.id),
+      select: { id: true },
+      orderBy: { id: 'asc' },
+    });
+    let emails = 0;
+    for (const { id } of paraEnviar) {
+      try {
+        await this.emailBoleto.enviar(id);
+        emails++;
+      } catch (erro) {
+        this.logger.error(
+          `O e-mail do boleto ${id} não saiu.`,
+          erro instanceof Error ? erro.stack : undefined,
+        );
+      }
+    }
 
     const pendentes = await this.prisma.boleto.count({
       where: { loteId: lote.id, status: 'RASCUNHO' },
     });
-    if (pendentes === 0) {
+    const emailsPendentes = await this.prisma.boleto.count({
+      where: semEmail(lote.id),
+    });
+    if (pendentes === 0 && emailsPendentes === 0) {
       await this.prisma.loteMensal.updateMany({
         where: { id: lote.id, status: 'RASCUNHO' },
         data: { status: 'ENVIADO', enviadoEm: new Date() },
       });
     }
     return {
-      situacao: pendentes === 0 ? 'ENVIADO' : 'INCOMPLETO',
+      situacao:
+        pendentes === 0 && emailsPendentes === 0 ? 'ENVIADO' : 'INCOMPLETO',
       competencia: texto,
       emitidos,
       pendentes,
+      emails,
+      emailsPendentes,
     };
   }
 
@@ -177,8 +226,7 @@ export class LoteMensalService {
           boletoId: id,
           valor: boleto.valor,
           vencimento: boleto.vencimento,
-          // 30 dias depois do vencimento (RN03).
-          validoAte: new Date(boleto.vencimento.getTime() + 30 * UM_DIA),
+          validoAte: validoAte(boleto.vencimento),
           pagador: {
             cnpj: boleto.associado.cnpj,
             nome: boleto.associado.razaoSocial,

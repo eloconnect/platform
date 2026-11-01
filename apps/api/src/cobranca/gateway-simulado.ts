@@ -14,6 +14,7 @@ import {
   type PedidoBoleto,
   type SituacaoNoBanco,
 } from './gateway-pagamento.js';
+import { pdfSimulado } from './pdf-simulado.js';
 
 /** A notificação que o banco simulado manda quando o boleto é pago. */
 export interface NotificacaoSimulada {
@@ -27,7 +28,7 @@ export interface NotificacaoSimulada {
 
 /**
  * Banco de mentira, para desenvolver sem o convênio com o Sicredi (RNF08).
- * Gera nosso número, linha digitável e Pix fictícios, que nenhum banco
+ * Gera nosso número, linha digitável, Pix e PDF fictícios, que nenhum banco
  * aceita, e guarda os boletos na memória do processo: serve para o
  * desenvolvimento e os testes. Como simular o pagamento na demonstração, em
  * que cada chamada pode cair num processo novo, é decisão da #48.
@@ -53,6 +54,14 @@ export class GatewaySimulado extends GatewayPagamento {
       linhaDigitavel: `74891.00000 ${numero.slice(0, 5)}.${numero.slice(5, 11)} ${numero.slice(11)}0000.000000 0 0000${centavos}`,
       pixCopiaECola: `00020101-pix-simulado-${nossoNumero}`,
     };
+  }
+
+  /**
+   * Monta o PDF com os dados recebidos, sem consultar a memória: funciona
+   * mesmo num processo que não emitiu o boleto.
+   */
+  async pdf(boleto: PedidoBoleto & BoletoEmitido): Promise<Buffer> {
+    return pdfSimulado(boleto);
   }
 
   async consultar(nossoNumero: string): Promise<SituacaoNoBanco> {

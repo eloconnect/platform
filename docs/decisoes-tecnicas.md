@@ -182,6 +182,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Edição do boleto (#45): a sede muda só o valor do boleto mensal de um associado, e só para um mês (decisão do grupo, 01/11/2026). A edição feita num mês vale para o boleto do mês seguinte, no horário de Mato Grosso, como a mudança de valor (RN15), e pode ser trocada ou desfeita até o mês virar. A cada mudança, o associado recebe um e-mail, e o log de auditoria guarda o valor de antes e o novo. O CNPJ e a razão social do boleto vêm do cadastro, e o vencimento continua no dia 10 (RN02). Mudar outros dados do boleto depende do que o Sicredi aceita (#40).
 
+- E-mail do boleto (#46): quando o lote emite o boleto, o associado recebe um e-mail em HTML, com uma versão só em texto. O valor e o vencimento vêm no começo, seguidos do QR Code do Pix, do código do Pix Copia e Cola, da linha digitável e do PDF do boleto, anexado (decisão do grupo, 01/11/2026). O PDF vem do banco: o gateway simulado gera um PDF marcado como simulação, e o do Sicredi depende do estudo (#40). O QR Code é gerado pela API com a biblioteca `qrcode-generator`, que não tem dependências. Se um e-mail não sai, por exemplo quando o provedor chega ao limite do dia, a execução seguinte do lote tenta de novo, e o lote só fica como enviado depois que todos os e-mails saem. Quem não tem e-mail no cadastro não recebe o e-mail e vai ver o boleto no site (#47).
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.

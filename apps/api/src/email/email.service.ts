@@ -8,11 +8,20 @@ import { ConfigService } from '@nestjs/config';
 import nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+  /** Para mostrar uma imagem no HTML do e-mail: `<img src="cid:...">`. */
+  cid?: string;
+}
+
 export interface EmailMessage {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  attachments?: EmailAttachment[];
 }
 
 @Injectable()
@@ -26,8 +35,11 @@ export class EmailService implements OnModuleDestroy {
     // Só na demonstração, que não tem SMTP (docs/deploy.md): o e-mail vai para
     // o log, com os links. Nunca ligar no sistema do cliente.
     if (this.config.get<string>('EMAIL_SO_NO_LOG') === 'true') {
+      const anexos = message.attachments?.length
+        ? ` Anexos: ${message.attachments.map(({ filename }) => filename).join(', ')}.`
+        : '';
       this.logger.log(
-        `E-mail não enviado (EMAIL_SO_NO_LOG=true). Para: ${message.to}. Assunto: ${message.subject}.\n${message.text}`,
+        `E-mail não enviado (EMAIL_SO_NO_LOG=true). Para: ${message.to}. Assunto: ${message.subject}.${anexos}\n${message.text}`,
       );
       return;
     }

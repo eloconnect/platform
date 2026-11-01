@@ -1,6 +1,13 @@
 import type { Prisma } from '../generated/prisma/client.js';
 import type { FormaPagamento } from '../generated/prisma/enums.js';
 
+const UM_DIA = 24 * 60 * 60 * 1000;
+
+/** Último dia para pagar: 30 dias depois do vencimento (RN03). */
+export function validoAte(vencimento: Date): Date {
+  return new Date(vencimento.getTime() + 30 * UM_DIA);
+}
+
 /** O que o banco precisa para emitir um boleto com Pix (RN06). */
 export interface PedidoBoleto {
   /** Id do boleto no sistema. */
@@ -50,6 +57,12 @@ export type SituacaoNoBanco =
 export abstract class GatewayPagamento {
   /** Emite o boleto com Pix, sem juros e sem multa (RN08). */
   abstract emitir(pedido: PedidoBoleto): Promise<BoletoEmitido>;
+
+  /**
+   * PDF do boleto emitido, como o banco gera, para mandar ao associado
+   * (RF12). TODO(#40): conferir como o Sicredi devolve o PDF.
+   */
+  abstract pdf(boleto: PedidoBoleto & BoletoEmitido): Promise<Buffer>;
 
   abstract consultar(nossoNumero: string): Promise<SituacaoNoBanco>;
 

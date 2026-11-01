@@ -53,6 +53,25 @@ describe('EmailService', () => {
     });
   });
 
+  it('envia os anexos, como o PDF do boleto', async () => {
+    const anexo = {
+      filename: 'boleto-2026-12.pdf',
+      content: Buffer.from('%PDF-1.4'),
+      contentType: 'application/pdf',
+    };
+
+    await service.send({
+      to: 'associado@example.com',
+      subject: 'Boleto',
+      text: 'Segue o boleto.',
+      attachments: [anexo],
+    });
+
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({ attachments: [anexo] }),
+    );
+  });
+
   it('informa erro quando a configuração SMTP está ausente', async () => {
     delete values.SMTP_HOST;
 
@@ -82,6 +101,36 @@ describe('EmailService', () => {
     expect(sendMail).not.toHaveBeenCalled();
     expect(log).toHaveBeenCalledWith(
       expect.stringContaining('https://app.example.com/criar-senha?token=abc'),
+    );
+    log.mockRestore();
+  });
+
+  it('com EMAIL_SO_NO_LOG=true, o log diz o nome dos anexos', async () => {
+    const log = jest
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    values = { EMAIL_SO_NO_LOG: 'true' };
+
+    await service.send({
+      to: 'associado@example.com',
+      subject: 'Boleto',
+      text: 'Segue o boleto.',
+      attachments: [
+        {
+          filename: 'boleto-2026-12.pdf',
+          content: Buffer.from('%PDF-1.4'),
+          contentType: 'application/pdf',
+        },
+        {
+          filename: 'qr-code-pix.gif',
+          content: Buffer.from('GIF87a'),
+          contentType: 'image/gif',
+        },
+      ],
+    });
+
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('Anexos: boleto-2026-12.pdf, qr-code-pix.gif.'),
     );
     log.mockRestore();
   });

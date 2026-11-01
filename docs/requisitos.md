@@ -113,7 +113,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | --- | --- | --- | --- |
 | RF10 | Gerar e enviar automaticamente, no primeiro dia útil do mês, o lote de boletos (com Pix QR Code) de todos os associados com contribuição ativa, sem revisão (RN04). | Must | [Validado] — conversa de 28/10/2026 (P20) |
 | RF11 | A sede edita o boleto de um associado (o valor ou outro dado). A edição vale para o boleto do mês seguinte, e o associado recebe um e-mail na hora (RN04). | Must | [Validado] — só o valor, até o fim do mês anterior ao do boleto (decisão do grupo, 01/11/2026) |
-| RF12 | Enviar o boleto por e-mail e disponibilizá-lo no app (boleto + Pix QR Code). | Must | [Validado] |
+| RF12 | Enviar o boleto por e-mail e disponibilizá-lo no app (boleto + Pix QR Code). | Must | [Validado] — o e-mail leva o QR Code e o código do Pix, a linha digitável e o PDF do boleto anexado (decisão do grupo, 01/11/2026) |
 | RF13 | Enviar lembrete automático 48h antes do vencimento. | Must | [Validado] |
 | RF14 | Enviar lembrete automático uma vez por semana após o vencimento, até o boleto expirar (RN07). | Must | [Validado] |
 | RF15 | Registrar automaticamente o pagamento (baixa) e atualizar o status do associado. | Must | [Validado] — técnica a definir (O2) |

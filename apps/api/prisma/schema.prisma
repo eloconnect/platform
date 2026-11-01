@@ -224,6 +224,9 @@ model Boleto {
   linhaDigitavel     String?
   pixCopiaECola      String?
   emitidoEm          DateTime?
+  /// Quando o e-mail com o boleto saiu para o associado (RF12). Nulo
+  /// enquanto não saiu: a próxima execução do lote tenta de novo.
+  emailEnviadoEm     DateTime?
   pagoEm             DateTime?
   /// Controle dos lembretes a cada 48h (RN07).
   ultimoLembreteEm   DateTime?
