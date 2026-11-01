@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { ConfigService } from '@nestjs/config';
 import type { EmailMessage, EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
@@ -31,6 +32,7 @@ describe('EmailBoletoService', () => {
     new GatewaySimulado(),
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     { send } as unknown as EmailService,
+    new ConfigService({ WEB_URL: 'https://app.example.com/' }),
   );
 
   beforeEach(() => {
@@ -74,10 +76,51 @@ describe('EmailBoletoService', () => {
     });
     expect(qrCode.content.subarray(0, 6).toString('latin1')).toBe('GIF87a');
 
+    expect(mensagem.text).toContain(
+      'Você também encontra este boleto no site, em Meus boletos: https://app.example.com/associado/boletos',
+    );
+    expect(mensagem.html).toContain(
+      '<a href="https://app.example.com/associado/boletos">Meus boletos</a>',
+    );
+
     expect(update).toHaveBeenCalledWith({
       where: { id: 'boleto-id' },
       data: { emailEnviadoEm: expect.any(Date) },
     });
+  });
+
+  it('o lembrete antes do vencimento diz o dia do vencimento (RN07)', async () => {
+    await service.enviar('boleto-id', 'LEMBRETE_ANTES');
+
+    const [[mensagem]] = send.mock.calls;
+    expect(mensagem.subject).toBe(
+      'Seu boleto de dezembro de 2026 vence em 10/12/2026 - Elo Connect',
+    );
+    expect(mensagem.text).toContain(
+      'Lembrete: o boleto de dezembro de 2026 da sua contribuição ao sindicato vence em 10/12/2026.',
+    );
+    expect(mensagem.text).toContain(BOLETO.pixCopiaECola);
+    // O lembrete não muda a data do e-mail do boleto.
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'boleto-id' },
+      data: { ultimoLembreteEm: expect.any(Date) },
+    });
+  });
+
+  it('o lembrete depois do vencimento diz até quando dá para pagar (RN07, RN09)', async () => {
+    await service.enviar('boleto-id', 'LEMBRETE_VENCIDO');
+
+    const [[mensagem]] = send.mock.calls;
+    expect(mensagem.subject).toBe(
+      'Seu boleto de dezembro de 2026 está vencido - Elo Connect',
+    );
+    expect(mensagem.text).toContain(
+      'venceu em 10/12/2026 e ainda não consta como pago.',
+    );
+    expect(mensagem.text).toContain('Você ainda pode pagar até 09/01/2027.');
+    expect(mensagem.html).toContain(
+      '<p>Se você já pagou, desconsidere este e-mail.</p>',
+    );
   });
 
   it('sem nome fantasia, usa a razão social', async () => {

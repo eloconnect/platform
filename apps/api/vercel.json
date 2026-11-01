@@ -3,6 +3,7 @@
   "buildCommand": "pnpm run vercel-build",
   "crons": [
     { "path": "/api/tarefas/lote-mensal", "schedule": "0 11 * * *" },
-    { "path": "/api/tarefas/bloqueio", "schedule": "10 11 * * *" }
+    { "path": "/api/tarefas/bloqueio", "schedule": "10 11 * * *" },
+    { "path": "/api/tarefas/lembretes", "schedule": "20 11 * * *" }
   ]
 }

@@ -1,6 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CronGuard } from '../auth/guards/cron.guard.js';
 import { BloqueioService } from './bloqueio.service.js';
+import { LembretesService } from './lembretes.service.js';
 import { LoteMensalService } from './lote-mensal.service.js';
 
 /**
@@ -13,6 +14,7 @@ export class TarefasController {
   constructor(
     private readonly lote: LoteMensalService,
     private readonly bloqueio: BloqueioService,
+    private readonly lembretes: LembretesService,
   ) {}
 
   /** Lote mensal de boletos (RF10). */
@@ -25,5 +27,11 @@ export class TarefasController {
   @Get('bloqueio')
   bloqueioAutomatico() {
     return this.bloqueio.executar();
+  }
+
+  /** Lembretes antes e depois do vencimento (RF13, RF14). */
+  @Get('lembretes')
+  lembretesDoDia() {
+    return this.lembretes.executar();
   }
 }

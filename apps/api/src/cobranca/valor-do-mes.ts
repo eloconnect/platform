@@ -16,6 +16,11 @@ export function hojeEmMatoGrosso(agora: Date): Date {
   );
 }
 
+/** O instante em que um dia começa em Mato Grosso (meia-noite local). */
+export function inicioDoDiaEmMatoGrosso(dia: Date): Date {
+  return new Date(dia.getTime() - FUSO_SEDE_HORAS * UMA_HORA);
+}
+
 /** "AAAA-MM-DD" de um dia guardado à meia-noite UTC. */
 export function textoDia(dia: Date): string {
   return dia.toISOString().slice(0, 10);
