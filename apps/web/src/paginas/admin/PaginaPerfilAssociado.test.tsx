@@ -317,7 +317,12 @@ describe('PaginaPerfilAssociado', () => {
     expect(
       await screen.findByRole('link', { name: 'Editar dados' }),
     ).toHaveAttribute('href', '/admin/associados/id-01/editar');
-    expect(screen.getByRole('status')).toHaveTextContent('Dados salvos.');
+    // O histórico de boletos também tem um aviso de carregamento.
+    expect(
+      screen
+        .getAllByRole('status')
+        .some((aviso) => aviso.textContent === 'Dados salvos.'),
+    ).toBe(true);
   });
 
   it('inativa depois de confirmar', async () => {
