@@ -61,3 +61,4 @@ export {
   type PublicarNoticiaRequest,
 } from './noticias.js';
 export type * from './convencoes.js';
+export { formatarDia, type BoletoEmAberto } from './boletos.js';

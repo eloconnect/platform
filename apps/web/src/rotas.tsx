@@ -11,6 +11,7 @@ import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
 import { PaginaNoticias } from './paginas/admin/PaginaNoticias';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
+import { PaginaBoletosAssociado } from './paginas/associado/PaginaBoletosAssociado';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
 import { PaginaConvencoesAssociado } from './paginas/associado/PaginaConvencoesAssociado';
 import { PaginaNoticiasAssociado } from './paginas/associado/PaginaNoticiasAssociado';
@@ -58,6 +59,8 @@ export const rotas: RouteObject[] = [
       { path: 'noticias', element: <PaginaNoticiasAssociado /> },
       // Em dia ou não, o associado vê as convenções; o PDF muda (RN12).
       { path: 'convencoes', element: <PaginaConvencoesAssociado /> },
+      // Em dia ou não, o associado vê os boletos em aberto para pagar (RF12).
+      { path: 'boletos', element: <PaginaBoletosAssociado /> },
     ],
   },
   {

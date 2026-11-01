@@ -10,6 +10,7 @@ import type {
   MinhaConta,
   ProximoBoleto,
 } from './associados.js';
+import type { BoletoEmAberto } from './boletos.js';
 import type {
   FiltrosLogAuditoria,
   ListaLogAuditoria,
@@ -370,6 +371,13 @@ export function createApiClient(
         'POST',
         `/convencoes/${encodeURIComponent(id)}/publicar`,
       ),
+
+    /** Boletos em aberto do associado logado (RF12). */
+    listarMeusBoletos: () =>
+      requisitar<BoletoEmAberto[]>('GET', '/associado/boletos'),
+
+    baixarPdfMeuBoleto: (id: string) =>
+      requisitarArquivo(`/associado/boletos/${encodeURIComponent(id)}/pdf`),
   };
 }
 

@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AuditoriaModule } from '../auditoria/auditoria.module.js';
+import { AuthModule } from '../auth/auth.module.js';
 import { EmailModule } from '../email/email.module.js';
+import { AssociadoBoletosController } from './associado-boletos.controller.js';
+import { BoletosAssociadoService } from './boletos-associado.service.js';
 import { EdicaoBoletoService } from './edicao-boleto.service.js';
 import { EmailBoletoService } from './email-boleto.service.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
@@ -11,13 +14,14 @@ import { TransacoesService } from './transacoes.service.js';
 
 /** Cobrança dos associados (M3). */
 @Module({
-  imports: [AuditoriaModule, EmailModule],
-  controllers: [TarefasController],
+  imports: [AuthModule, AuditoriaModule, EmailModule],
+  controllers: [TarefasController, AssociadoBoletosController],
   providers: [
     TransacoesService,
     LoteMensalService,
     EdicaoBoletoService,
     EmailBoletoService,
+    BoletosAssociadoService,
     // TODO(#40): o adaptador do Sicredi entra aqui quando houver o convênio.
     { provide: GatewayPagamento, useClass: GatewaySimulado },
   ],

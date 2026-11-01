@@ -8,6 +8,19 @@ export function dataDaCompetencia({ ano, mes }: Competencia): Date {
   return new Date(Date.UTC(ano, mes - 1, 1));
 }
 
+/** O dia de hoje em Mato Grosso, à meia-noite UTC, como o banco guarda dias. */
+export function hojeEmMatoGrosso(agora: Date): Date {
+  const local = new Date(agora.getTime() + FUSO_SEDE_HORAS * UMA_HORA);
+  return new Date(
+    Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate()),
+  );
+}
+
+/** "AAAA-MM-DD" de um dia guardado à meia-noite UTC. */
+export function textoDia(dia: Date): string {
+  return dia.toISOString().slice(0, 10);
+}
+
 /** O contrário de `dataDaCompetencia`. */
 export function competenciaDaData(data: Date): Competencia {
   return { ano: data.getUTCFullYear(), mes: data.getUTCMonth() + 1 };

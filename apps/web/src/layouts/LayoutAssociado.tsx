@@ -10,6 +10,7 @@ export function LayoutAssociado() {
         { para: '/associado', texto: 'Início' },
         { para: '/associado/noticias', texto: 'Notícias' },
         { para: '/associado/convencoes', texto: 'Convenções' },
+        { para: '/associado/boletos', texto: 'Boletos' },
         { para: '/', texto: 'Sair', aoClicar: limparSessao },
       ]}
     />

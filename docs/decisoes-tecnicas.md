@@ -184,6 +184,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - E-mail do boleto (#46): quando o lote emite o boleto, o associado recebe um e-mail em HTML, com uma versão só em texto. O valor e o vencimento vêm no começo, seguidos do QR Code do Pix, do código do Pix Copia e Cola, da linha digitável e do PDF do boleto, anexado (decisão do grupo, 01/11/2026). O PDF vem do banco: o gateway simulado gera um PDF marcado como simulação, e o do Sicredi depende do estudo (#40). O QR Code é gerado pela API com a biblioteca `qrcode-generator`, que não tem dependências. Se um e-mail não sai, por exemplo quando o provedor chega ao limite do dia, a execução seguinte do lote tenta de novo, e o lote só fica como enviado depois que todos os e-mails saem. Quem não tem e-mail no cadastro não recebe o e-mail e vai ver o boleto no site (#47).
 
+- Boletos no site (#47): em "Meus boletos", o associado vê os boletos em aberto, em dia ou não, com o valor e o vencimento em destaque, o QR Code do Pix, os botões de copiar o código Pix e a linha digitável e o PDF do boleto. O boleto vencido mostra até quando ainda dá para pagar (RN03). O QR Code é gerado no navegador, com a mesma biblioteca da API, e o PDF vem do banco pela API, só para o dono do boleto.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.
