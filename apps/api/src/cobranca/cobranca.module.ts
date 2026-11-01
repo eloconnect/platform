@@ -10,6 +10,7 @@ import { EdicaoBoletoService } from './edicao-boleto.service.js';
 import { EmailBoletoService } from './email-boleto.service.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
 import { GatewaySimulado } from './gateway-simulado.js';
+import { HistoricoBoletosService } from './historico-boletos.service.js';
 import { LoteMensalService } from './lote-mensal.service.js';
 import { PagamentosService } from './pagamentos.service.js';
 import { TarefasController } from './tarefas.controller.js';
@@ -31,6 +32,7 @@ import { TransacoesService } from './transacoes.service.js';
     BoletosAssociadoService,
     BloqueioService,
     PagamentosService,
+    HistoricoBoletosService,
     // TODO(#40): o adaptador do Sicredi entra aqui quando houver o convênio.
     { provide: GatewayPagamento, useClass: GatewaySimulado },
   ],
@@ -39,6 +41,7 @@ import { TransacoesService } from './transacoes.service.js';
     GatewayPagamento,
     EdicaoBoletoService,
     PagamentosService,
+    HistoricoBoletosService,
   ],
 })
 export class CobrancaModule {}

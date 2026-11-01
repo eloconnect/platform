@@ -64,7 +64,11 @@ export type * from './convencoes.js';
 export {
   formatarDia,
   type BoletoEmAberto,
+  type BoletoHistorico,
   type FormaPagamento,
+  type HistoricoBoletos,
   type ResultadoPagamento,
   type SimularPagamentoRequest,
+  type StatusBoleto,
+  type TipoBoleto,
 } from './boletos.js';
