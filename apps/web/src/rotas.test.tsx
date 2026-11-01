@@ -19,6 +19,7 @@ vi.mock('./api', () => ({
     painelValores: vi.fn<ApiClient['painelValores']>(),
     listarConvencoes: vi.fn<ApiClient['listarConvencoes']>(),
     listarConvencoesAssociado: vi.fn<ApiClient['listarConvencoesAssociado']>(),
+    listarMeusBoletos: vi.fn<ApiClient['listarMeusBoletos']>(),
   },
 }));
 
@@ -118,6 +119,7 @@ describe('Áreas logadas', () => {
     vi.mocked(api.listarBeneficios).mockResolvedValue([]);
     vi.mocked(api.listarConvencoes).mockResolvedValue([]);
     vi.mocked(api.listarConvencoesAssociado).mockResolvedValue([]);
+    vi.mocked(api.listarMeusBoletos).mockResolvedValue([]);
 
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Farmácia Teste',
@@ -166,6 +168,7 @@ describe('Áreas logadas', () => {
     ['/associado', 'ASSOCIADO', 'Área do associado'],
     ['/associado/noticias', 'ASSOCIADO', 'Notícias'],
     ['/associado/convencoes', 'ASSOCIADO', 'Convenções coletivas'],
+    ['/associado/boletos', 'ASSOCIADO', 'Meus boletos'],
   ] as const)('%s abre para o perfil %s', async (caminho, perfil, titulo) => {
     entrarComo(perfil);
     abrir(caminho);
@@ -230,7 +233,7 @@ describe('Áreas logadas', () => {
     },
   );
 
-  it('o associado vê as notícias e as convenções no menu', () => {
+  it('o associado vê as notícias, as convenções e os boletos no menu', () => {
     entrarComo('ASSOCIADO');
     abrir('/associado');
 
@@ -241,6 +244,10 @@ describe('Áreas logadas', () => {
     expect(screen.getByRole('link', { name: 'Convenções' })).toHaveAttribute(
       'href',
       '/associado/convencoes',
+    );
+    expect(screen.getByRole('link', { name: 'Boletos' })).toHaveAttribute(
+      'href',
+      '/associado/boletos',
     );
   });
 
