@@ -10,7 +10,11 @@ import type {
   MinhaConta,
   ProximoBoleto,
 } from './associados.js';
-import type { BoletoEmAberto } from './boletos.js';
+import type {
+  BoletoEmAberto,
+  ResultadoPagamento,
+  SimularPagamentoRequest,
+} from './boletos.js';
 import type {
   FiltrosLogAuditoria,
   ListaLogAuditoria,
@@ -378,6 +382,14 @@ export function createApiClient(
 
     baixarPdfMeuBoleto: (id: string) =>
       requisitarArquivo(`/associado/boletos/${encodeURIComponent(id)}/pdf`),
+
+    /** Pagamento de mentira, só com o banco simulado (demonstração). */
+    simularPagamento: (id: string, dados: SimularPagamentoRequest) =>
+      requisitar<ResultadoPagamento>(
+        'POST',
+        `/boletos/${encodeURIComponent(id)}/pagamento-simulado`,
+        dados,
+      ),
   };
 }
 

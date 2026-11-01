@@ -22,6 +22,8 @@ export const ACOES_AUDITORIA = [
   // Valor do boleto do mês seguinte de um associado (RN04, RF11)
   'BOLETO_VALOR_EDITADO',
   'BOLETO_VALOR_NORMAL',
+  // Pagamento de mentira, só com o banco simulado (demonstração, RF15)
+  'PAGAMENTO_SIMULADO',
   // Benefícios (RF24)
   'BENEFICIO_CRIADO',
   'BENEFICIO_EDITADO',
@@ -56,6 +58,7 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   VALOR_ALTERADO: 'Valor da contribuição alterado',
   BOLETO_VALOR_EDITADO: 'Valor do próximo boleto mudado',
   BOLETO_VALOR_NORMAL: 'Próximo boleto voltou ao valor normal',
+  PAGAMENTO_SIMULADO: 'Pagamento simulado (demonstração)',
   BENEFICIO_CRIADO: 'Benefício cadastrado',
   BENEFICIO_EDITADO: 'Benefício editado',
   BENEFICIO_REMOVIDO: 'Benefício removido',

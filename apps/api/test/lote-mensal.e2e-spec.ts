@@ -26,6 +26,10 @@ import type { PrismaService } from '../src/prisma/prisma.service.js';
 
 process.env.JWT_SECRET ??= 'segredo-so-para-teste-com-mais-de-32-caracteres';
 
+// O lote emite o boleto de todo associado com contribuição ativa do banco de
+// teste, que guarda os dados de outros testes e cresce a cada rodada.
+jest.setTimeout(60_000);
+
 type Tx = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
 
 class Desfazer extends Error {}

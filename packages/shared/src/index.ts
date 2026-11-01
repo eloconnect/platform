@@ -61,4 +61,10 @@ export {
   type PublicarNoticiaRequest,
 } from './noticias.js';
 export type * from './convencoes.js';
-export { formatarDia, type BoletoEmAberto } from './boletos.js';
+export {
+  formatarDia,
+  type BoletoEmAberto,
+  type FormaPagamento,
+  type ResultadoPagamento,
+  type SimularPagamentoRequest,
+} from './boletos.js';

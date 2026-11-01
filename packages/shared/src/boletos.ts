@@ -19,6 +19,23 @@ export interface BoletoEmAberto {
   pixCopiaECola: string;
 }
 
+/** Como o associado pagou (RF30). */
+export type FormaPagamento = 'BOLETO' | 'PIX';
+
+/** Pagamento de mentira, feito pela sede, só com o banco simulado. */
+export interface SimularPagamentoRequest {
+  formaPagamento: FormaPagamento;
+}
+
+/** O que a baixa de um pagamento fez (RF15, RN10). */
+export interface ResultadoPagamento {
+  boletoId: string;
+  /** O pagamento já tinha sido registrado, e nada mudou. */
+  jaEstavaPago: boolean;
+  /** O associado estava bloqueado e voltou a ter acesso. */
+  desbloqueado: boolean;
+}
+
 /** "2026-12-10" vira "10/12/2026", sem passar por fuso horário. */
 export function formatarDia(dia: string): string {
   const [ano, mes, numero] = dia.slice(0, 10).split('-');
