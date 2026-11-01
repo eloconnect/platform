@@ -33,7 +33,6 @@ describe('Meus boletos (e2e)', () => {
       data: {
         cnpj: marcador.replace(/\D/g, '').padEnd(14, '0').slice(0, 14),
         razaoSocial: 'Farmácia dos Boletos Ltda',
-        contribuicaoAtiva: true,
       },
     });
     const usuario = await prisma.usuario.create({
