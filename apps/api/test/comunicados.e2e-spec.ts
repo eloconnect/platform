@@ -36,6 +36,8 @@ describe('Cobrança formal (e2e)', () => {
   let comunicados: ComunicadosService;
   let admin: { id: string; nome: string };
   let tokenAdmin: string;
+  /** Associados criados aqui, que saem do lote no fim. */
+  const criados: string[] = [];
 
   const http = () => request(app.getHttpServer());
   const assinar = (perfil: string, sub: string) =>
@@ -49,9 +51,9 @@ describe('Cobrança formal (e2e)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send(dados);
 
-  function criarAssociado(dados: object = {}) {
+  async function criarAssociado(dados: object = {}) {
     const marcador = crypto.randomUUID();
-    return prisma.associado.create({
+    const associado = await prisma.associado.create({
       data: {
         cnpj: marcador.replace(/\D/g, '').padEnd(14, '0').slice(0, 14),
         razaoSocial: 'Farmácia do Comunicado Ltda',
@@ -59,6 +61,8 @@ describe('Cobrança formal (e2e)', () => {
         ...dados,
       },
     });
+    criados.push(associado.id);
+    return associado;
   }
 
   beforeAll(async () => {
@@ -110,6 +114,10 @@ describe('Cobrança formal (e2e)', () => {
   });
 
   afterAll(async () => {
+    await prisma.associado.updateMany({
+      where: { id: { in: criados } },
+      data: { contribuicaoAtiva: false },
+    });
     await prisma.envioComunicado.deleteMany();
     await prisma.comunicado.deleteMany();
     await app.close();
@@ -146,9 +154,6 @@ describe('Cobrança formal (e2e)', () => {
     const naoPagante = await criarAssociado();
     const inativado = await criarAssociado({ inativadoEm: new Date() });
     const semEmail = await criarAssociado({ email: null });
-    const valor = await prisma.valorContribuicao.findFirstOrThrow({
-      orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }],
-    });
 
     const { body } = await criarComunicado({
       assunto: ' Cobrança formal ',
@@ -165,8 +170,10 @@ describe('Cobrança formal (e2e)', () => {
     expect(comunicado.mensagem).toMatch(
       /^Texto da sede\.\n\nValor da contribuição: R\$/,
     );
-    expect(comunicado.mensagem).toContain(
-      valor.valorMensal.toFixed(2).replace('.', ','),
+    // O valor exato fica no teste da mensagem: o teste de valores roda ao
+    // mesmo tempo e pode cadastrar outro valor no meio deste.
+    expect(comunicado.mensagem).toMatch(
+      /Valor da contribuição: R\$\s[\d.]+,\d{2} por mês\./,
     );
     const destinos = (
       await prisma.envioComunicado.findMany({
@@ -256,7 +263,9 @@ describe('Cobrança formal (e2e)', () => {
       enviados: total - 3,
       pendentes: 0,
     });
-    expect(new Set(enviados.map(({ to }) => to)).size).toBe(total);
+    // Um e-mail para cada envio. Associados diferentes podem ter o mesmo
+    // endereço, como uma rede de farmácias.
+    expect(enviados).toHaveLength(total);
     const painel = await comunicados.painel();
     expect(painel.comunicados[0]).toMatchObject({
       id,

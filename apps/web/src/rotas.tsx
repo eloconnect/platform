@@ -6,6 +6,7 @@ import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
 import { PaginaBeneficios } from './paginas/admin/PaginaBeneficios';
 import { PaginaCobrancaFormal } from './paginas/admin/PaginaCobrancaFormal';
+import { PaginaImportarAssociados } from './paginas/admin/PaginaImportarAssociados';
 import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssociado';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
@@ -88,6 +89,15 @@ export const rotas: RouteObject[] = [
         element: (
           <RotaProtegida perfis={['ADMIN']}>
             <PaginaFormularioAssociado />
+          </RotaProtegida>
+        ),
+      },
+      // A carga inicial é cadastro, só do chave mestre (RF42, RN33).
+      {
+        path: 'associados/importar',
+        element: (
+          <RotaProtegida perfis={['ADMIN']}>
+            <PaginaImportarAssociados />
           </RotaProtegida>
         ),
       },

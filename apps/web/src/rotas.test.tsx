@@ -170,6 +170,7 @@ describe('Áreas logadas', () => {
     ['/admin', 'ADMIN', 'Painel da sede'],
     ['/admin/associados', 'ADMIN', 'Associados'],
     ['/admin/associados/novo', 'ADMIN', 'Cadastrar associado'],
+    ['/admin/associados/importar', 'ADMIN', 'Importar associados'],
     ['/admin/auditoria', 'ADMIN', 'Histórico de ações'],
     ['/admin/valores', 'ADMIN', 'Valor da contribuição'],
     ['/admin/cobranca-formal', 'ADMIN', 'Cobrança formal'],
@@ -214,6 +215,7 @@ describe('Áreas logadas', () => {
     ['/associado', 'ADMIN_BASICO', 'Painel da sede'],
     // O cadastro é só do chave mestre (RN33).
     ['/admin/associados/novo', 'ADMIN_BASICO', 'Painel da sede'],
+    ['/admin/associados/importar', 'ADMIN_BASICO', 'Painel da sede'],
     // O histórico de ações, os valores e a cobrança também (RN20, RN33).
     ['/admin/auditoria', 'ADMIN_BASICO', 'Painel da sede'],
     ['/admin/valores', 'ADMIN_BASICO', 'Painel da sede'],

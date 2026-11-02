@@ -126,7 +126,7 @@ export function csvHistorico(boletos: BoletoHistorico[]): Buffer {
   const conteudo = linhas
     .map((linha) => linha.map(celulaCsv).join(';'))
     .join('\r\n');
-  return Buffer.from(`﻿${conteudo}\r\n`, 'utf8');
+  return Buffer.from(`\uFEFF${conteudo}\r\n`, 'utf8');
 }
 
 /** Entre aspas quando o valor tem ";", aspas ou quebra de linha. */

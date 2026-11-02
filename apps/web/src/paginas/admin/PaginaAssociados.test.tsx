@@ -52,13 +52,16 @@ describe('PaginaAssociados', () => {
     vi.mocked(api.listarAssociados).mockResolvedValue(lista({}));
   });
 
-  it('o perfil básico da sede não vê o botão de cadastrar (RN33)', async () => {
+  it('o perfil básico da sede não vê os botões de cadastrar e importar (RN33)', async () => {
     entrarComo('ADMIN_BASICO');
     abrir();
 
     await screen.findByText('Nenhum associado encontrado.');
     expect(
       screen.queryByRole('link', { name: 'Cadastrar associado' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Importar planilha' }),
     ).not.toBeInTheDocument();
   });
 
@@ -107,6 +110,9 @@ describe('PaginaAssociados', () => {
     expect(
       screen.getByRole('link', { name: 'Cadastrar associado' }),
     ).toHaveAttribute('href', '/admin/associados/novo');
+    expect(
+      screen.getByRole('link', { name: 'Importar planilha' }),
+    ).toHaveAttribute('href', '/admin/associados/importar');
   });
 
   it('busca com os filtros escolhidos', async () => {
