@@ -1,6 +1,11 @@
-import type { BoletoHistorico, HistoricoBoletos } from '@eloconnect/shared';
+import type {
+  BoletoHistorico,
+  FormatoExportacao,
+  HistoricoBoletos,
+} from '@eloconnect/shared';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { csvHistorico, pdfHistorico } from './exportar-historico.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
 import { GatewaySimulado } from './gateway-simulado.js';
 import {
@@ -11,7 +16,8 @@ import {
 
 /**
  * Histórico de boletos e pagamentos de um associado: no perfil, para a sede
- * (US07: RF07), e na área do associado (US31: RF31).
+ * (US07: RF07), que também o exporta em PDF ou CSV (US32: RF32), e na área do
+ * associado (US31: RF31).
  */
 @Injectable()
 export class HistoricoBoletosService {
@@ -34,6 +40,32 @@ export class HistoricoBoletosService {
     return {
       simulacao: this.gateway instanceof GatewaySimulado,
       boletos: await this.boletos(associadoId, agora),
+    };
+  }
+
+  /**
+   * Histórico em PDF ou CSV, para a sede comprovar a contribuição ou a não
+   * contribuição do associado (US32: RF32).
+   */
+  async exportar(
+    associadoId: string,
+    formato: FormatoExportacao,
+    agora = new Date(),
+  ): Promise<{ arquivo: Buffer; nomeArquivo: string }> {
+    const associado = await this.prisma.associado.findUnique({
+      where: { id: associadoId },
+      select: { razaoSocial: true, cnpj: true },
+    });
+    if (!associado) {
+      throw new NotFoundException('Associado não encontrado.');
+    }
+    const boletos = await this.boletos(associadoId, agora);
+    return {
+      arquivo:
+        formato === 'pdf'
+          ? pdfHistorico({ ...associado, emitidoEm: agora, boletos })
+          : csvHistorico(boletos),
+      nomeArquivo: `historico-${associado.cnpj}.${formato}`,
     };
   }
 

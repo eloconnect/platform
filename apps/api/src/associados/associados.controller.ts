@@ -3,15 +3,19 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
   Post,
   Put,
   Query,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
+import type { FormatoExportacao } from '@eloconnect/shared';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
@@ -27,10 +31,22 @@ import {
 } from './dto/associado.dto.js';
 import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
+/** Formatos da exportação do histórico, no jeito que o ParseEnumPipe lê. */
+const FORMATOS = { pdf: 'pdf', csv: 'csv' } satisfies Record<
+  FormatoExportacao,
+  FormatoExportacao
+>;
+
+/** Tipo de arquivo de cada formato. */
+const TIPOS: Record<FormatoExportacao, string> = {
+  pdf: 'application/pdf',
+  csv: 'text/csv; charset=utf-8',
+};
+
 /**
- * Gestão de associados pela sede (US06, US07, US08, US09, US11, US35: RF06,
- * RF07, RF08, RF09, RF11, RF38). Só o chave mestre altera; o perfil básico
- * só consulta (RN33).
+ * Gestão de associados pela sede (US06, US07, US08, US09, US11, US32, US35:
+ * RF06, RF07, RF08, RF09, RF11, RF32, RF38). Só o chave mestre altera; o
+ * perfil básico só consulta e exporta (RN33).
  */
 @Controller('associados')
 @UseGuards(RolesGuard)
@@ -111,6 +127,21 @@ export class AssociadosController {
   @Roles('ADMIN', 'ADMIN_BASICO')
   listarBoletos(@Param('id', ParseUUIDPipe) id: string) {
     return this.historico.listar(id);
+  }
+
+  /** O mesmo histórico em PDF ou CSV, para comprovar a contribuição (RF32). */
+  @Get(':id/boletos/:formato')
+  @Roles('ADMIN', 'ADMIN_BASICO')
+  @Header('Cache-Control', 'private, no-store')
+  async exportarBoletos(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('formato', new ParseEnumPipe(FORMATOS)) formato: FormatoExportacao,
+  ): Promise<StreamableFile> {
+    const { arquivo, nomeArquivo } = await this.historico.exportar(id, formato);
+    return new StreamableFile(arquivo, {
+      type: TIPOS[formato],
+      disposition: `attachment; filename="${nomeArquivo}"`,
+    });
   }
 
   /** Muda o valor do boleto do mês seguinte (RF11, RN04). */

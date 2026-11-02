@@ -46,6 +46,9 @@ export interface BoletoHistorico {
   formaPagamento: FormaPagamento | null;
 }
 
+/** Formatos em que a sede exporta o histórico de um associado (RF32). */
+export type FormatoExportacao = 'pdf' | 'csv';
+
 /** Histórico de boletos e pagamentos de um associado, para a sede (RF07). */
 export interface HistoricoBoletos {
   /** Do mês mais novo para o mais antigo. */
