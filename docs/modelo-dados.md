@@ -65,7 +65,7 @@ erDiagram
     SolicitacaoCancelamento {
         uuid id PK
         uuid associadoId FK
-        StatusCancelamento status "PENDENTE, APROVADA, RECUSADA"
+        StatusCancelamento status "PENDENTE, APROVADA, RECUSADA, CONFIRMADA_AUTOMATICAMENTE"
         string motivo
         string observacaoSede
         datetime decididaEm
@@ -267,7 +267,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
 | Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, grupo e ordem), cadastrada pela sede. O `grupo` separa assessoria jurídica e consultoria (RN32); a regra de acesso de cada grupo depende da P15. |
 | Matriz e filiais (RN31) | P14 | **Fora do modelo**. Provavelmente, uma ligação da filial com a matriz no `Associado`. |
-| Confirmação automática do cancelamento (RN18) | — | Status APROVADA com `decididaPorId` nulo = confirmado pelo sistema depois de 15 dias sem recusa (#56). |
+| Confirmação automática do cancelamento (RN18) | — | Status próprio, CONFIRMADA_AUTOMATICAMENTE, com `decididaPorId` nulo: confirmado pelo sistema no dia seguinte ao fim do prazo de 15 dias, sem recusa (#56, decisão do grupo, 02/11/2026). |
 | Aceite do compartilhamento com o contador | P11 | **Fora do modelo**. Se for preciso registrar data e hora do aceite, entra um campo em `Usuario`. |
 | Retenção e exclusão de dados (LGPD) | P07 | Inativação em vez de exclusão. Revisar quando houver orientação. |
 | Efeitos da inativação e reativação do associado | P13 | A inativação só preenche `inativadoEm` (o guard já barra benefícios e suporte); a reativação limpa o campo. |

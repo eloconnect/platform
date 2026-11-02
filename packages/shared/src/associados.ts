@@ -23,7 +23,12 @@ export interface Associado {
   atualizadoEm: string;
 }
 
-export type StatusCancelamento = 'PENDENTE' | 'APROVADA' | 'RECUSADA';
+export type StatusCancelamento =
+  | 'PENDENTE'
+  | 'APROVADA'
+  | 'RECUSADA'
+  /** Sem recusa da sede em 15 dias (RN18). */
+  | 'CONFIRMADA_AUTOMATICAMENTE';
 
 /** Pedido de cancelamento feito pelo associado. Datas em texto ISO. */
 export interface SolicitacaoCancelamento {
@@ -35,6 +40,18 @@ export interface SolicitacaoCancelamento {
   decididaEm: string | null;
   /** Quem da sede aprovou ou recusou. */
   decididaPor: { nome: string } | null;
+  /**
+   * Último dia para a sede responder ("AAAA-MM-DD"), 15 dias depois do
+   * pedido; no dia seguinte, o pedido pendente é confirmado (RN18).
+   */
+  respostaAte: string;
+}
+
+/** Decisão do chave mestre sobre um pedido de cancelamento (RF27). */
+export interface DecidirCancelamentoRequest {
+  decisao: 'APROVADA' | 'RECUSADA';
+  /** Anotação que só a sede vê. */
+  observacao?: string;
 }
 
 /** Conta de acesso criada pelo associado (RF05). Datas em texto ISO. */

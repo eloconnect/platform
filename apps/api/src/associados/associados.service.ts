@@ -20,6 +20,7 @@ import {
   type MinhaConta,
   type StatusAssociado,
 } from '@eloconnect/shared';
+import { respostaAte } from '../cancelamentos/prazo.js';
 import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
 import { hojeEmMatoGrosso, textoDia } from '../cobranca/valor-do-mes.js';
 import { EmailService } from '../email/email.service.js';
@@ -61,7 +62,7 @@ const DIAS_ACESSO_APOS_INTERRUPCAO = 30;
  * Último dia com acesso depois da interrupção ("AAAA-MM-DD"): o dia da
  * interrupção, no horário de Mato Grosso, mais 30 dias.
  */
-function ultimoDiaComAcesso(interrompidaEm: Date): string {
+export function ultimoDiaComAcesso(interrompidaEm: Date): string {
   const dia = hojeEmMatoGrosso(interrompidaEm);
   return textoDia(
     new Date(dia.getTime() + DIAS_ACESSO_APOS_INTERRUPCAO * UM_DIA),
@@ -210,9 +211,14 @@ export class AssociadosService {
     if (!associado) {
       throw new NotFoundException('Associado não encontrado.');
     }
-    const { usuario, cobrancaInterrompidaEm, ...dados } = associado;
+    const { usuario, cobrancaInterrompidaEm, cancelamentos, ...dados } =
+      associado;
     return {
       ...dados,
+      cancelamentos: cancelamentos.map((pedido) => ({
+        ...pedido,
+        respostaAte: respostaAte(pedido.solicitadaEm),
+      })),
       interrupcaoCobranca: interrupcao({
         contribuicaoAtiva: associado.contribuicaoAtiva,
         cobrancaInterrompidaEm,

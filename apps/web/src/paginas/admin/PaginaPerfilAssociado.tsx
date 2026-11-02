@@ -2,7 +2,6 @@ import type {
   AcessoManualStatus,
   Associado,
   AssociadoDetalhe,
-  StatusCancelamento,
 } from '@eloconnect/shared';
 import {
   acessoManualEmVigor,
@@ -26,6 +25,7 @@ import {
   useTituloPagina,
 } from '../../componentes';
 import { JanelaInterromperCobranca } from './JanelaInterromperCobranca';
+import { SecaoCancelamentos } from './SecaoCancelamentos';
 import { SecaoHistoricoBoletos } from './SecaoHistoricoBoletos';
 import { SecaoProximoBoleto } from './SecaoProximoBoleto';
 import { textosSituacao } from './situacaoAssociado';
@@ -34,12 +34,6 @@ type Resultado =
   | { tipo: 'ok'; associado: AssociadoDetalhe }
   | { tipo: 'nao-encontrado' }
   | { tipo: 'erro' };
-
-const STATUS_CANCELAMENTO: Record<StatusCancelamento, string> = {
-  PENDENTE: 'Pendente',
-  APROVADA: 'Aprovada',
-  RECUSADA: 'Recusada',
-};
 
 /** Textos de cada decisão da sede sobre o acesso (RF09, RN11). */
 const DECISOES_ACESSO: {
@@ -80,7 +74,8 @@ const DECISOES_ACESSO: {
  * solicitações de cancelamento e o histórico de boletos e pagamentos.
  * Daqui a sede edita, inativa e reativa o associado (US08, RF08), bloqueia ou
  * libera o acesso a benefícios e suporte (US09, RF09), muda o valor do
- * próximo boleto (US11, RF11) e interrompe a cobrança recorrente (US35, RF38).
+ * próximo boleto (US11, RF11), interrompe a cobrança recorrente (US35, RF38)
+ * e decide os pedidos de cancelamento (US27, RF27).
  */
 export function PaginaPerfilAssociado() {
   const { id = '' } = useParams();
@@ -303,33 +298,7 @@ function Perfil({
         <p>{textoConta(associado.conta)}</p>
       </section>
 
-      <section className="mt-4">
-        <h2>Solicitações de cancelamento</h2>
-        {associado.cancelamentos.length === 0 ? (
-          <p>Nenhuma solicitação.</p>
-        ) : (
-          <ul>
-            {associado.cancelamentos.map((solicitacao) => (
-              <li key={solicitacao.id} className="mb-3">
-                <strong>{STATUS_CANCELAMENTO[solicitacao.status]}</strong>,
-                pedida em {formatarData(solicitacao.solicitadaEm)}.
-                {solicitacao.motivo && <div>Motivo: {solicitacao.motivo}</div>}
-                {solicitacao.decididaEm && (
-                  <div>
-                    Decidida em {formatarData(solicitacao.decididaEm)}
-                    {solicitacao.decididaPor &&
-                      ` por ${solicitacao.decididaPor.nome}`}
-                    .
-                  </div>
-                )}
-                {solicitacao.observacaoSede && (
-                  <div>Observação da sede: {solicitacao.observacaoSede}</div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <SecaoCancelamentos associado={associado} aoAtualizar={aoAtualizar} />
 
       <SecaoProximoBoleto
         associado={associado}
@@ -560,14 +529,24 @@ function textoAcesso(associado: AssociadoDetalhe): string {
 }
 
 /**
- * A interrupção da cobrança pela sede (RN25). Enquanto o associado continua
- * adimplente, mostra até quando vai o acesso; depois, o bloqueio automático
- * o torna inadimplente.
+ * O fim da cobrança recorrente, pela interrupção da sede (RN25) ou pelo
+ * cancelamento confirmado (RN18). Enquanto o associado continua adimplente,
+ * mostra até quando vai o acesso; depois, o bloqueio automático o torna
+ * inadimplente.
  */
 function textoInterrupcao(associado: AssociadoDetalhe): string {
   const interrupcao = associado.interrupcaoCobranca;
   if (!interrupcao) return '';
-  const quando = `Cobrança mensal interrompida pela sede em ${formatarData(interrupcao.interrompidaEm)}.`;
+  // O cancelamento confirmado encerra a cobrança no instante da decisão.
+  const porCancelamento = associado.cancelamentos.some(
+    (pedido) =>
+      pedido.decididaEm === interrupcao.interrompidaEm &&
+      (pedido.status === 'APROVADA' ||
+        pedido.status === 'CONFIRMADA_AUTOMATICAMENTE'),
+  );
+  const quando = porCancelamento
+    ? `Cancelamento do boleto mensal confirmado em ${formatarData(interrupcao.interrompidaEm)}.`
+    : `Cobrança mensal interrompida pela sede em ${formatarData(interrupcao.interrompidaEm)}.`;
   return associado.situacao === 'ADIMPLENTE'
     ? `${quando} O acesso a benefícios e suporte continua até ${formatarDia(interrupcao.acessoAte)}.`
     : quando;

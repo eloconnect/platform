@@ -134,6 +134,8 @@ enum StatusCancelamento {
   PENDENTE
   APROVADA
   RECUSADA
+  /// Sem recusa da sede em 15 dias (RN18).
+  CONFIRMADA_AUTOMATICAMENTE
 }
 
 /// Pedido de cancelamento da cobrança recorrente, validado pela sede (RN18).

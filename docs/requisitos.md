@@ -1,6 +1,6 @@
 # Elo Connect — Requisitos (v7)
 
-Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 01/11/2026.
+Consolidado a partir da entrevista, das respostas complementares do cliente e do questionário de 14/10/2026, respondido em partes em 27 e 28/10/2026, da conversa por vídeo de 28/10/2026 e do pedido de imagens nas notícias, registrado em 29/10/2026 (resumo no [Registro da Entrevista](registro-entrevista.md), seções 8 a 10). Última atualização: 02/11/2026.
 
 **Legenda de status**
 
@@ -250,3 +250,4 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P22 | O sindicato pediu um exemplo de termo de adesão para os advogados usarem de base (resposta 19). O grupo pode indicar um modelo? Que cuidados isso exige? O aceite do compartilhamento do acesso com o contador (P11) pode entrar no mesmo termo? | Professores | RN23, RN29, RF36 |
 | P23 | Qual é o valor atual da contribuição mensal? O plano anual é o valor de 12 meses com 20% de desconto? (pergunta 22, em branco) Enquanto não houver resposta, a sede digita o valor mensal, e o sistema calcula o anual assim. | Cliente | RF18, RN13, RF17 |
 | P24 | Em que formato chegam os documentos da convenção (PDF, planilha, outro)? Além do resumo, há algum conteúdo que sempre é publicado, como a tabela de reajuste? Os PDFs costumam passar de 4 MB? (pergunta 39, em branco; o envio pelo sistema tem esse limite por enquanto) Enquanto não houver resposta, a convenção tem o resumo em texto e os dois PDFs, e a tabela de reajuste espera. | Cliente | RF21, RF22 |
+| P25 | O que acontece depois que o cancelamento é confirmado? Quem estava em dia mantém o acesso a benefícios e suporte por mais 30 dias, como na interrupção pela sede (RN25), ou perde na hora? O boleto do mês que já saiu continua valendo ou é cancelado no banco? Quem da sede recebe o aviso de um pedido novo? (perguntas 29 a 32, em branco) Enquanto não houver resposta, vale o mesmo da interrupção: quem estava em dia mantém o acesso por 30 dias, e o boleto que já saiu continua valendo, sem lembretes. O aviso do pedido vai para os usuários chave mestre, que decidem (decisão do grupo, 02/11/2026). | Cliente | RF27, RN18 |
