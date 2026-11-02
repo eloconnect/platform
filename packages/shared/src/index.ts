@@ -74,6 +74,7 @@ export {
   type BoletoEmAberto,
   type BoletoHistorico,
   type FormaPagamento,
+  type FormatoExportacao,
   type HistoricoBoletos,
   type ResultadoPagamento,
   type SimularPagamentoRequest,

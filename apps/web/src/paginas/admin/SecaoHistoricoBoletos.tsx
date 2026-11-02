@@ -1,6 +1,7 @@
 import type {
   AssociadoDetalhe,
   BoletoHistorico,
+  FormatoExportacao,
   HistoricoBoletos,
 } from '@eloconnect/shared';
 import {
@@ -15,6 +16,7 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Table from 'react-bootstrap/Table';
 import { api } from '../../api';
+import { baixarArquivo } from '../../arquivos';
 import { Botao, MensagemErro } from '../../componentes';
 import { ehChaveMestre } from '../../sessao';
 
@@ -25,8 +27,9 @@ type Estado =
 
 /**
  * Histórico de boletos e pagamentos no perfil do associado (US07: RF07), do
- * mês mais novo para o mais antigo. Na demonstração, com o banco simulado, o
- * chave mestre simula o pagamento de um boleto em aberto ou expirado (RF15).
+ * mês mais novo para o mais antigo, que os dois perfis da sede baixam em PDF
+ * ou CSV (US32: RF32). Na demonstração, com o banco simulado, o chave mestre
+ * simula o pagamento de um boleto em aberto ou expirado (RF15).
  */
 export function SecaoHistoricoBoletos({
   associado,
@@ -73,6 +76,8 @@ export function SecaoHistoricoBoletos({
           minutos.
         </MensagemErro>
       )}
+      {/* Sem boleto, o arquivo comprova a não contribuição. */}
+      {estado.tipo === 'ok' && <ExportarHistorico associado={associado} />}
       {estado.tipo === 'ok' && estado.historico.boletos.length === 0 && (
         <p>Nenhum boleto ainda.</p>
       )}
@@ -126,6 +131,54 @@ export function SecaoHistoricoBoletos({
         }}
       />
     </section>
+  );
+}
+
+/** Botões que baixam o histórico em PDF ou CSV, para comprovar a contribuição. */
+function ExportarHistorico({ associado }: { associado: AssociadoDetalhe }) {
+  const [baixando, setBaixando] = useState(false);
+  const [erro, setErro] = useState(false);
+
+  async function baixar(formato: FormatoExportacao) {
+    setBaixando(true);
+    setErro(false);
+    try {
+      baixarArquivo(
+        await api.baixarHistoricoBoletos(associado.id, formato),
+        `historico-${associado.cnpj}.${formato}`,
+      );
+    } catch {
+      setErro(true);
+    } finally {
+      setBaixando(false);
+    }
+  }
+
+  return (
+    <div className="mb-3">
+      {erro && (
+        <MensagemErro>
+          Não foi possível baixar o histórico agora. Tente de novo em alguns
+          minutos.
+        </MensagemErro>
+      )}
+      <div className="d-flex flex-wrap gap-2">
+        <Botao
+          variant="outline-primary"
+          disabled={baixando}
+          onClick={() => void baixar('pdf')}
+        >
+          Baixar em PDF
+        </Botao>
+        <Botao
+          variant="outline-primary"
+          disabled={baixando}
+          onClick={() => void baixar('csv')}
+        >
+          Baixar planilha (CSV)
+        </Botao>
+      </div>
+    </div>
   );
 }
 
