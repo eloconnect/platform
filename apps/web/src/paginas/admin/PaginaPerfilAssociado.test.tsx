@@ -8,7 +8,7 @@ import { ApiError } from '@eloconnect/shared';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../../api';
 import { entrarComo } from '../../test/sessao';
 import { PaginaPerfilAssociado } from './PaginaPerfilAssociado';
@@ -22,6 +22,7 @@ vi.mock('../../api', () => ({
     editarProximoBoleto: vi.fn<ApiClient['editarProximoBoleto']>(),
     voltarAoValorNormal: vi.fn<ApiClient['voltarAoValorNormal']>(),
     listarBoletosAssociado: vi.fn<ApiClient['listarBoletosAssociado']>(),
+    baixarHistoricoBoletos: vi.fn<ApiClient['baixarHistoricoBoletos']>(),
     simularPagamento: vi.fn<ApiClient['simularPagamento']>(),
     interromperCobranca: vi.fn<ApiClient['interromperCobranca']>(),
   },
@@ -85,6 +86,21 @@ function secao(titulo: string): HTMLElement {
   return elemento;
 }
 
+/** Guarda o nome de cada arquivo baixado, sem sair da página. */
+function prepararDownload() {
+  vi.stubGlobal('URL', {
+    createObjectURL: vi.fn<typeof URL.createObjectURL>(() => 'blob:x'),
+    revokeObjectURL: vi.fn<typeof URL.revokeObjectURL>(),
+  });
+  const baixados: string[] = [];
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+    this: HTMLAnchorElement,
+  ) {
+    baixados.push(this.download);
+  });
+  return baixados;
+}
+
 const boleto = (
   dados: Partial<BoletoHistorico> & Pick<BoletoHistorico, 'id' | 'status'>,
 ): BoletoHistorico => ({
@@ -141,6 +157,7 @@ describe('PaginaPerfilAssociado', () => {
       simulacao: false,
     });
     vi.mocked(api.simularPagamento).mockReset();
+    vi.mocked(api.baixarHistoricoBoletos).mockReset();
     vi.mocked(api.interromperCobranca).mockReset();
   });
 
@@ -221,7 +238,10 @@ describe('PaginaPerfilAssociado', () => {
     expect(secao('Próximo boleto')).toHaveTextContent(
       'Boleto de dezembro de 2026: R$ 100,00',
     );
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    // Só os botões de baixar o histórico, que não alteram nada (RF32).
+    expect(
+      (await screen.findAllByRole('button')).map((botao) => botao.textContent),
+    ).toEqual(['Baixar em PDF', 'Baixar planilha (CSV)']);
     expect(
       screen.queryByRole('link', { name: 'Editar dados' }),
     ).not.toBeInTheDocument();
@@ -900,6 +920,61 @@ describe('PaginaPerfilAssociado', () => {
             .then((titulo) => titulo.closest('section') ?? document.body),
         ).findByRole('alert'),
       ).toHaveTextContent('Não foi possível carregar os boletos agora.');
+    });
+  });
+
+  describe('exportar o histórico (RF32)', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it.each(['ADMIN', 'ADMIN_BASICO'] as const)(
+      'o perfil %s baixa o histórico em PDF e em planilha',
+      async (perfil) => {
+        entrarComo(perfil);
+        const baixados = prepararDownload();
+        vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+        vi.mocked(api.baixarHistoricoBoletos).mockResolvedValue(
+          new Blob(['arquivo']),
+        );
+        abrir();
+
+        await userEvent.click(
+          await screen.findByRole('button', { name: 'Baixar em PDF' }),
+        );
+        await userEvent.click(
+          screen.getByRole('button', { name: 'Baixar planilha (CSV)' }),
+        );
+
+        expect(vi.mocked(api.baixarHistoricoBoletos).mock.calls).toEqual([
+          ['id-01', 'pdf'],
+          ['id-01', 'csv'],
+        ]);
+        expect(baixados).toEqual([
+          'historico-11222333000181.pdf',
+          'historico-11222333000181.csv',
+        ]);
+      },
+    );
+
+    it('avisa quando não consegue baixar', async () => {
+      prepararDownload();
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.baixarHistoricoBoletos).mockRejectedValue(
+        new TypeError('Failed to fetch'),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Baixar em PDF' }),
+      );
+
+      expect(
+        await within(secao('Histórico de boletos e pagamentos')).findByRole(
+          'alert',
+        ),
+      ).toHaveTextContent('Não foi possível baixar o histórico agora.');
     });
   });
 

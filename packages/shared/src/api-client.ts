@@ -16,6 +16,7 @@ import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type {
   BoletoEmAberto,
   BoletoHistorico,
+  FormatoExportacao,
   HistoricoBoletos,
   ResultadoPagamento,
   SimularPagamentoRequest,
@@ -417,6 +418,12 @@ export function createApiClient(
       requisitar<HistoricoBoletos>(
         'GET',
         `/associados/${encodeURIComponent(id)}/boletos`,
+      ),
+
+    /** O mesmo histórico em PDF ou CSV, para comprovar a contribuição (RF32). */
+    baixarHistoricoBoletos: (id: string, formato: FormatoExportacao) =>
+      requisitarArquivo(
+        `/associados/${encodeURIComponent(id)}/boletos/${formato}`,
       ),
 
     /** Pagamento de mentira, só com o banco simulado (demonstração). */
