@@ -12,10 +12,12 @@ export function LayoutAdmin() {
         { para: '/admin/beneficios', texto: 'Benefícios' },
         { para: '/admin/convencoes', texto: 'Convenções' },
         { para: '/admin/noticias', texto: 'Notícias' },
-        // Valores e histórico de ações são só do chave mestre (RN20, RN33).
+        // Valores, cobrança formal e histórico de ações são só do chave
+        // mestre (RN20, RN33).
         ...(ehChaveMestre()
           ? [
               { para: '/admin/valores', texto: 'Valores' },
+              { para: '/admin/cobranca-formal', texto: 'Cobrança formal' },
               { para: '/admin/auditoria', texto: 'Histórico de ações' },
             ]
           : []),

@@ -17,6 +17,7 @@ vi.mock('./api', () => ({
     listarUsuariosSede: vi.fn<ApiClient['listarUsuariosSede']>(),
     minhaConta: vi.fn<ApiClient['minhaConta']>(),
     painelValores: vi.fn<ApiClient['painelValores']>(),
+    painelComunicados: vi.fn<ApiClient['painelComunicados']>(),
     listarConvencoes: vi.fn<ApiClient['listarConvencoes']>(),
     listarConvencoesAssociado: vi.fn<ApiClient['listarConvencoesAssociado']>(),
     listarMeusBoletos: vi.fn<ApiClient['listarMeusBoletos']>(),
@@ -158,6 +159,11 @@ describe('Áreas logadas', () => {
       historico: [],
       associadosAvisados: 0,
     });
+    vi.mocked(api.painelComunicados).mockResolvedValue({
+      destinatarios: 0,
+      limiteDiario: 150,
+      comunicados: [],
+    });
   });
 
   it.each([
@@ -166,6 +172,7 @@ describe('Áreas logadas', () => {
     ['/admin/associados/novo', 'ADMIN', 'Cadastrar associado'],
     ['/admin/auditoria', 'ADMIN', 'Histórico de ações'],
     ['/admin/valores', 'ADMIN', 'Valor da contribuição'],
+    ['/admin/cobranca-formal', 'ADMIN', 'Cobrança formal'],
     ['/admin/beneficios', 'ADMIN', 'Benefícios'],
     ['/admin/beneficios', 'ADMIN_BASICO', 'Benefícios'],
     ['/admin/convencoes', 'ADMIN', 'Convenções coletivas'],
@@ -207,9 +214,10 @@ describe('Áreas logadas', () => {
     ['/associado', 'ADMIN_BASICO', 'Painel da sede'],
     // O cadastro é só do chave mestre (RN33).
     ['/admin/associados/novo', 'ADMIN_BASICO', 'Painel da sede'],
-    // O histórico de ações e os valores também (RN20, RN33).
+    // O histórico de ações, os valores e a cobrança também (RN20, RN33).
     ['/admin/auditoria', 'ADMIN_BASICO', 'Painel da sede'],
     ['/admin/valores', 'ADMIN_BASICO', 'Painel da sede'],
+    ['/admin/cobranca-formal', 'ADMIN_BASICO', 'Painel da sede'],
   ] as const)(
     '%s com o perfil %s vai para a própria área',
     async (caminho, perfil, titulo) => {
@@ -266,7 +274,7 @@ describe('Áreas logadas', () => {
     ).toHaveAttribute('href', '/associado/historico');
   });
 
-  it('só o chave mestre vê valores e histórico de ações no menu (RN33)', () => {
+  it('só o chave mestre vê valores, cobrança formal e histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN');
     abrir('/admin');
 
@@ -274,18 +282,24 @@ describe('Áreas logadas', () => {
       'href',
       '/admin/valores',
     );
+    expect(
+      screen.getByRole('link', { name: 'Cobrança formal' }),
+    ).toHaveAttribute('href', '/admin/cobranca-formal');
 
     expect(
       screen.getByRole('link', { name: 'Histórico de ações' }),
     ).toHaveAttribute('href', '/admin/auditoria');
   });
 
-  it('o perfil básico não vê valores nem histórico de ações no menu (RN33)', () => {
+  it('o perfil básico não vê valores, cobrança formal nem histórico de ações no menu (RN33)', () => {
     entrarComo('ADMIN_BASICO');
     abrir('/admin');
 
     expect(
       screen.queryByRole('link', { name: 'Valores' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Cobrança formal' }),
     ).not.toBeInTheDocument();
 
     expect(

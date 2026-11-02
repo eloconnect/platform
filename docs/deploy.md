@@ -33,6 +33,7 @@ Ficam só no painel da Vercel, nunca no repositório.
 | `WEB_URL` | `https://eloconnect.vercel.app` |
 | `EMAIL_SO_NO_LOG` | `true` |
 | `CRON_SECRET` | Gerada na sua máquina com `openssl rand -hex 32` |
+| `LIMITE_DIARIO_COMUNICADO` | Opcional: e-mails da cobrança formal por dia. Sem ela, são 150 |
 
 O SMTP fica sem configurar, e o e-mail não sai enquanto não houver provedor (P12). Com `EMAIL_SO_NO_LOG=true`, a API escreve cada e-mail no log, com os links, em vez de enviar. É assim que a equipe testa a criação de conta e a recuperação de senha na demonstração: faça o pedido nas telas e abra o log da função em Logs, no projeto `eloconnect-api`. Os e-mails do seed são fictícios (`@example.com`), e o log só a equipe vê. **Nunca ligue essa variável no sistema do cliente**: os links dão acesso às contas.
 
@@ -40,7 +41,7 @@ Quando houver provedor, o envio depois da resposta precisa do `waitUntil` do `@v
 
 ## Tarefas agendadas (Cron Jobs)
 
-As tarefas de cobrança rodam pelo cron da Vercel, configurado no `apps/api/vercel.json`: o lote mensal de boletos (`/api/tarefas/lote-mensal`), o bloqueio de quem deixou o boleto expirar (`/api/tarefas/bloqueio`) os lembretes antes e depois do vencimento (`/api/tarefas/lembretes`) e a confirmação dos pedidos de cancelamento sem resposta da sede em 15 dias (`/api/tarefas/cancelamentos`). A Vercel chama cada uma uma vez por dia, só no deploy de produção, e manda o `CRON_SECRET` em cada chamada. Sem essa variável, a API recusa as chamadas e as tarefas não rodam. Depois de criar a variável, faça um Redeploy da API. As execuções aparecem em Settings → Cron Jobs do projeto `eloconnect-api`, no botão View Logs. A Vercel não repete uma execução que falhou, mas a API recupera no dia seguinte o que ficou para trás.
+As tarefas de cobrança rodam pelo cron da Vercel, configurado no `apps/api/vercel.json`: o lote mensal de boletos (`/api/tarefas/lote-mensal`), o bloqueio de quem deixou o boleto expirar (`/api/tarefas/bloqueio`) os lembretes antes e depois do vencimento (`/api/tarefas/lembretes`) a confirmação dos pedidos de cancelamento sem resposta da sede em 15 dias (`/api/tarefas/cancelamentos`) e o envio da parte do dia da cobrança formal (`/api/tarefas/comunicados`). A Vercel chama cada uma uma vez por dia, só no deploy de produção, e manda o `CRON_SECRET` em cada chamada. Sem essa variável, a API recusa as chamadas e as tarefas não rodam. Depois de criar a variável, faça um Redeploy da API. As execuções aparecem em Settings → Cron Jobs do projeto `eloconnect-api`, no botão View Logs. A Vercel não repete uma execução que falhou, mas a API recupera no dia seguinte o que ficou para trás.
 
 ## PDFs das convenções e imagens das notícias (Vercel Blob)
 

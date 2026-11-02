@@ -5,6 +5,7 @@
     { "path": "/api/tarefas/lote-mensal", "schedule": "0 11 * * *" },
     { "path": "/api/tarefas/bloqueio", "schedule": "10 11 * * *" },
     { "path": "/api/tarefas/lembretes", "schedule": "20 11 * * *" },
-    { "path": "/api/tarefas/cancelamentos", "schedule": "30 11 * * *" }
+    { "path": "/api/tarefas/cancelamentos", "schedule": "30 11 * * *" },
+    { "path": "/api/tarefas/comunicados", "schedule": "40 11 * * *" }
   ]
 }

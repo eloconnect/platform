@@ -62,6 +62,12 @@ export {
 } from './noticias.js';
 export type * from './convencoes.js';
 export {
+  LIMITES_COMUNICADO,
+  type Comunicado,
+  type CriarComunicadoRequest,
+  type PainelComunicados,
+} from './comunicados.js';
+export {
   TERMO_ADESAO,
   type AderirRequest,
   type AdesaoFeita,

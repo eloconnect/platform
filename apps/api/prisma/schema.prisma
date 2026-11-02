@@ -49,6 +49,7 @@ model Usuario {
   noticias               Noticia[]
   cancelamentosDecididos SolicitacaoCancelamento[]
   adesoes                AdesaoCobranca[]
+  comunicados            Comunicado[]
 }
 
 enum TipoToken {
@@ -125,6 +126,7 @@ model Associado {
   cancelamentos SolicitacaoCancelamento[]
   edicoesBoleto EdicaoBoleto[]
   adesoes       AdesaoCobranca[]
+  comunicados   EnvioComunicado[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -266,6 +268,39 @@ model AdesaoCobranca {
   usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
 
   @@index([associadoId, aceitaEm])
+}
+
+/// Cobrança formal (comunicado) por e-mail a todos os associados do cadastro,
+/// sem boleto (RN19, RF29). A mensagem já traz o valor e os benefícios e é a
+/// mesma para todos.
+model Comunicado {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  assunto     String
+  mensagem    String
+  criadoPorId String    @db.Uuid
+  criadoEm    DateTime  @default(now())
+  /// Quando o último e-mail saiu.
+  concluidoEm DateTime?
+
+  criadoPor Usuario           @relation(fields: [criadoPorId], references: [id], onDelete: Restrict)
+  envios    EnvioComunicado[]
+}
+
+/// Um e-mail do comunicado. O envio é escalonado pelo limite diário do
+/// provedor de e-mail (RNF09): cada dia sai uma parte.
+model EnvioComunicado {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  comunicadoId String    @db.Uuid
+  associadoId  String    @db.Uuid
+  /// E-mail do cadastro na hora do comunicado.
+  email        String
+  enviadoEm    DateTime?
+
+  comunicado Comunicado @relation(fields: [comunicadoId], references: [id], onDelete: Restrict)
+  associado  Associado  @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+
+  @@unique([comunicadoId, associadoId])
+  @@index([enviadoEm])
 }
 
 /// Valor do boleto mensal de um associado mudado pela sede para um mês só
