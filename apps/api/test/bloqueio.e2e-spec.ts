@@ -175,14 +175,16 @@ describe('Bloqueio automático (e2e)', () => {
         (await tx.boleto.findUniqueOrThrow({ where: { id: pago.id } })).status,
       ).toBe('PAGO');
 
-      // Rodar de novo não muda nada.
-      await expect(
-        bloqueio.executar(new Date('2099-06-10T12:00:00Z')),
-      ).resolves.toEqual({
-        dia: '2099-06-10',
-        expirados: 0,
-        bloqueados: 0,
-        fimDoAcesso: 0,
+      // Rodar de novo não muda nada do que este teste criou. As contagens
+      // podem não ser zero: outros testes rodam ao mesmo tempo, no mesmo
+      // banco, e criam associados e boletos entre uma execução e outra.
+      await bloqueio.executar(new Date('2099-06-10T12:00:00Z'));
+      expect(await tx.transacao.count({ where: { boletoId: boleto.id } })).toBe(
+        1,
+      );
+      expect(await situacao(pagou.id)).toEqual({
+        situacao: 'ADIMPLENTE',
+        acessoManual: null,
       });
     });
   });

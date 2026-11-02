@@ -12,6 +12,7 @@ import { PaginaNoticias } from './paginas/admin/PaginaNoticias';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaAdesaoAssociado } from './paginas/associado/PaginaAdesaoAssociado';
+import { PaginaCancelamentoAssociado } from './paginas/associado/PaginaCancelamentoAssociado';
 import { PaginaBoletosAssociado } from './paginas/associado/PaginaBoletosAssociado';
 import { PaginaHistoricoAssociado } from './paginas/associado/PaginaHistoricoAssociado';
 import { PaginaInicioAssociado } from './paginas/associado/PaginaInicioAssociado';
@@ -67,6 +68,8 @@ export const rotas: RouteObject[] = [
       { path: 'historico', element: <PaginaHistoricoAssociado /> },
       // Adesão à cobrança recorrente, sem aprovação da sede (RN23).
       { path: 'adesao', element: <PaginaAdesaoAssociado /> },
+      // Quem recebe o boleto pede o cancelamento, que passa pela sede (RF26).
+      { path: 'cancelamento', element: <PaginaCancelamentoAssociado /> },
     ],
   },
   {

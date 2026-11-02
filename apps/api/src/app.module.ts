@@ -13,6 +13,7 @@ import { BeneficiosModule } from './beneficios/beneficios.module.js';
 import { NoticiasModule } from './noticias/noticias.module.js';
 import { ConvencoesModule } from './convencoes/convencoes.module.js';
 import { CobrancaModule } from './cobranca/cobranca.module.js';
+import { CancelamentosModule } from './cancelamentos/cancelamentos.module.js';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CobrancaModule } from './cobranca/cobranca.module.js';
     NoticiasModule,
     ConvencoesModule,
     CobrancaModule,
+    CancelamentosModule,
   ],
   controllers: [AppController, HealthController],
   providers: [AppService],

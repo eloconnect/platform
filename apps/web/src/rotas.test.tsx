@@ -133,6 +133,7 @@ describe('Áreas logadas', () => {
       situacao: 'Adimplente',
       acessoLiberadoAte: null,
       recebeBoletoMensal: true,
+      cancelamentoPedidoEm: null,
     });
 
     vi.mocked(api.listarAssociados).mockResolvedValue({
@@ -179,6 +180,7 @@ describe('Áreas logadas', () => {
     ['/associado/boletos', 'ASSOCIADO', 'Meus boletos'],
     ['/associado/historico', 'ASSOCIADO', 'Histórico de pagamentos'],
     ['/associado/adesao', 'ASSOCIADO', 'Receber o boleto todo mês'],
+    ['/associado/cancelamento', 'ASSOCIADO', 'Cancelar o boleto mensal'],
   ] as const)('%s abre para o perfil %s', async (caminho, perfil, titulo) => {
     entrarComo(perfil);
     abrir(caminho);

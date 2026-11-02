@@ -169,4 +169,15 @@ export interface MinhaConta {
   acessoLiberadoAte: string | null;
   /** A farmácia recebe o boleto todo mês (contribuição ativa, RN23). */
   recebeBoletoMensal: boolean;
+  /**
+   * Data e hora ISO do pedido de cancelamento que espera a resposta da sede;
+   * nulo sem pedido pendente (RN18).
+   */
+  cancelamentoPedidoEm: string | null;
+}
+
+/** Pedido de cancelamento do boleto mensal feito pelo associado (RF26). */
+export interface PedidoCancelamento {
+  /** Data e hora ISO do pedido. */
+  pedidoEm: string;
 }
