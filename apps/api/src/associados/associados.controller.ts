@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -13,8 +14,11 @@ import {
   Put,
   Query,
   StreamableFile,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type { FormatoExportacao } from '@eloconnect/shared';
 import { Roles } from '../auth/decorators/roles.decorator.js';
 import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
@@ -23,6 +27,8 @@ import { EditarProximoBoletoDto } from '../cobranca/dto/editar-proximo-boleto.dt
 import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
 import { HistoricoBoletosService } from '../cobranca/historico-boletos.service.js';
 import { AssociadosService } from './associados.service.js';
+import { ImportacaoService } from './importacao.service.js';
+import { textoDoArquivo } from './planilha.js';
 import {
   CriarAssociadoDto,
   DefinirAcessoDto,
@@ -30,6 +36,9 @@ import {
   InterromperCobrancaDto,
 } from './dto/associado.dto.js';
 import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
+
+/** Cerca de 2.000 farmácias cabem com folga em 1 MB. */
+const TAMANHO_MAXIMO_PLANILHA = 1024 * 1024;
 
 /** Formatos da exportação do histórico, no jeito que o ParseEnumPipe lê. */
 const FORMATOS = { pdf: 'pdf', csv: 'csv' } satisfies Record<
@@ -45,7 +54,8 @@ const TIPOS: Record<FormatoExportacao, string> = {
 
 /**
  * Gestão de associados pela sede (US06, US07, US08, US09, US11, US32, US35:
- * RF06, RF07, RF08, RF09, RF11, RF32, RF38). Só o chave mestre altera; o
+ * RF06, RF07, RF08, RF09, RF11, RF32, RF38), com a carga inicial pela
+ * planilha (RF42). Só o chave mestre altera; o
  * perfil básico só consulta e exporta (RN33).
  */
 @Controller('associados')
@@ -56,6 +66,7 @@ export class AssociadosController {
     private readonly associados: AssociadosService,
     private readonly edicoes: EdicaoBoletoService,
     private readonly historico: HistoricoBoletosService,
+    private readonly importacao: ImportacaoService,
   ) {}
 
   @Get()
@@ -82,6 +93,27 @@ export class AssociadosController {
     @Body() dados: EditarAssociadoDto,
   ) {
     return this.associados.editar(usuarioId, id, dados);
+  }
+
+  /**
+   * Carga inicial pela planilha modelo, em CSV (RF42). Só o chave mestre,
+   * como o cadastro (RN33).
+   */
+  @Post('importacao')
+  @HttpCode(200)
+  @UseInterceptors(
+    FileInterceptor('planilha', {
+      limits: { fileSize: TAMANHO_MAXIMO_PLANILHA, files: 1 },
+    }),
+  )
+  importar(
+    @UsuarioAtual() usuarioId: string,
+    @UploadedFile() arquivo?: { buffer: Buffer },
+  ) {
+    if (!arquivo) {
+      throw new BadRequestException('Escolha a planilha.');
+    }
+    return this.importacao.importar(usuarioId, textoDoArquivo(arquivo.buffer));
   }
 
   @Post(':id/inativar')

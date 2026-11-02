@@ -31,6 +31,14 @@ export class AuditoriaService {
   async registrar(tx: Transacao, registro: RegistroAuditoria): Promise<void> {
     await tx.logAuditoria.create({ data: registro });
   }
+
+  /** Grava várias ações de uma vez, como numa importação. */
+  async registrarVarias(
+    tx: Transacao,
+    registros: RegistroAuditoria[],
+  ): Promise<void> {
+    await tx.logAuditoria.createMany({ data: registros });
+  }
 }
 
 type ValorCampo = string | number | boolean | Date | null | undefined;

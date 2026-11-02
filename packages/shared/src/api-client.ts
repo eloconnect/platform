@@ -14,6 +14,7 @@ import type {
   ProximoBoleto,
 } from './associados.js';
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
+import type { ResultadoImportacao } from './importacao.js';
 import type {
   Comunicado,
   CriarComunicadoRequest,
@@ -262,6 +263,16 @@ export function createApiClient(
         'POST',
         `/associados/${encodeURIComponent(id)}/reativar`,
       ),
+
+    /** Carga inicial: a planilha modelo preenchida pela sede (RF42). */
+    importarAssociados: (planilha: File) => {
+      const corpo = new FormData();
+      corpo.append('planilha', planilha);
+      return requisitarMultipart<ResultadoImportacao>(
+        '/associados/importacao',
+        corpo,
+      );
+    },
 
     minhaConta: () => requisitar<MinhaConta>('GET', '/minha-conta'),
 

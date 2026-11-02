@@ -62,6 +62,12 @@ export {
 } from './noticias.js';
 export type * from './convencoes.js';
 export {
+  COLUNAS_IMPORTACAO,
+  planilhaModelo,
+  type ErroImportacao,
+  type ResultadoImportacao,
+} from './importacao.js';
+export {
   LIMITES_COMUNICADO,
   type Comunicado,
   type CriarComunicadoRequest,

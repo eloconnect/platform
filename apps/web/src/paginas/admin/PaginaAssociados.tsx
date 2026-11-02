@@ -92,12 +92,17 @@ export function PaginaAssociados() {
     <>
       <h1>Associados</h1>
       {ehChaveMestre() && (
-        <Link
-          className="btn btn-primary btn-lg mb-4"
-          to="/admin/associados/novo"
-        >
-          Cadastrar associado
-        </Link>
+        <div className="d-flex flex-wrap gap-3 mb-4">
+          <Link className="btn btn-primary btn-lg" to="/admin/associados/novo">
+            Cadastrar associado
+          </Link>
+          <Link
+            className="btn btn-outline-primary btn-lg"
+            to="/admin/associados/importar"
+          >
+            Importar planilha
+          </Link>
+        </div>
       )}
 
       {/* A key recria o formulário quando o endereço muda (ex.: "Voltar"). */}

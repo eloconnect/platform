@@ -105,7 +105,7 @@ describe('csvHistorico', () => {
     const csv = csvHistorico([JULHO, JUNHO]).toString('utf8');
 
     expect(csv).toBe(
-      '﻿Mês;Valor (R$);Vencimento;Situação\r\n' +
+      '\uFEFFMês;Valor (R$);Vencimento;Situação\r\n' +
         'julho de 2099;1300,00;10/07/2099;Vencido\r\n' +
         'junho de 2099 (avulso);120,00;10/06/2099;Pago em 08/06/2099, com Pix\r\n',
     );
@@ -113,7 +113,7 @@ describe('csvHistorico', () => {
 
   it('gera só o cabeçalho quando não há boleto', () => {
     expect(csvHistorico([]).toString('utf8')).toBe(
-      '﻿Mês;Valor (R$);Vencimento;Situação\r\n',
+      '\uFEFFMês;Valor (R$);Vencimento;Situação\r\n',
     );
   });
 });

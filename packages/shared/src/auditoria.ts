@@ -9,6 +9,8 @@ export const ACOES_AUDITORIA = [
   'ASSOCIADO_EDITADO',
   'ASSOCIADO_INATIVADO',
   'ASSOCIADO_REATIVADO',
+  // Carga inicial dos que já pagam, pela planilha modelo (RF42)
+  'ASSOCIADO_IMPORTADO',
   'CONTRIBUICAO_ATIVADA',
   'CONTRIBUICAO_INTERROMPIDA',
   // Pedido de cancelamento do associado (RN18, RF27)
@@ -54,6 +56,7 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   ASSOCIADO_EDITADO: 'Cadastro editado',
   ASSOCIADO_INATIVADO: 'Associado inativado',
   ASSOCIADO_REATIVADO: 'Associado reativado',
+  ASSOCIADO_IMPORTADO: 'Associado importado da planilha',
   CONTRIBUICAO_ATIVADA: 'Boleto mensal ativado',
   CONTRIBUICAO_INTERROMPIDA: 'Boleto mensal interrompido',
   CANCELAMENTO_APROVADO: 'Cancelamento aprovado',
