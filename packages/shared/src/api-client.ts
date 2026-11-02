@@ -15,6 +15,11 @@ import type {
 } from './associados.js';
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type {
+  Comunicado,
+  CriarComunicadoRequest,
+  PainelComunicados,
+} from './comunicados.js';
+import type {
   BoletoEmAberto,
   BoletoHistorico,
   FormatoExportacao,
@@ -278,6 +283,13 @@ export function createApiClient(
         `/associados/${encodeURIComponent(id)}/interromper-cobranca`,
         dados,
       ),
+
+    /** Cobrança formal: quem recebe, o limite por dia e os comunicados (RF29). */
+    painelComunicados: () =>
+      requisitar<PainelComunicados>('GET', '/comunicados'),
+
+    criarComunicado: (dados: CriarComunicadoRequest) =>
+      requisitar<Comunicado>('POST', '/comunicados', dados),
 
     /** O chave mestre aprova ou recusa um pedido de cancelamento (RF27). */
     decidirCancelamento: (id: string, dados: DecidirCancelamentoRequest) =>

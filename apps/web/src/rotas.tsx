@@ -5,6 +5,7 @@ import { LayoutPublico } from './layouts/LayoutPublico';
 import { RotaProtegida } from './layouts/RotaProtegida';
 import { PaginaAssociados } from './paginas/admin/PaginaAssociados';
 import { PaginaBeneficios } from './paginas/admin/PaginaBeneficios';
+import { PaginaCobrancaFormal } from './paginas/admin/PaginaCobrancaFormal';
 import { PaginaFormularioAssociado } from './paginas/admin/PaginaFormularioAssociado';
 import { PaginaInicioAdmin } from './paginas/admin/PaginaInicioAdmin';
 import { PaginaLogAuditoria } from './paginas/admin/PaginaLogAuditoria';
@@ -116,6 +117,14 @@ export const rotas: RouteObject[] = [
         element: (
           <RotaProtegida perfis={['ADMIN']}>
             <PaginaValores />
+          </RotaProtegida>
+        ),
+      },
+      {
+        path: 'cobranca-formal',
+        element: (
+          <RotaProtegida perfis={['ADMIN']}>
+            <PaginaCobrancaFormal />
           </RotaProtegida>
         ),
       },

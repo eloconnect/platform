@@ -20,6 +20,9 @@ erDiagram
     Associado ||--o{ EdicaoBoleto : "tem"
     Associado ||--o{ AdesaoCobranca : "adere"
     Usuario ||--o{ AdesaoCobranca : "aceita o termo"
+    Usuario ||--o{ Comunicado : "escreve"
+    Comunicado ||--o{ EnvioComunicado : "manda"
+    Associado ||--o{ EnvioComunicado : "recebe"
     Boleto ||--o{ Transacao : "gera"
     Associado ||--o{ Transacao : "tem"
     Usuario |o--o{ Transacao : "registra"
@@ -113,6 +116,21 @@ erDiagram
         string versaoTermo
         datetime aceitaEm
     }
+    Comunicado {
+        uuid id PK
+        string assunto
+        string mensagem "texto da sede com o valor e os benefícios"
+        uuid criadoPorId FK
+        datetime criadoEm
+        datetime concluidoEm "nulo enquanto o envio continua"
+    }
+    EnvioComunicado {
+        uuid id PK
+        uuid comunicadoId FK "UK com associadoId"
+        uuid associadoId FK
+        string email "o do cadastro na hora do comunicado"
+        datetime enviadoEm "nulo enquanto não saiu"
+    }
     Transacao {
         uuid id PK
         uuid boletoId FK
@@ -199,6 +217,8 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 **Adesão pelo associado** (RN23, RF36). Liga a `contribuicaoAtiva`, sem aprovação da sede, e grava a `AdesaoCobranca` com a versão do termo aceito. Na mesma transação, gera o boleto MENSAL do mês, sem lote, com o valor cheio, e o emite no banco. Se o banco falhar, nada fica gravado. Quem já tem o boleto do mês não recebe outro, e o lote mensal não gera um segundo boleto para quem aderiu.
 
 **Interrupção da cobrança pela sede** (RN25, RF38). Desliga a `contribuicaoAtiva` e guarda o instante em `cobrancaInterrompidaEm`. Quem estava em dia mantém a situação ADIMPLENTE por mais 30 dias: o último dia com acesso é o dia da interrupção, no horário de Mato Grosso, mais 30. No dia seguinte, o job diário do bloqueio o torna INADIMPLENTE. Quando a cobrança é ativada de novo, o campo volta a nulo. O motivo fica só no log de auditoria.
+
+**Cobrança formal** (RN19, RF29, RNF09). O `Comunicado` guarda a mensagem já pronta, igual para todos, e um `EnvioComunicado` por associado do cadastro com e-mail, menos os inativados, criados na hora do comunicado. O job diário manda os envios pendentes até o limite do dia e marca o `enviadoEm`; quando não sobra nenhum, o comunicado ganha o `concluidoEm`. Só um comunicado é enviado por vez.
 
 **Boleto vencido é calculado.** Não existe status VENCIDO: um boleto EM_ABERTO com `vencimento` no passado está vencido. Evita que um job precise atualizar boletos todo dia.
 
