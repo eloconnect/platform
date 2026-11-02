@@ -134,7 +134,7 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
           alt="QR Code do Pix"
           width={280}
           height={280}
-          className="d-block mb-3"
+          className="d-block mb-3 img-fluid"
         />
         <p className="font-monospace text-break">{boleto.pixCopiaECola}</p>
         <Botao
