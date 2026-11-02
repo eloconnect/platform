@@ -14,6 +14,7 @@ import type {
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type {
   BoletoEmAberto,
+  BoletoHistorico,
   HistoricoBoletos,
   ResultadoPagamento,
   SimularPagamentoRequest,
@@ -401,6 +402,10 @@ export function createApiClient(
 
     baixarPdfMeuBoleto: (id: string) =>
       requisitarArquivo(`/associado/boletos/${encodeURIComponent(id)}/pdf`),
+
+    /** Histórico de boletos e pagamentos do associado logado (RF31). */
+    listarMeuHistorico: () =>
+      requisitar<BoletoHistorico[]>('GET', '/associado/boletos/historico'),
 
     /** Histórico de boletos e pagamentos no perfil do associado (RF07). */
     listarBoletosAssociado: (id: string) =>

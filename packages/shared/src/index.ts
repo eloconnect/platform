@@ -69,6 +69,8 @@ export {
 } from './adesao.js';
 export {
   formatarDia,
+  textoMesBoleto,
+  textoSituacaoBoleto,
   type BoletoEmAberto,
   type BoletoHistorico,
   type FormaPagamento,

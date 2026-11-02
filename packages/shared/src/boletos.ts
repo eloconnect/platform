@@ -1,4 +1,4 @@
-import type { Competencia } from './valores.js';
+import { textoCompetencia, type Competencia } from './valores.js';
 
 /**
  * Boleto em aberto, como o associado vê para pagar (US12: RF12, RN06).
@@ -27,7 +27,10 @@ export type StatusBoleto =
 
 export type TipoBoleto = 'MENSAL' | 'AVULSO' | 'ANUAL';
 
-/** Boleto no histórico do perfil do associado, para a sede (RF07). */
+/**
+ * Boleto no histórico de boletos e pagamentos, no perfil do associado, para a
+ * sede (RF07), e na área do associado (RF31).
+ */
 export interface BoletoHistorico {
   id: string;
   competencia: Competencia;
@@ -43,7 +46,7 @@ export interface BoletoHistorico {
   formaPagamento: FormaPagamento | null;
 }
 
-/** Histórico de boletos e pagamentos de um associado (RF07). */
+/** Histórico de boletos e pagamentos de um associado, para a sede (RF07). */
 export interface HistoricoBoletos {
   /** Do mês mais novo para o mais antigo. */
   boletos: BoletoHistorico[];
@@ -69,4 +72,54 @@ export interface ResultadoPagamento {
 export function formatarDia(dia: string): string {
   const [ano, mes, numero] = dia.slice(0, 10).split('-');
   return `${numero}/${mes}/${ano}`;
+}
+
+const TIPOS: Record<TipoBoleto, string> = {
+  MENSAL: '',
+  AVULSO: ' (avulso)',
+  ANUAL: ' (plano anual)',
+};
+
+const SITUACOES: Record<Exclude<StatusBoleto, 'EM_ABERTO' | 'PAGO'>, string> = {
+  RASCUNHO: 'Em emissão',
+  CANCELADO: 'Cancelado',
+  EXPIRADO: 'Expirado, sem pagamento',
+};
+
+const FORMAS: Record<FormaPagamento, string> = {
+  PIX: 'Pix',
+  BOLETO: 'boleto',
+};
+
+/** Mês do boleto, com o tipo quando não é o mensal: "junho de 2099 (avulso)". */
+export function textoMesBoleto(
+  boleto: Pick<BoletoHistorico, 'competencia' | 'tipo'>,
+): string {
+  return `${textoCompetencia(boleto.competencia)}${TIPOS[boleto.tipo]}`;
+}
+
+/**
+ * Situação do boleto em texto claro, a mesma para a sede e para o associado
+ * (RF07, RF31): "Em aberto", "Vencido", "Pago em 08/06/2099, com Pix"...
+ */
+export function textoSituacaoBoleto(
+  boleto: Pick<
+    BoletoHistorico,
+    'status' | 'vencido' | 'pagoEm' | 'formaPagamento'
+  >,
+): string {
+  if (boleto.status === 'EM_ABERTO') {
+    return boleto.vencido ? 'Vencido' : 'Em aberto';
+  }
+  if (boleto.status === 'PAGO') {
+    // A data do pagamento no horário de Mato Grosso, onde fica a sede.
+    const quando = boleto.pagoEm
+      ? ` em ${new Date(boleto.pagoEm).toLocaleDateString('pt-BR', { timeZone: 'America/Cuiaba' })}`
+      : '';
+    const forma = boleto.formaPagamento
+      ? `, com ${FORMAS[boleto.formaPagamento]}`
+      : '';
+    return `Pago${quando}${forma}`;
+  }
+  return SITUACOES[boleto.status];
 }

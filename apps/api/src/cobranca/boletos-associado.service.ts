@@ -1,7 +1,8 @@
-import type { BoletoEmAberto } from '@eloconnect/shared';
+import type { BoletoEmAberto, BoletoHistorico } from '@eloconnect/shared';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { GatewayPagamento, validoAte } from './gateway-pagamento.js';
+import { HistoricoBoletosService } from './historico-boletos.service.js';
 import {
   competenciaDaData,
   hojeEmMatoGrosso,
@@ -10,13 +11,15 @@ import {
 
 /**
  * Boletos do associado logado (US12: RF12, RN06): os que estão em aberto,
- * com o Pix e a linha digitável, e o PDF de cada um.
+ * com o Pix e a linha digitável, e o PDF de cada um. Também o histórico de
+ * todos os boletos e pagamentos dele (US31: RF31).
  */
 @Injectable()
 export class BoletosAssociadoService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly gateway: GatewayPagamento,
+    private readonly historicoBoletos: HistoricoBoletosService,
   ) {}
 
   /** Boletos em aberto, do vencimento mais antigo ao mais novo. */
@@ -53,6 +56,17 @@ export class BoletosAssociadoService {
               },
             ]
           : [],
+    );
+  }
+
+  /** Todos os boletos do associado, do mês mais novo para o mais antigo. */
+  async historico(
+    usuarioId: string,
+    agora = new Date(),
+  ): Promise<BoletoHistorico[]> {
+    return this.historicoBoletos.boletos(
+      await this.associadoDe(usuarioId),
+      agora,
     );
   }
 

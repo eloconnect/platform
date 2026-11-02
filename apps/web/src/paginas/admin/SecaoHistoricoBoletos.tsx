@@ -1,13 +1,14 @@
 import type {
   AssociadoDetalhe,
   BoletoHistorico,
-  FormaPagamento,
   HistoricoBoletos,
 } from '@eloconnect/shared';
 import {
   formatarDia,
   formatarReais,
   textoCompetencia,
+  textoMesBoleto,
+  textoSituacaoBoleto,
 } from '@eloconnect/shared';
 import { useEffect, useState, type FormEvent } from 'react';
 import Form from 'react-bootstrap/Form';
@@ -21,26 +22,6 @@ type Estado =
   | { tipo: 'carregando' }
   | { tipo: 'erro' }
   | { tipo: 'ok'; historico: HistoricoBoletos };
-
-const TIPOS: Record<BoletoHistorico['tipo'], string> = {
-  MENSAL: '',
-  AVULSO: ' (avulso)',
-  ANUAL: ' (plano anual)',
-};
-
-const SITUACOES: Record<
-  Exclude<BoletoHistorico['status'], 'EM_ABERTO' | 'PAGO'>,
-  string
-> = {
-  RASCUNHO: 'Em emissão',
-  CANCELADO: 'Cancelado',
-  EXPIRADO: 'Expirado, sem pagamento',
-};
-
-const FORMAS: Record<FormaPagamento, string> = {
-  PIX: 'Pix',
-  BOLETO: 'boleto',
-};
 
 /**
  * Histórico de boletos e pagamentos no perfil do associado (US07: RF07), do
@@ -109,15 +90,12 @@ export function SecaoHistoricoBoletos({
           <tbody>
             {estado.historico.boletos.map((boleto) => (
               <tr key={boleto.id}>
-                <td>
-                  {textoCompetencia(boleto.competencia)}
-                  {TIPOS[boleto.tipo]}
-                </td>
+                <td>{textoMesBoleto(boleto)}</td>
                 <td className="text-nowrap">{formatarReais(boleto.valor)}</td>
                 <td className="text-nowrap">
                   {formatarDia(boleto.vencimento)}
                 </td>
-                <td>{textoSituacao(boleto)}</td>
+                <td>{textoSituacaoBoleto(boleto)}</td>
                 {podeSimular && (
                   <td>
                     {(boleto.status === 'EM_ABERTO' ||
@@ -149,23 +127,6 @@ export function SecaoHistoricoBoletos({
       />
     </section>
   );
-}
-
-function textoSituacao(boleto: BoletoHistorico): string {
-  if (boleto.status === 'EM_ABERTO') {
-    return boleto.vencido ? 'Vencido' : 'Em aberto';
-  }
-  if (boleto.status === 'PAGO') {
-    // A data do pagamento no horário de Mato Grosso, onde fica a sede.
-    const quando = boleto.pagoEm
-      ? ` em ${new Date(boleto.pagoEm).toLocaleDateString('pt-BR', { timeZone: 'America/Cuiaba' })}`
-      : '';
-    const forma = boleto.formaPagamento
-      ? `, com ${FORMAS[boleto.formaPagamento]}`
-      : '';
-    return `Pago${quando}${forma}`;
-  }
-  return SITUACOES[boleto.status];
 }
 
 /** Confirmação do pagamento simulado, com a forma de pagamento. */
