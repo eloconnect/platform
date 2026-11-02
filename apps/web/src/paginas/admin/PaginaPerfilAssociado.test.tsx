@@ -3,6 +3,7 @@ import type {
   AssociadoDetalhe,
   BoletoHistorico,
   ProximoBoleto,
+  SolicitacaoCancelamento,
 } from '@eloconnect/shared';
 import { ApiError } from '@eloconnect/shared';
 import { render, screen, within } from '@testing-library/react';
@@ -25,6 +26,7 @@ vi.mock('../../api', () => ({
     baixarHistoricoBoletos: vi.fn<ApiClient['baixarHistoricoBoletos']>(),
     simularPagamento: vi.fn<ApiClient['simularPagamento']>(),
     interromperCobranca: vi.fn<ApiClient['interromperCobranca']>(),
+    decidirCancelamento: vi.fn<ApiClient['decidirCancelamento']>(),
   },
 }));
 
@@ -159,6 +161,7 @@ describe('PaginaPerfilAssociado', () => {
     vi.mocked(api.simularPagamento).mockReset();
     vi.mocked(api.baixarHistoricoBoletos).mockReset();
     vi.mocked(api.interromperCobranca).mockReset();
+    vi.mocked(api.decidirCancelamento).mockReset();
   });
 
   it('mostra a situação, os dados cadastrais e o espaço dos boletos', async () => {
@@ -263,6 +266,7 @@ describe('PaginaPerfilAssociado', () => {
             solicitadaEm: '2026-10-10T12:00:00.000Z',
             decididaEm: null,
             decididaPor: null,
+            respostaAte: '2026-10-25',
           },
           {
             id: 'c1',
@@ -272,6 +276,7 @@ describe('PaginaPerfilAssociado', () => {
             solicitadaEm: '2026-09-01T12:00:00.000Z',
             decididaEm: '2026-09-02T12:00:00.000Z',
             decididaPor: { nome: 'Admin de Exemplo' },
+            respostaAte: '2026-09-16',
           },
         ],
       }),
@@ -297,6 +302,9 @@ describe('PaginaPerfilAssociado', () => {
     ).getAllByRole('listitem');
     expect(pendente).toHaveTextContent('Pendente, pedida em 10/10/2026.');
     expect(pendente).toHaveTextContent('Motivo: Motivo fictício');
+    expect(pendente).toHaveTextContent(
+      'A sede pode responder até 25/10/2026. Sem resposta, o cancelamento é confirmado no dia seguinte.',
+    );
     expect(recusada).toHaveTextContent('Recusada, pedida em 01/09/2026.');
     expect(recusada).toHaveTextContent(
       'Decidida em 02/09/2026 por Admin de Exemplo.',
@@ -975,6 +983,148 @@ describe('PaginaPerfilAssociado', () => {
           'alert',
         ),
       ).toHaveTextContent('Não foi possível baixar o histórico agora.');
+    });
+  });
+
+  describe('decisão do cancelamento (RF27)', () => {
+    const PENDENTE: SolicitacaoCancelamento = {
+      id: 'c1',
+      status: 'PENDENTE',
+      motivo: null,
+      observacaoSede: null,
+      solicitadaEm: '2026-11-02T15:00:00.000Z',
+      decididaEm: null,
+      decididaPor: null,
+      respostaAte: '2026-11-17',
+    };
+
+    it('o chave mestre aprova, com a observação, e o perfil mostra o fim da cobrança', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ cancelamentos: [PENDENTE] }),
+      );
+      vi.mocked(api.decidirCancelamento).mockResolvedValue(
+        associado({
+          contribuicaoAtiva: false,
+          interrupcaoCobranca: {
+            interrompidaEm: '2026-11-03T15:00:00.000Z',
+            acessoAte: '2026-12-03',
+          },
+          cancelamentos: [
+            {
+              ...PENDENTE,
+              status: 'APROVADA',
+              decididaEm: '2026-11-03T15:00:00.000Z',
+              decididaPor: { nome: 'Admin de Exemplo' },
+              observacaoSede: 'Conversa por telefone.',
+            },
+          ],
+        }),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Aprovar o cancelamento' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Aprovar o cancelamento?',
+      });
+      expect(janela).toHaveTextContent(
+        'mantém o acesso a benefícios e suporte por mais 30 dias',
+      );
+      await userEvent.type(
+        within(janela).getByLabelText('Observação'),
+        ' Conversa por telefone. ',
+      );
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Sim, aprovar' }),
+      );
+
+      expect(api.decidirCancelamento).toHaveBeenCalledWith('c1', {
+        decisao: 'APROVADA',
+        observacao: 'Conversa por telefone.',
+      });
+      expect(
+        await screen.findByText(
+          'Cancelamento aprovado. O associado vai receber um e-mail com a resposta.',
+        ),
+      ).toBeInTheDocument();
+      const pedido = within(secao('Solicitações de cancelamento')).getByRole(
+        'listitem',
+      );
+      expect(pedido).toHaveTextContent('Aprovada, pedida em 02/11/2026.');
+      expect(pedido).toHaveTextContent(
+        'Decidida em 03/11/2026 por Admin de Exemplo.',
+      );
+      expect(secao('Situação')).toHaveTextContent(
+        'Cancelamento do boleto mensal confirmado em 03/11/2026. O acesso a benefícios e suporte continua até 03/12/2026.',
+      );
+    });
+
+    it('recusar mostra o motivo quando o pedido já foi decidido', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ cancelamentos: [PENDENTE] }),
+      );
+      vi.mocked(api.decidirCancelamento).mockRejectedValue(
+        new ApiError(409, 'Este pedido de cancelamento já foi decidido.'),
+      );
+      abrir();
+
+      await userEvent.click(
+        await screen.findByRole('button', { name: 'Recusar o cancelamento' }),
+      );
+      const janela = await screen.findByRole('dialog', {
+        name: 'Recusar o cancelamento?',
+      });
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Sim, recusar' }),
+      );
+
+      expect(api.decidirCancelamento).toHaveBeenCalledWith('c1', {
+        decisao: 'RECUSADA',
+      });
+      expect(await within(janela).findByRole('alert')).toHaveTextContent(
+        'Este pedido de cancelamento já foi decidido.',
+      );
+    });
+
+    it('o perfil básico vê o pedido, sem os botões de decidir (RN33)', async () => {
+      entrarComo('ADMIN_BASICO');
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({ cancelamentos: [PENDENTE] }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
+      expect(
+        within(secao('Solicitações de cancelamento')).getByRole('listitem'),
+      ).toHaveTextContent('Pendente, pedida em 02/11/2026.');
+      expect(
+        screen.queryByRole('button', { name: 'Aprovar o cancelamento' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('mostra o pedido confirmado sem resposta da sede (RN18)', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(
+        associado({
+          cancelamentos: [
+            {
+              ...PENDENTE,
+              status: 'CONFIRMADA_AUTOMATICAMENTE',
+              decididaEm: '2026-11-18T11:00:00.000Z',
+            },
+          ],
+        }),
+      );
+      abrir();
+
+      await screen.findByRole('heading', { level: 2, name: 'Situação' });
+      const pedido = within(secao('Solicitações de cancelamento')).getByRole(
+        'listitem',
+      );
+      expect(pedido).toHaveTextContent(
+        'Confirmada sem resposta da sede, pedida em 02/11/2026.',
+      );
+      expect(pedido).toHaveTextContent('Confirmada em 18/11/2026.');
     });
   });
 

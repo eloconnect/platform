@@ -11,6 +11,9 @@ export const ACOES_AUDITORIA = [
   'ASSOCIADO_REATIVADO',
   'CONTRIBUICAO_ATIVADA',
   'CONTRIBUICAO_INTERROMPIDA',
+  // Pedido de cancelamento do associado (RN18, RF27)
+  'CANCELAMENTO_APROVADO',
+  'CANCELAMENTO_RECUSADO',
   // Troca do e-mail de acesso junto com o do cadastro (RN34)
   'CONTA_EMAIL_ALTERADO',
   // Acesso manual (RN11): bloquear, liberar ou voltar a seguir o pagamento
@@ -51,6 +54,8 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   ASSOCIADO_REATIVADO: 'Associado reativado',
   CONTRIBUICAO_ATIVADA: 'Boleto mensal ativado',
   CONTRIBUICAO_INTERROMPIDA: 'Boleto mensal interrompido',
+  CANCELAMENTO_APROVADO: 'Cancelamento aprovado',
+  CANCELAMENTO_RECUSADO: 'Cancelamento recusado',
   CONTA_EMAIL_ALTERADO: 'E-mail de acesso trocado',
   ACESSO_BLOQUEADO: 'Acesso bloqueado',
   ACESSO_LIBERADO: 'Acesso liberado',

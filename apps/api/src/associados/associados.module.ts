@@ -11,5 +11,6 @@ import { MinhaContaController } from './minha-conta.controller.js';
   imports: [AuthModule, AuditoriaModule, EmailModule, CobrancaModule],
   controllers: [AssociadosController, MinhaContaController],
   providers: [AssociadosService],
+  exports: [AssociadosService],
 })
 export class AssociadosModule {}

@@ -2,6 +2,7 @@ import type {
   Associado,
   AssociadoDetalhe,
   CriarAssociadoRequest,
+  DecidirCancelamentoRequest,
   DefinirAcessoRequest,
   EditarAssociadoRequest,
   EditarProximoBoletoRequest,
@@ -275,6 +276,14 @@ export function createApiClient(
       requisitar<AssociadoDetalhe>(
         'POST',
         `/associados/${encodeURIComponent(id)}/interromper-cobranca`,
+        dados,
+      ),
+
+    /** O chave mestre aprova ou recusa um pedido de cancelamento (RF27). */
+    decidirCancelamento: (id: string, dados: DecidirCancelamentoRequest) =>
+      requisitar<AssociadoDetalhe>(
+        'POST',
+        `/cancelamentos/${encodeURIComponent(id)}/decisao`,
         dados,
       ),
 
