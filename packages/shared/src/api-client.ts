@@ -9,6 +9,7 @@ import type {
   InterromperCobrancaRequest,
   ListaAssociados,
   MinhaConta,
+  PedidoCancelamento,
   ProximoBoleto,
 } from './associados.js';
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
@@ -257,6 +258,10 @@ export function createApiClient(
       ),
 
     minhaConta: () => requisitar<MinhaConta>('GET', '/minha-conta'),
+
+    /** Pedido de cancelamento do boleto mensal, que passa pela sede (RF26). */
+    pedirCancelamento: () =>
+      requisitar<PedidoCancelamento>('POST', '/associado/cancelamento'),
 
     definirAcesso: (id: string, dados: DefinirAcessoRequest) =>
       requisitar<Associado>(

@@ -551,6 +551,7 @@ describe('Associados (e2e)', () => {
         situacao: 'Inadimplente',
         acessoLiberadoAte: null,
         recebeBoletoMensal: true,
+        cancelamentoPedidoEm: null,
       });
 
       const liberado = await comoAdmin(http().put(`/associados/${id}/acesso`))

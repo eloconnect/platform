@@ -549,8 +549,9 @@ export class AssociadosService {
   }
 
   /**
-   * O que o associado vê na área dele: a situação e, se a sede liberou o
-   * acesso, até quando a liberação vale (RN11, RN22).
+   * O que o associado vê na área dele: a situação, até quando vale a
+   * liberação do acesso pela sede, se houver (RN11, RN22), e o pedido de
+   * cancelamento que espera a resposta da sede (RN18).
    */
   async minhaConta(usuarioId: string): Promise<MinhaConta> {
     const usuario = await this.prisma.usuario.findUnique({
@@ -564,6 +565,10 @@ export class AssociadosService {
             contribuicaoAtiva: true,
             acessoManual: true,
             acessoManualAte: true,
+            cancelamentos: {
+              where: { status: 'PENDENTE' },
+              select: { solicitadaEm: true },
+            },
           },
         },
       },
@@ -582,6 +587,8 @@ export class AssociadosService {
         ? (associado.acessoManualAte?.toISOString() ?? null)
         : null,
       recebeBoletoMensal: associado.contribuicaoAtiva,
+      cancelamentoPedidoEm:
+        associado.cancelamentos[0]?.solicitadaEm.toISOString() ?? null,
     };
   }
 
