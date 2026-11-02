@@ -13,8 +13,8 @@ import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { BoletosAssociadoService } from './boletos-associado.service.js';
 
 /**
- * Boletos do associado logado (RF12). Em dia ou não, ele vê os boletos em
- * aberto para pagar.
+ * Boletos do associado logado. Em dia ou não, ele vê os boletos em aberto
+ * para pagar (RF12) e o histórico de boletos e pagamentos (RF31).
  */
 @Controller('associado/boletos')
 @UseGuards(RolesGuard)
@@ -25,6 +25,11 @@ export class AssociadoBoletosController {
   @Get()
   listar(@UsuarioAtual() usuarioId: string) {
     return this.boletos.listar(usuarioId);
+  }
+
+  @Get('historico')
+  historico(@UsuarioAtual() usuarioId: string) {
+    return this.boletos.historico(usuarioId);
   }
 
   @Get(':id/pdf')

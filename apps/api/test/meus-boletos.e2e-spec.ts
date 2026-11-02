@@ -1,8 +1,9 @@
-// Boletos do associado logado (US12: RF12, RN06). Roda no banco de teste
+// Boletos do associado logado (US12: RF12, RN06) e o histórico de boletos e
+// pagamentos dele (US31: RF31). Roda no banco de teste
 // (preparar-banco.mjs). Os boletos vencem em 2099, para não entrarem nas
 // tarefas de outros testes.
 import 'dotenv/config';
-import type { BoletoEmAberto } from '@eloconnect/shared';
+import type { BoletoEmAberto, BoletoHistorico } from '@eloconnect/shared';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
@@ -86,15 +87,18 @@ describe('Meus boletos (e2e)', () => {
 
   afterAll(() => app.close());
 
-  it('recusa sem token (401) e para a sede (403)', async () => {
-    const admin = await assinar('ADMIN', crypto.randomUUID());
+  it.each(['/associado/boletos', '/associado/boletos/historico'])(
+    '%s recusa sem token (401) e para a sede (403)',
+    async (caminho) => {
+      const admin = await assinar('ADMIN', crypto.randomUUID());
 
-    await http().get('/associado/boletos').expect(401);
-    await http()
-      .get('/associado/boletos')
-      .set('Authorization', `Bearer ${admin}`)
-      .expect(403);
-  });
+      await http().get(caminho).expect(401);
+      await http()
+        .get(caminho)
+        .set('Authorization', `Bearer ${admin}`)
+        .expect(403);
+    },
+  );
 
   it('mostra só os boletos em aberto do próprio associado, do mais antigo ao mais novo', async () => {
     const { associado, token } = await criarAssociado();
@@ -173,5 +177,49 @@ describe('Meus boletos (e2e)', () => {
     await pdf(pago.id).expect(404);
     await pdf(deOutro.id).expect(404);
     await pdf('nao-e-um-id').expect(400);
+  });
+
+  it('o histórico mostra todos os boletos do próprio associado, do mês mais novo para o mais antigo', async () => {
+    const { associado, token } = await criarAssociado();
+    const outro = await criarAssociado();
+    const junho = await criarBoleto(associado.id, 6, 'PAGO');
+    const julho = await criarBoleto(associado.id, 7);
+    const agosto = await criarBoleto(associado.id, 8, 'RASCUNHO');
+    await criarBoleto(outro.associado.id, 9);
+    // A forma de pagamento vem do histórico de transações (RF30).
+    await prisma.transacao.create({
+      data: {
+        boletoId: junho.id,
+        associadoId: associado.id,
+        evento: 'PAGO',
+        valor: '130.00',
+        formaPagamento: 'BOLETO',
+      },
+    });
+
+    const { body } = await http()
+      .get('/associado/boletos/historico')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(body).toEqual([
+      expect.objectContaining({ id: agosto.id, status: 'RASCUNHO' }),
+      {
+        id: julho.id,
+        competencia: { ano: 2099, mes: 7 },
+        tipo: 'MENSAL',
+        valor: '130.00',
+        vencimento: '2099-07-10',
+        status: 'EM_ABERTO',
+        vencido: false,
+        pagoEm: null,
+        formaPagamento: null,
+      },
+      expect.objectContaining({
+        id: junho.id,
+        status: 'PAGO',
+        formaPagamento: 'BOLETO',
+      }),
+    ] satisfies BoletoHistorico[]);
   });
 });
