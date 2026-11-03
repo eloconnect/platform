@@ -253,3 +253,47 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P25 | O que acontece depois que o cancelamento é confirmado? Quem estava em dia mantém o acesso a benefícios e suporte por mais 30 dias, como na interrupção pela sede (RN25), ou perde na hora? O boleto do mês que já saiu continua valendo ou é cancelado no banco? Quem da sede recebe o aviso de um pedido novo? (perguntas 29 a 32, em branco) Enquanto não houver resposta, vale o mesmo da interrupção: quem estava em dia mantém o acesso por 30 dias, e o boleto que já saiu continua valendo, sem lembretes. O aviso do pedido vai para os usuários chave mestre, que decidem (decisão do grupo, 02/11/2026). | Cliente | RF27, RN18 |
 | P26 | O sindicato já tem um texto para a cobrança formal (comunicado a todos os associados)? Além da existência do sindicato, do valor e dos benefícios, o que ela precisa dizer? (pergunta 44, em branco) Enquanto não houver resposta, a sede escreve o assunto e o texto na tela, e o sistema acrescenta o valor da contribuição e a lista de benefícios cadastrados (decisão do grupo, 02/11/2026). | Cliente | RF29, RN19 |
 | P27 | As farmácias que já pagam, importadas pela planilha com "Recebe boleto mensal: sim", começam em dia (Adimplente) ou só depois de pagar o primeiro boleto pelo sistema? (pergunta 43, em branco) Enquanto não houver resposta, elas entram em dia, porque já pagam fora do sistema (decisão do grupo, 02/11/2026). | Cliente | RF42 |
+
+## 9. O que foi entregue no MVP
+
+Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção 4 continua dizendo o que o cliente validou; esta seção diz o que já funciona no sistema. **Entregue** quer dizer pronto e testado. **Em simulação** quer dizer pronto, mas com o banco simulado no lugar do Sicredi, porque o sindicato ainda não tem o convênio de cobrança (#40). **Não feito** quer dizer que o requisito espera a resposta de uma pendência. Como cada parte funciona: [Decisões técnicas](decisoes-tecnicas.md).
+
+| **ID** | **Situação** | **Observação** | **Issues** |
+| --- | --- | --- | --- |
+| RF01 | Entregue | O e-mail para o pedido de cadastro depende da P19; sem ele, o aviso orienta a falar com a sede. | #20, #132 |
+| RF02 | Entregue | | #16, #17 |
+| RF03 | Entregue | | #18, #19 |
+| RF04, RF05 | Entregue | | #61, #62 |
+| RF06 | Entregue | | #24, #25, #132 |
+| RF07 | Entregue | Com o histórico de boletos e os pedidos de cancelamento. | #26, #52 |
+| RF08 | Entregue | Reativar o inativado depende da P13. | #22, #23, #143 |
+| RF09 | Entregue | | #27, #142 |
+| RF42 | Entregue | Quem já paga entra em dia até a resposta da P27. | #68 |
+| RF43 | Não feito | P14. | #133 |
+| RF10 | Em simulação | Lote no primeiro dia útil, pelo cron da Vercel. | #44 |
+| RF11 | Em simulação | Só o valor do boleto; outros dados dependem do que o Sicredi aceita. | #45 |
+| RF12 | Em simulação | E-mail com QR Code, Pix Copia e Cola, linha digitável e PDF, e "Meus boletos" no site. | #46, #47 |
+| RF13, RF14 | Entregue | | #50 |
+| RF15 | Em simulação | Na demonstração, o chave mestre simula o pagamento; o canal do banco depende do estudo do Sicredi. | #48 |
+| RF16 | Entregue | | #49 |
+| RF17 | Não feito | P04, P15 e P23. | #64 |
+| RF36 | Em simulação | Termo provisório (P21) e vencimento do primeiro boleto provisório (P16). | #43 |
+| RF37 | Não feito | P10. | #63 |
+| RF38 | Entregue | | #51 |
+| RF18, RF19, RF20 | Entregue | O valor atual depende da P23. | #36, #37, #38 |
+| RF21 | Entregue | A tabela de reajuste espera a P24. | #30, #31 |
+| RF22 | Entregue | | #32 |
+| RF23 | Não feito | P05. | #65 |
+| RF24 | Entregue | A lista completa depende da P06. | #35 |
+| RF25 | Não feito | P06 e P15. | #66 |
+| RF26 | Entregue | | #55 |
+| RF27 | Entregue | O acesso e o boleto do mês depois do cancelamento são provisórios até a P25. | #56 |
+| RF28 | Não feito | P02. | #67 |
+| RF29 | Entregue | Vai para o cadastro até a importação da JUCEMAT (P02); o texto do cliente depende da P26; o limite diário, da P12. | #57 |
+| RF30 | Entregue | | #42 |
+| RF31 | Entregue | | #53 |
+| RF32 | Entregue | | #54 |
+| RF39, RF40 | Entregue | | #15, #39 |
+| RF35, RF41 | Entregue | | #33, #34, #156 |
+
+Também entraram os testes de ponta a ponta do fluxo da cobrança (#59). A revisão de acessibilidade com ferramentas e leitor de tela (#58) ficou para depois; o tema já segue o RNF01 e o RNF02 (fonte de 18px, contraste AA, rótulos visíveis). O roteiro da apresentação está em [Roteiro da demonstração](roteiro-demonstracao.md).

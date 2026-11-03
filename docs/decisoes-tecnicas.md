@@ -2,7 +2,7 @@
 
 Última atualização: 02/11/2026.
 
-Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos e pendências detalhadas), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
+Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos, pendências detalhadas e, na seção 9, o que foi entregue no MVP), [Roteiro da demonstração](roteiro-demonstracao.md), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
 ## Nome
 
@@ -103,7 +103,7 @@ Decidida no ADR-001 (aceito pelo grupo em 09/10/2026). O PI não exige nem restr
 
 - Hospedagem: volume estimado de até ~2.000 associados, ~150 com contribuição ativa e menos de 400 acessos mensais. Estudo de 20 a 24/10/2026 (#28):
 
-  - **Demonstração do PI** (entrega até o fim de 2026): **Vercel** no plano grátis (Hobby) para as telas e a API, e **Neon** (Postgres grátis, sem prazo de validade) para o banco, só com dados fictícios. A Vercel roda o NestJS como uma função, sem configuração. As tarefas agendadas (lote mensal e lembretes) vão usar os Cron Jobs da Vercel. Quando houver provedor de e-mail (P12), a API precisa do `waitUntil` para o e-mail enviado depois da resposta. Como a demonstração está configurada: [deploy.md](deploy.md). Os PDFs das convenções (RF21) e as imagens das notícias (RF41) ficam no Vercel Blob, numa área privada servida pela API, com 1 GB grátis.
+  - **Demonstração do PI** (entrega até o fim de 2026): **Vercel** no plano grátis (Hobby) para as telas e a API, e **Neon** (Postgres grátis, sem prazo de validade) para o banco, só com dados fictícios. A Vercel roda o NestJS como uma função, sem configuração. As tarefas agendadas usam os Cron Jobs da Vercel: o lote mensal, o bloqueio, os lembretes, a confirmação dos cancelamentos e a cobrança formal, uma vez por dia cada (`apps/api/vercel.json`). Quando houver provedor de e-mail (P12), a API precisa do `waitUntil` para o e-mail enviado depois da resposta. Como a demonstração está configurada: [deploy.md](deploy.md). Os PDFs das convenções (RF21) e as imagens das notícias (RF41) ficam no Vercel Blob, numa área privada servida pela API, com 1 GB grátis.
   - **Produção** (sistema do cliente): o plano grátis da Vercel é só para uso pessoal e não comercial, então não serve. A hospedagem de produção depende de quanto o sindicato pode gastar por mês (P12).
   - Avaliados e descartados: Render (o plano grátis dorme depois de 15 minutos sem acesso e leva cerca de 1 minuto para acordar, e o Postgres grátis expira em 30 dias), Koyeb (sem plano grátis para contas novas desde fevereiro de 2026, segundo fontes de terceiros) e Supabase (pausa o banco depois de 7 dias sem uso).
 
