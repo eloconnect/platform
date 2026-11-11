@@ -87,6 +87,9 @@ describe('PaginaBoletosAssociado', () => {
     );
     expect(await navigator.clipboard.readText()).toBe(DEZEMBRO.pixCopiaECola);
     expect(screen.getByRole('status')).toHaveTextContent('Código Pix copiado.');
+    expect(
+      screen.getByRole('button', { name: 'Código copiado' }),
+    ).toBeInTheDocument();
 
     await usuario.click(
       screen.getByRole('button', { name: 'Copiar a linha digitável' }),

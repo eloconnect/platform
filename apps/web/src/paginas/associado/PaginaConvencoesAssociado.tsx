@@ -2,7 +2,12 @@ import type { Convencao } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../../api';
 import { abrirArquivo } from '../../arquivos';
-import { Botao, MensagemErro, useTituloPagina } from '../../componentes';
+import {
+  Botao,
+  Carregando,
+  MensagemErro,
+  useTituloPagina,
+} from '../../componentes';
 import { CartaoConvencao } from './CartaoConvencao';
 
 type Estado =
@@ -61,7 +66,7 @@ export function PaginaConvencoesAssociado() {
         </MensagemErro>
       )}
       {estado.tipo === 'carregando' && (
-        <p role="status">Carregando as convenções...</p>
+        <Carregando texto="Carregando as convenções..." />
       )}
       {estado.tipo === 'erro' && (
         <MensagemErro>

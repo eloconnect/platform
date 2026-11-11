@@ -198,6 +198,15 @@ describe('Áreas logadas', () => {
     ).toBeInTheDocument();
   });
 
+  it('fora do início, a página do associado tem o caminho de volta', async () => {
+    entrarComo('ASSOCIADO');
+    abrir('/associado/noticias');
+
+    expect(
+      await screen.findByRole('link', { name: 'Voltar para o início' }),
+    ).toHaveAttribute('href', '/associado');
+  });
+
   it.each(['/admin', '/associado', '/associado/noticias'])(
     '%s sem login vai para o login',
     async (caminho) => {

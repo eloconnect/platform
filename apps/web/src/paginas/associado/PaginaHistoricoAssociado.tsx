@@ -7,7 +7,7 @@ import {
 } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../../api';
-import { MensagemErro, useTituloPagina } from '../../componentes';
+import { Carregando, MensagemErro, useTituloPagina } from '../../componentes';
 
 type Estado =
   | { tipo: 'carregando' }
@@ -37,8 +37,11 @@ export function PaginaHistoricoAssociado() {
   return (
     <>
       <h1>Histórico de pagamentos</h1>
+      <p className="lead">
+        Todos os boletos da farmácia, do mais novo para o mais antigo.
+      </p>
       {estado.tipo === 'carregando' && (
-        <p role="status">Carregando os boletos...</p>
+        <Carregando texto="Carregando os boletos..." />
       )}
       {estado.tipo === 'erro' && (
         <MensagemErro>

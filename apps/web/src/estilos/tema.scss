@@ -1,24 +1,214 @@
 // Tema do Elo Connect. Público majoritariamente idoso (RNF01, RNF02):
 // fonte grande, alto contraste, botões grandes e foco bem visível.
+//
+// Uma marca, dois ambientes. O padrão é o acolhedor (área pública e do
+// associado): cantos macios, sombra leve e fonte feita para baixa visão.
+// A sede é clássica e entra com data-ambiente="sede" na raiz do documento,
+// que troca os tokens do Bootstrap (ver o bloco "Ambiente da sede").
+//
+// 1rem = 18px: os tamanhos abaixo já partem disso.
 
-// Cores com contraste calculado contra texto branco (WCAG AA exige 4,5:1).
-// As cores padrão do Bootstrap ficam no limite (4,5:1); estas têm folga.
-$primary: #0b4f8c; //   8,4:1
-$secondary: #495057; // 8,2:1
-$success: #146c43; //   6,5:1
-$danger: #b02a37; //    6,5:1
-$info: #055160; //      8,9:1
-$body-color: #1b1f23; // 16,6:1 sobre branco
+$elo-verde: #0f5b52; //        7,96:1 com branco
+$elo-verde-escuro: #0a413a; // 11,47:1 com branco
+$elo-verde-claro: #e3efec;
+$elo-verde-noite: #13302c; //  14,12:1 com branco
+$elo-mel: #eebf62; //          só decoração, nunca texto
+$elo-tinta: #1c2321; //        14,5:1 ou mais em todos os fundos claros
+$elo-tinta-2: #454f4c; //      7,2:1 ou mais em todos os fundos claros
+// Neutros quentes: marfim no fundo e areia nas faixas, no lugar de grandes
+// áreas verdes. O verde fica para a marca e as ações; o mel, para detalhes.
+$elo-fundo: #f7f5f0; //        marfim
+$elo-areia: #efebe2; //        tinta-2 a 7,1:1 e verde a 6,6:1
+$elo-fundo-sede: #ebedea;
+$elo-borda: #d5d2ca;
+$elo-divisoria: #e7e3da;
+$elo-borda-campo: #6f7a76; //  4,45:1 no branco
 
-// 1rem = 18px: tudo que o Bootstrap mede em rem cresce junto.
+// Situações: texto escuro sobre fundo claro, sempre com ícone e palavra.
+$elo-ok-texto: #17522d;
+$elo-ok-fundo: #e6f2ea;
+$elo-atraso-texto: #8c1f1f;
+$elo-atraso-fundo: #faeaea;
+$elo-aviso-texto: #6a4000;
+$elo-aviso-fundo: #fbf0db;
+$elo-neutro-texto: #3a4441;
+$elo-neutro-fundo: #ebedea;
+
+$primary: $elo-verde;
+$secondary: $elo-tinta-2;
+$success: $elo-ok-texto;
+$danger: $elo-atraso-texto;
+$warning: $elo-aviso-texto;
+$info: $elo-verde;
+
+$primary-text-emphasis: $elo-verde-escuro;
+$primary-bg-subtle: $elo-verde-claro;
+$primary-border-subtle: #9fc3bb;
+$secondary-text-emphasis: $elo-neutro-texto;
+$secondary-bg-subtle: $elo-neutro-fundo;
+$secondary-border-subtle: $elo-borda;
+$success-text-emphasis: $elo-ok-texto;
+$success-bg-subtle: $elo-ok-fundo;
+$success-border-subtle: #9cc7aa;
+$danger-text-emphasis: $elo-atraso-texto;
+$danger-bg-subtle: $elo-atraso-fundo;
+$danger-border-subtle: #e0a8a8;
+$warning-text-emphasis: $elo-aviso-texto;
+$warning-bg-subtle: $elo-aviso-fundo;
+$warning-border-subtle: #d9b46a;
+$info-text-emphasis: $elo-verde-escuro;
+$info-bg-subtle: $elo-verde-claro;
+$info-border-subtle: #9fc3bb;
+
+$body-bg: $elo-fundo;
+$body-color: $elo-tinta;
+// O padrão do Bootstrap (75% de opacidade) não passa no contraste.
+$body-secondary-color: $elo-tinta-2;
+$body-tertiary-color: $elo-tinta-2;
+$border-color: $elo-borda;
+
 // Em porcentagem, respeita quem aumentou a fonte no navegador.
 $font-size-root: 112.5%;
+// Texto de 19px na área pública e na do associado; a sede volta a 18px.
+$font-size-base: 1.0556rem;
 $line-height-base: 1.6;
+$font-family-sans-serif:
+  'Atkinson Hyperlegible Next Variable',
+  system-ui,
+  -apple-system,
+  'Segoe UI',
+  Roboto,
+  sans-serif;
+$headings-font-family: var(--elo-fonte-titulo);
+$headings-font-weight: 700;
+$headings-line-height: 1.2;
+$font-size-sm: 0.889rem; //   16px: o menor texto do sistema
+$font-size-lg: 1.222rem; //   22px
+$small-font-size: 0.889em;
+// Escala curta: título da página, subtítulo, título de bloco e texto.
+$h1-font-size: 2.111rem; //   38px (menor no celular, pelo RFS)
+$h2-font-size: 1.556rem; //   28px
+$h3-font-size: 1.278rem; //   23px
+$h4-font-size: 1.167rem; //   21px
+$h5-font-size: 1.111rem; //   20px
+$h6-font-size: 1.0556rem;
+$lead-font-size: 1.222rem;
+$lead-font-weight: 400;
+$badge-font-size: 0.889em;
 
+$link-color: $elo-verde;
+$link-hover-color: $elo-verde-escuro;
 $link-decoration: underline;
+$link-hover-decoration: underline;
+$link-underline-offset: 0.1875em;
+
+// Raios em tokens: a sede só troca as variáveis CSS.
+$border-radius: 0.75rem;
+$border-radius-sm: 0.5rem;
+$border-radius-lg: 1.125rem;
+$border-radius-xl: 1.5rem;
+$input-btn-border-width: 2px;
+$input-border-color: $elo-borda-campo;
+$form-select-border-color: $elo-borda-campo;
+$input-focus-border-color: $elo-verde;
+$input-placeholder-color: #5f6a66;
+$input-font-size-lg: 1.111rem;
+$btn-font-weight: 700;
+$form-label-font-weight: 600;
+
+$card-border-color: $elo-divisoria;
+$table-bg: #fff;
+$table-border-color: $elo-divisoria;
+$navbar-light-color: $elo-tinta;
+$navbar-light-hover-color: $elo-verde;
+$navbar-light-active-color: $elo-verde-escuro;
 $navbar-nav-link-padding-x: 0.75rem;
 
 @import 'bootstrap/scss/bootstrap';
+
+:root {
+  --elo-fonte-titulo: 'Figtree Variable', system-ui, sans-serif;
+  // Dois níveis de sombra, baixos e difusos: acabamento, não destaque.
+  --elo-sombra: 0 1px 2px rgb(28 35 33 / 5%), 0 6px 20px rgb(28 35 33 / 6%);
+  --elo-sombra-alta:
+    0 2px 4px rgb(28 35 33 / 6%), 0 14px 36px rgb(28 35 33 / 9%);
+  --elo-raio-cartao: 1.25rem;
+}
+
+h1,
+h2,
+h3,
+.h1,
+.h2,
+.h3 {
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+// Valores e datas alinhados, como num extrato.
+.elo-numero {
+  font-variant-numeric: tabular-nums;
+}
+
+// ---------------------------------------------------------------
+// Ambiente da sede: clássico, cantos retos, sem sombra
+// ---------------------------------------------------------------
+:root[data-ambiente='sede'] {
+  --bs-body-font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  --bs-body-font-size: 1rem;
+  --elo-fonte-titulo: 'IBM Plex Sans', system-ui, sans-serif;
+  --bs-body-bg: #{$elo-fundo-sede};
+  --bs-border-radius: 0.222rem;
+  --bs-border-radius-sm: 0.222rem;
+  --bs-border-radius-lg: 0.333rem;
+  --bs-border-radius-xl: 0.333rem;
+  --elo-sombra: none;
+  --elo-sombra-alta: none;
+  --elo-raio-cartao: var(--bs-border-radius-lg);
+
+  h1,
+  h2,
+  h3,
+  .h1,
+  .h2,
+  .h3 {
+    letter-spacing: 0;
+  }
+
+  h1,
+  .h1 {
+    font-size: 1.889rem;
+  }
+
+  .card {
+    --bs-card-spacer-y: 1rem;
+    --bs-card-spacer-x: 1rem;
+  }
+
+  h2,
+  .h2 {
+    font-size: 1.444rem;
+  }
+
+  // A sede usa o mesmo Botao e o mesmo CampoTexto, em versão compacta:
+  // a fonte continua em 18px, e o que muda é o espaçamento.
+  .btn-lg {
+    --bs-btn-font-size: 1rem;
+    --bs-btn-font-weight: 600;
+    --bs-btn-padding-y: 0.45rem;
+    --bs-btn-padding-x: 1.1rem;
+  }
+
+  .form-control-lg,
+  .form-select-lg {
+    padding-block: 0.4rem;
+    font-size: 1rem;
+  }
+
+  .form-select-lg {
+    padding-left: 0.75rem;
+  }
+}
 
 #raiz {
   min-height: 100vh;
@@ -38,8 +228,204 @@ main {
 .btn,
 .form-control,
 .form-select,
-.nav-link {
+.nav-link,
+.navbar-toggler {
   min-height: 2.75rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.card {
+  --bs-card-border-radius: var(--elo-raio-cartao);
+  --bs-card-inner-border-radius: calc(var(--elo-raio-cartao) - 1px);
+  --bs-card-spacer-y: 1.5rem;
+  --bs-card-spacer-x: 1.5rem;
+  box-shadow: var(--elo-sombra);
+}
+
+// Aviso de sucesso e de erro: sempre com ícone ao lado do texto.
+.elo-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+
+  > .elo-icone {
+    width: 1.5em;
+    height: 1.5em;
+  }
+
+  > div > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Confirmação curta de uma ação (ex.: "Código Pix copiado.").
+.elo-confirmacao {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.6em;
+  color: $elo-ok-texto;
+  font-weight: 700;
+
+  &:not(:empty) {
+    animation: elo-surgir 0.2s ease-out;
+  }
+}
+
+@keyframes elo-surgir {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+@keyframes elo-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes elo-brilho {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+// Entrada suave de cada página, curta, sem nada que pisque ou se mexa sozinho.
+.elo-entrada {
+  animation: elo-entrar 0.28s ease-out both;
+}
+
+// O botão "afunda" de leve ao toque.
+.btn {
+  transition:
+    color 0.15s,
+    background-color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.1s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Carregando: blocos no formato do conteúdo, com um brilho lento.
+.elo-carregando {
+  padding-block: 0.5rem;
+}
+
+.elo-esqueleto {
+  height: 1.75rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, #e9e5dc 25%, #f3f0e9 50%, #e9e5dc 75%);
+  background-size: 200% 100%;
+  animation: elo-brilho 1.6s ease-in-out infinite;
+}
+
+.elo-esqueleto--curto {
+  width: 60%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ---------------------------------------------------------------
+// Tamanho da letra (A / A+ / A++)
+// ---------------------------------------------------------------
+:root[data-letra='grande'] {
+  --bs-root-font-size: #{$font-size-root * 1.15};
+}
+
+:root[data-letra='maior'] {
+  --bs-root-font-size: #{$font-size-root * 1.3};
+}
+
+.elo-barra-letra {
+  border-bottom: 1px solid $elo-divisoria;
+  background: $elo-areia;
+
+  .container {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.elo-tamanho-letra {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-block: 0.25rem;
+  font-size: $font-size-sm;
+
+  > span {
+    margin-right: 0.5rem;
+    color: $elo-tinta-2;
+  }
+
+  .btn {
+    min-width: 2.75rem;
+    padding: 0 0.5rem;
+    border: 2px solid transparent;
+    color: $elo-tinta;
+    font-family: var(--elo-fonte-titulo);
+    font-weight: 700;
+    line-height: 1;
+
+    &:hover {
+      border-color: $elo-borda;
+    }
+
+    &[aria-pressed='true'] {
+      border-color: $elo-verde;
+      background: #fff;
+      color: $elo-verde;
+    }
+
+    // Cada botão um pouco maior, como dica do que ele faz.
+    &:nth-of-type(2) {
+      font-size: 1.15em;
+    }
+
+    &:nth-of-type(3) {
+      font-size: 1.3em;
+    }
+  }
+}
+
+// ---------------------------------------------------------------
+// Molde das páginas do associado
+// ---------------------------------------------------------------
+.elo-coluna {
+  max-width: 46rem;
+}
+
+.elo-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+
+  svg {
+    transform: scaleX(-1);
+  }
 }
 
 // Foco visível em qualquer fundo: anel preto por dentro e amarelo por fora.
@@ -47,7 +433,7 @@ main {
 :focus-visible {
   outline: 3px solid #ffbf47 !important;
   outline-offset: 2px !important;
-  box-shadow: 0 0 0 5px #1b1f23 !important;
+  box-shadow: 0 0 0 5px $elo-tinta !important;
 }
 
 // Link "Pular para o conteúdo": aparece só quando recebe foco pelo teclado.
@@ -62,23 +448,256 @@ main {
   font-weight: 600;
 }
 
+.elo-icone {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+}
+
+// ---------------------------------------------------------------
+// Marca e menu do topo
+// ---------------------------------------------------------------
+.elo-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: $elo-tinta;
+  font-family: var(--elo-fonte-titulo);
+  font-size: 1.333rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+
+  svg {
+    width: 2.5rem;
+    height: 1.5rem;
+    color: $elo-verde;
+  }
+}
+
+.elo-marca-elo {
+  font-weight: 800;
+}
+
+.elo-topo {
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: var(--bs-border-radius);
+
+    &.active {
+      background: $elo-verde-claro;
+      font-weight: 700;
+    }
+  }
+
+  .elo-item-destaque {
+    padding-inline: 1.25rem;
+    background: $elo-verde;
+    color: #fff;
+    font-weight: 700;
+
+    &:hover,
+    &:focus,
+    &.active {
+      background: $elo-verde-escuro;
+      color: #fff;
+    }
+
+    @include media-breakpoint-up(lg) {
+      margin-left: 0.5rem;
+    }
+  }
+}
+
+.navbar-toggler {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 0;
+  background: $elo-verde;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.elo-rodape {
+  padding-block: 1.5rem;
+  background: $elo-verde-noite;
+  color: #fff;
+}
+
+// ---------------------------------------------------------------
+// Situação: sempre ícone e palavra, nunca só cor
+// ---------------------------------------------------------------
+.elo-situacao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.75rem 0.15rem 0.5rem;
+  border-radius: 50rem;
+  font-weight: 700;
+}
+
+:root[data-ambiente='sede'] .elo-situacao {
+  border-radius: var(--bs-border-radius);
+  font-weight: 600;
+}
+
+.elo-situacao--ok {
+  background: $elo-ok-fundo;
+  color: $elo-ok-texto;
+}
+
+.elo-situacao--atraso {
+  background: $elo-atraso-fundo;
+  color: $elo-atraso-texto;
+}
+
+.elo-situacao--aviso {
+  background: $elo-aviso-fundo;
+  color: $elo-aviso-texto;
+}
+
+.elo-situacao--neutro {
+  background: $elo-neutro-fundo;
+  color: $elo-neutro-texto;
+}
+
+// ---------------------------------------------------------------
+// Sede: menu lateral e folha branca
+// ---------------------------------------------------------------
+.elo-sede {
+  flex: 1 0 auto;
+
+  @include media-breakpoint-up(lg) {
+    display: flex;
+    align-items: stretch;
+  }
+}
+
+.elo-lateral {
+  padding: 0.75rem 1rem;
+  background: $elo-verde-noite;
+  color: #fff;
+
+  @include media-breakpoint-up(lg) {
+    position: sticky;
+    top: 0;
+    flex: none;
+    width: 16rem;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1.25rem 0.875rem;
+  }
+
+  .elo-marca {
+    flex-wrap: wrap;
+    margin: 0;
+    color: #fff;
+
+    svg {
+      color: #fff;
+    }
+  }
+
+  .elo-marca-sub {
+    display: block;
+    color: #c9d6d3; // 9,44:1 no menu escuro
+    font-family: var(--bs-body-font-family);
+    font-size: $font-size-sm;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .navbar-toggler {
+    background: #fff;
+    color: $elo-verde-noite;
+  }
+
+  .elo-grupo-menu {
+    margin: 1rem 0.5rem 0.25rem;
+    color: #c9d6d3;
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.35rem 0.625rem;
+    border-radius: var(--bs-border-radius);
+    color: #fff;
+
+    &:hover,
+    &:focus {
+      background: #1d4540;
+      color: #fff;
+    }
+
+    &.active {
+      background: #dcece8;
+      color: $elo-verde-noite;
+      font-weight: 700;
+    }
+  }
+}
+
+.elo-sede-conteudo {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: clamp(0.75rem, 2vw, 1.75rem);
+}
+
+.elo-folha {
+  max-width: 82rem;
+  margin-inline: auto;
+  padding: clamp(1.1rem, 2.5vw, 2rem);
+  border: 1px solid $elo-borda;
+  border-radius: var(--bs-border-radius-lg);
+  background: #fff;
+}
+
+.elo-filtros {
+  padding: 1.25rem 1.25rem 0.25rem;
+  border: 1px solid $elo-borda;
+  border-radius: var(--bs-border-radius-lg);
+  background: #f3f4f1;
+}
+
+.elo-tabela {
+  thead th {
+    border-bottom: 2px solid $elo-tinta;
+    color: $elo-tinta-2;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  td {
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ---------------------------------------------------------------
+// Login, criação de conta e recuperação de senha
+// ---------------------------------------------------------------
 .cartao-pagina {
   width: 100%;
   max-width: 58rem;
   margin: 0 auto;
   padding: clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid #e2e6ef;
-  border-radius: 1.1rem;
+  border: 1px solid $elo-divisoria;
+  border-radius: var(--bs-border-radius-xl);
   background: #fff;
-  box-shadow: 0 0.35rem 1rem #263c7112;
+  box-shadow: var(--elo-sombra);
 }
 
 .cartao-pagina h1 {
   margin: 0;
-  color: #202a3c;
-  font-size: 1.25rem;
-  font-weight: 750;
-  letter-spacing: -0.03em;
+  font-size: 1.667rem;
 }
 
 .cartao-autenticacao {
@@ -91,12 +710,385 @@ main {
   }
 }
 
-/* Texto escrito pela sede, com as quebras de linha que ela digitou. */
+// ---------------------------------------------------------------
+// Fotos: uma moldura em forma de elo, ligada à marca
+// ---------------------------------------------------------------
+.elo-foto {
+  position: relative;
+  isolation: isolate;
+  margin: 0 1rem 1rem 0;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    border-radius: 1.75rem;
+    object-fit: cover;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 1rem -1rem -1rem 1rem;
+    border: 0.4rem solid $elo-mel;
+    border-radius: 1.75rem;
+  }
+}
+
+.elo-foto-nota {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.75rem 0 0;
+  font-weight: 700;
+
+  @include media-breakpoint-up(sm) {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    margin: 0;
+    padding: 0.65rem 1.1rem 0.65rem 0.8rem;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: var(--elo-sombra);
+  }
+
+  svg {
+    color: $elo-verde;
+  }
+}
+
+// ---------------------------------------------------------------
+// Página inicial pública
+// ---------------------------------------------------------------
+.elo-abertura {
+  padding-block: clamp(2rem, 6vw, 4.5rem);
+}
+
+.elo-sobrelinha {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: $elo-verde;
+  font-weight: 700;
+
+  // Filete de mel: o detalhe da marca, nunca texto.
+  &::before {
+    content: '';
+    flex: none;
+    width: 2rem;
+    height: 3px;
+    border-radius: 2px;
+    background: $elo-mel;
+  }
+}
+
+.elo-display {
+  @include font-size(3.25rem);
+  margin-bottom: 1.25rem;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.elo-faixa {
+  padding-block: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.elo-faixa--branca {
+  background: #fff;
+}
+
+.elo-faixa--clara {
+  background: $elo-areia;
+}
+
+.elo-picto {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: $elo-verde-claro;
+  color: $elo-verde;
+
+  svg {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.elo-oferta {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+
+  h3 {
+    margin-bottom: 0.2rem;
+  }
+
+  p {
+    margin: 0;
+    color: $elo-tinta-2;
+  }
+}
+
+.elo-passos {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: 1rem;
+  }
+
+  h3 {
+    margin-bottom: 0.15rem;
+    font-size: 1.222rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.elo-passo-numero {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: $elo-verde;
+  color: #fff;
+  font-family: var(--elo-fonte-titulo);
+  font-size: 1.333rem;
+  font-weight: 700;
+}
+
+.elo-aviso-cadastro {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 2px solid $elo-verde;
+  border-radius: var(--bs-border-radius-xl);
+  background: #fff;
+}
+
+// ---------------------------------------------------------------
+// Início do associado
+// ---------------------------------------------------------------
+// Cartão escuro, como o topo de um app de banco: o nome da farmácia e a
+// situação em primeiro plano.
+.elo-boas-vindas {
+  margin-bottom: 1.75rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: var(--elo-raio-cartao);
+  background: $elo-verde-noite;
+  box-shadow: var(--elo-sombra-alta);
+  color: #fff;
+
+  h1 {
+    margin-bottom: 0.5rem;
+    color: $elo-mel; // 8:1 no verde-noite
+    font-family: var(--bs-body-font-family);
+    font-size: 1.0556rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .elo-nome-farmacia {
+    color: #fff;
+  }
+
+  .elo-frase-situacao {
+    color: #dfe9e6; // 12:1 no verde-noite
+  }
+}
+
+.elo-nome-farmacia {
+  @include font-size(2.222rem);
+  margin-bottom: 0.75rem;
+  font-family: var(--elo-fonte-titulo);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.elo-boleto {
+  margin-bottom: 2rem;
+  padding: clamp(1.25rem, 3.5vw, 2.25rem);
+  border: 1px solid $elo-divisoria;
+  border-radius: var(--elo-raio-cartao);
+  background: #fff;
+  box-shadow: var(--elo-sombra);
+
+  h2 {
+    margin-bottom: 1.25rem;
+    font-size: 1.444rem;
+  }
+
+  dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 3rem;
+    margin: 0;
+  }
+
+  dt {
+    color: $elo-tinta-2;
+    font-weight: 400;
+  }
+
+  dd {
+    margin: 0;
+    font-family: var(--elo-fonte-titulo);
+    font-size: 1.667rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .elo-valor {
+    font-size: 2.556rem;
+    line-height: 1.15;
+  }
+}
+
+.elo-boleto--vencido {
+  border: 2px solid #d9b46a;
+  background: $elo-aviso-fundo;
+}
+
+.elo-boleto-corpo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+
+  .btn {
+    @include media-breakpoint-down(sm) {
+      width: 100%;
+    }
+  }
+}
+
+.elo-atalhos {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2.25rem;
+
+  // Os cartões entram um depois do outro.
+  > li {
+    animation: elo-entrar 0.3s ease-out both;
+
+    @for $i from 2 through 4 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 0.05}s;
+      }
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.elo-atalho {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid $elo-divisoria;
+  border-radius: var(--elo-raio-cartao);
+  background: #fff;
+  box-shadow: var(--elo-sombra);
+  color: $elo-tinta;
+  text-decoration: none;
+
+  height: 100%;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s;
+
+  &:hover {
+    border-color: $elo-verde;
+    box-shadow: var(--elo-sombra-alta);
+    color: $elo-tinta;
+    transform: translateY(-2px);
+  }
+
+  strong {
+    display: block;
+    color: $elo-verde;
+    font-size: 1.222rem;
+    text-decoration: underline;
+    text-underline-offset: 0.1875em;
+  }
+
+  span {
+    color: $elo-tinta-2;
+  }
+}
+
+.elo-tudo-certo {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-bottom: 2rem;
+  padding: clamp(1.25rem, 3.5vw, 2rem);
+  border: 1px solid $elo-divisoria;
+  border-radius: var(--elo-raio-cartao);
+  background: #fff;
+  box-shadow: var(--elo-sombra);
+
+  h2 {
+    margin-bottom: 0.25rem;
+    font-size: 1.278rem;
+  }
+
+  .elo-picto {
+    background: $elo-ok-fundo;
+    color: $elo-ok-texto;
+  }
+}
+
+.elo-boas-vindas .elo-esqueleto {
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 12%) 25%,
+    rgb(255 255 255 / 22%) 50%,
+    rgb(255 255 255 / 12%) 75%
+  );
+  background-size: 200% 100%;
+}
+
+.elo-rodape-pagina {
+  padding-top: 1.25rem;
+  border-top: 1px solid $elo-borda;
+  color: $elo-tinta-2;
+
+  a {
+    color: inherit;
+  }
+}
+
+// Texto escrito pela sede, com as quebras de linha que ela digitou.
 .texto-com-quebras {
   white-space: pre-line;
 }
 
-/* Imagem atual da notícia na janela de edição, sem empurrar os campos. */
+// Imagem atual da notícia na janela de edição, sem empurrar os campos.
 .imagem-previa {
   max-height: 12rem;
   max-width: 100%;

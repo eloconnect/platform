@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { AvisoSucesso, Botao, CampoTexto, MensagemErro } from '.';
+import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it } from 'vitest';
+import { AvisoSucesso, Botao, CampoTexto, MensagemErro, TamanhoLetra } from '.';
 
 describe('CampoTexto', () => {
   it('liga o rótulo visível ao campo', () => {
@@ -50,5 +51,41 @@ describe('Mensagens', () => {
   it('sucesso é anunciado como status', () => {
     render(<AvisoSucesso>Salvo</AvisoSucesso>);
     expect(screen.getByRole('status')).toHaveTextContent('Salvo');
+  });
+});
+
+describe('TamanhoLetra', () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('aumenta a letra do site e guarda a escolha no aparelho', async () => {
+    const usuario = userEvent.setup();
+    const { unmount } = render(<TamanhoLetra />);
+    expect(
+      screen.getByRole('group', { name: 'Tamanho da letra' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Letra normal' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    await usuario.click(screen.getByRole('button', { name: 'Letra maior' }));
+
+    expect(document.documentElement.dataset.letra).toBe('maior');
+    expect(screen.getByRole('button', { name: 'Letra maior' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(localStorage.getItem('elo-tamanho-letra')).toBe('maior');
+
+    // Fora da área (ex.: na sede), a letra volta ao normal.
+    unmount();
+    expect(document.documentElement.dataset.letra).toBeUndefined();
+  });
+
+  it('abre com a escolha guardada', () => {
+    localStorage.setItem('elo-tamanho-letra', 'grande');
+    render(<TamanhoLetra />);
+    expect(document.documentElement.dataset.letra).toBe('grande');
   });
 });

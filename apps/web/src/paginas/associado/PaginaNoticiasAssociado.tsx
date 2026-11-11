@@ -1,7 +1,7 @@
 import type { Noticia } from '@eloconnect/shared';
 import { useEffect, useState } from 'react';
 import { api } from '../../api';
-import { MensagemErro, useTituloPagina } from '../../componentes';
+import { Carregando, MensagemErro, useTituloPagina } from '../../componentes';
 import { ImagemNoticia } from './ImagemNoticia';
 
 type Estado =
@@ -32,8 +32,11 @@ export function PaginaNoticiasAssociado() {
   return (
     <>
       <h1>Notícias</h1>
+      <p className="lead">
+        Avisos e novidades publicados pela sede do sindicato.
+      </p>
       {estado.tipo === 'carregando' && (
-        <p role="status">Carregando as notícias...</p>
+        <Carregando texto="Carregando as notícias..." />
       )}
       {estado.tipo === 'erro' && (
         <MensagemErro>
