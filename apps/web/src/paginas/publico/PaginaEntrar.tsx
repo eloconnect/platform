@@ -42,7 +42,7 @@ export function PaginaEntrar() {
 
   return (
     <section className="cartao-pagina cartao-autenticacao">
-      <h1 className="text-center mb-4 text-uppercase">Entrar</h1>
+      <h1 className="text-center mb-4">Entrar</h1>
 
       <Form
         onSubmit={(event) => {

@@ -91,7 +91,7 @@ export function PaginaRedefinirSenha({
 
   return (
     <section className="cartao-pagina cartao-autenticacao">
-      <h1 className="text-uppercase">{textos.titulo}</h1>
+      <h1>{textos.titulo}</h1>
 
       {concluido ? (
         <>

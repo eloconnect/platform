@@ -15,6 +15,7 @@ import { ehChaveMestre } from '../../sessao';
 import {
   Botao,
   CampoTexto,
+  EtiquetaSituacao,
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
@@ -90,20 +91,25 @@ export function PaginaAssociados() {
 
   return (
     <>
-      <h1>Associados</h1>
-      {ehChaveMestre() && (
-        <div className="d-flex flex-wrap gap-3 mb-4">
-          <Link className="btn btn-primary btn-lg" to="/admin/associados/novo">
-            Cadastrar associado
-          </Link>
-          <Link
-            className="btn btn-outline-primary btn-lg"
-            to="/admin/associados/importar"
-          >
-            Importar planilha
-          </Link>
-        </div>
-      )}
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <h1 className="mb-0">Associados</h1>
+        {ehChaveMestre() && (
+          <div className="d-flex flex-wrap gap-3">
+            <Link
+              className="btn btn-outline-primary btn-lg"
+              to="/admin/associados/importar"
+            >
+              Importar planilha
+            </Link>
+            <Link
+              className="btn btn-primary btn-lg"
+              to="/admin/associados/novo"
+            >
+              Cadastrar associado
+            </Link>
+          </div>
+        )}
+      </div>
 
       {/* A key recria o formulário quando o endereço muda (ex.: "Voltar"). */}
       <Form
@@ -111,6 +117,7 @@ export function PaginaAssociados() {
         role="search"
         aria-label="Buscar associados"
         onSubmit={buscar}
+        className="elo-filtros"
       >
         <Row>
           <Col lg={6}>
@@ -165,7 +172,9 @@ export function PaginaAssociados() {
           label="Mostrar também os inativados"
           defaultChecked={filtros.incluirInativos ?? false}
         />
-        <Botao type="submit">Buscar</Botao>
+        <Botao type="submit" className="mb-3">
+          Buscar
+        </Botao>
       </Form>
 
       <p role="status" className="mt-4">
@@ -182,7 +191,7 @@ export function PaginaAssociados() {
 
       {lista && lista.itens.length > 0 && (
         <>
-          <Table responsive>
+          <Table responsive hover className="elo-tabela">
             <thead>
               <tr>
                 <th scope="col">Associado</th>
@@ -208,9 +217,11 @@ export function PaginaAssociados() {
                     {formatarCnpj(associado.cnpj)}
                   </td>
                   <td>
-                    <ul className="list-unstyled mb-0">
+                    <ul className="list-unstyled d-flex flex-column align-items-start gap-1 mb-0">
                       {textosSituacao(associado).map((texto) => (
-                        <li key={texto}>{texto}</li>
+                        <li key={texto}>
+                          <EtiquetaSituacao situacao={texto} />
+                        </li>
                       ))}
                     </ul>
                   </td>

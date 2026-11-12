@@ -7,7 +7,8 @@ export function LayoutPublico() {
       inicio="/"
       itensMenu={[
         { para: '/', texto: 'Início' },
-        { para: '/entrar', texto: 'Entrar' },
+        { para: '/cadastro', texto: 'Criar conta' },
+        { para: '/entrar', texto: 'Entrar', destaque: true },
       ]}
     />
   );

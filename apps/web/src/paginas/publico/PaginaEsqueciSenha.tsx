@@ -42,7 +42,7 @@ export function PaginaEsqueciSenha() {
 
   return (
     <section className="cartao-pagina cartao-autenticacao">
-      <h1 className="text-uppercase">Esqueci minha senha</h1>
+      <h1>Esqueci minha senha</h1>
       <p className="pagina-descricao">
         Informe o e-mail cadastrado. Enviaremos um link, válido por 1 hora, para
         você criar uma nova senha.

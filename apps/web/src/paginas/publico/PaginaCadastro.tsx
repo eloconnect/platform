@@ -50,7 +50,7 @@ export function PaginaCadastro() {
 
   return (
     <section className="cartao-pagina cartao-autenticacao">
-      <h1 className="text-uppercase">Criar conta</h1>
+      <h1>Criar conta</h1>
       <p className="pagina-descricao">
         Informe o CNPJ da farmácia. Enviaremos um link, válido por 24 horas,
         para o e-mail da farmácia que está no cadastro do sindicato. Pelo link,

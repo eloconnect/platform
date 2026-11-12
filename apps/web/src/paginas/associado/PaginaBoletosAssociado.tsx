@@ -5,7 +5,7 @@ import {
   textoCompetencia,
 } from '@eloconnect/shared';
 import qrcodeGenerator from 'qrcode-generator';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import { useLocation } from 'react-router';
 import { api } from '../../api';
@@ -13,10 +13,17 @@ import { abrirArquivo } from '../../arquivos';
 import {
   AvisoSucesso,
   Botao,
+  Carregando,
+  Icone,
   lerAviso,
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+
+/** Quanto tempo o botão mostra "copiado" antes de voltar ao normal. */
+const TEMPO_CONFIRMACAO_MS = 5000;
+
+type Copia = 'pix' | 'linha';
 
 type Estado =
   | { tipo: 'carregando' }
@@ -48,9 +55,12 @@ export function PaginaBoletosAssociado() {
   return (
     <>
       <h1>Meus boletos</h1>
+      <p className="lead">
+        Os boletos em aberto da farmácia, para pagar com Pix ou com o boleto.
+      </p>
       {aviso && <AvisoSucesso>{aviso}</AvisoSucesso>}
       {estado.tipo === 'carregando' && (
-        <p role="status">Carregando os boletos...</p>
+        <Carregando texto="Carregando os boletos..." />
       )}
       {estado.tipo === 'erro' && (
         <MensagemErro>
@@ -76,16 +86,29 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
     [boleto.pixCopiaECola],
   );
   const [aviso, setAviso] = useState('');
+  // O botão copiado fica verde, com o visto, por alguns segundos: para quem
+  // não tem prática, é a prova de que deu certo.
+  const [copiado, setCopiado] = useState<Copia | null>(null);
+  const temporizador = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [erroCopia, setErroCopia] = useState(false);
   const [baixando, setBaixando] = useState(false);
   const [erroPdf, setErroPdf] = useState(false);
 
-  async function copiar(texto: string, avisoCopiado: string) {
+  useEffect(() => () => clearTimeout(temporizador.current), []);
+
+  async function copiar(qual: Copia, texto: string, avisoCopiado: string) {
+    clearTimeout(temporizador.current);
     setAviso('');
+    setCopiado(null);
     setErroCopia(false);
     try {
       await navigator.clipboard.writeText(texto);
       setAviso(avisoCopiado);
+      setCopiado(qual);
+      temporizador.current = setTimeout(() => {
+        setAviso('');
+        setCopiado(null);
+      }, TEMPO_CONFIRMACAO_MS);
     } catch {
       setErroCopia(true);
     }
@@ -112,10 +135,10 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
         <Card.Title as="h2" className="h3">
           Boleto de {mes}
         </Card.Title>
-        <p className="fs-3 mb-1">
+        <p className="fs-3 mb-1 elo-numero">
           <strong>Valor: {formatarReais(boleto.valor)}</strong>
         </p>
-        <p className="fs-3">
+        <p className="fs-3 elo-numero">
           <strong>Vencimento: {formatarDia(boleto.vencimento)}</strong>
         </p>
         <p>
@@ -138,11 +161,19 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
         />
         <p className="font-monospace text-break">{boleto.pixCopiaECola}</p>
         <Botao
+          variant={copiado === 'pix' ? 'success' : 'primary'}
           onClick={() =>
-            void copiar(boleto.pixCopiaECola, 'Código Pix copiado.')
+            void copiar('pix', boleto.pixCopiaECola, 'Código Pix copiado.')
           }
         >
-          Copiar o código Pix
+          {copiado === 'pix' ? (
+            <>
+              <Icone nome="visto" />
+              Código copiado
+            </>
+          ) : (
+            'Copiar o código Pix'
+          )}
         </Botao>
 
         <h3 className="h4 mt-4">Pagar com o boleto</h3>
@@ -150,12 +181,23 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
         <p className="font-monospace text-break">{boleto.linhaDigitavel}</p>
         <div className="d-flex flex-wrap gap-3">
           <Botao
-            variant="outline-primary"
+            variant={copiado === 'linha' ? 'success' : 'outline-primary'}
             onClick={() =>
-              void copiar(boleto.linhaDigitavel, 'Linha digitável copiada.')
+              void copiar(
+                'linha',
+                boleto.linhaDigitavel,
+                'Linha digitável copiada.',
+              )
             }
           >
-            Copiar a linha digitável
+            {copiado === 'linha' ? (
+              <>
+                <Icone nome="visto" />
+                Linha copiada
+              </>
+            ) : (
+              'Copiar a linha digitável'
+            )}
           </Botao>
           <Botao
             variant="outline-primary"
@@ -166,8 +208,13 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
           </Botao>
         </div>
 
-        <p role="status" className="mt-3 mb-0 fw-bold">
-          {aviso}
+        <p role="status" className="elo-confirmacao mt-3 mb-0">
+          {aviso && (
+            <>
+              <Icone nome="visto" />
+              {aviso}
+            </>
+          )}
         </p>
         {erroCopia && (
           <MensagemErro>
