@@ -161,6 +161,7 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
         />
         <p className="font-monospace text-break">{boleto.pixCopiaECola}</p>
         <Botao
+          className="elo-botao-celular"
           variant={copiado === 'pix' ? 'success' : 'primary'}
           onClick={() =>
             void copiar('pix', boleto.pixCopiaECola, 'Código Pix copiado.')
@@ -181,6 +182,7 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
         <p className="font-monospace text-break">{boleto.linhaDigitavel}</p>
         <div className="d-flex flex-wrap gap-3">
           <Botao
+            className="elo-botao-celular"
             variant={copiado === 'linha' ? 'success' : 'outline-primary'}
             onClick={() =>
               void copiar(
@@ -200,6 +202,7 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
             )}
           </Botao>
           <Botao
+            className="elo-botao-celular"
             variant="outline-primary"
             disabled={baixando}
             onClick={() => void baixarPdf()}

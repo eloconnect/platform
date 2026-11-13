@@ -82,7 +82,7 @@ export function SecaoHistoricoBoletos({
         <p>Nenhum boleto ainda.</p>
       )}
       {estado.tipo === 'ok' && estado.historico.boletos.length > 0 && (
-        <Table responsive>
+        <Table responsive className="elo-tabela">
           <thead>
             <tr>
               <th scope="col">Mês</th>
