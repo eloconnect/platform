@@ -20,6 +20,7 @@ import {
   AvisoSucesso,
   lerAviso,
   Botao,
+  EtiquetaSituacao,
   CampoTexto,
   MensagemErro,
   useTituloPagina,
@@ -120,7 +121,9 @@ export function PaginaPerfilAssociado() {
 
   return (
     <>
-      <Link to="/admin/associados">Voltar para a lista de associados</Link>
+      <Link to="/admin/associados" className="elo-link-solto">
+        Voltar para a lista de associados
+      </Link>
       <h1 className="mt-3">{titulo}</h1>
       {aviso && <AvisoSucesso>{aviso}</AvisoSucesso>}
 
@@ -215,10 +218,12 @@ function Perfil({
 
       <section className="mt-4">
         <h2>Situação</h2>
-        <ul>
+        <ul className="list-unstyled d-flex flex-column align-items-start gap-2">
           {textosSituacao({ ...associado, cancelamentoSolicitado }).map(
             (texto) => (
-              <li key={texto}>{texto}</li>
+              <li key={texto}>
+                <EtiquetaSituacao situacao={texto} />
+              </li>
             ),
           )}
           <li>

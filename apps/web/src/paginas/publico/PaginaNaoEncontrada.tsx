@@ -7,7 +7,9 @@ export function PaginaNaoEncontrada() {
     <>
       <h1>Página não encontrada</h1>
       <p>O endereço digitado não existe.</p>
-      <Link to="/">Voltar para o início</Link>
+      <Link to="/" className="elo-link-solto">
+        Voltar para o início
+      </Link>
     </>
   );
 }

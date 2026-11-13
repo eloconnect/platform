@@ -86,7 +86,9 @@ function CarregarEEditar({ id }: { id: string }) {
     return (
       <>
         <MensagemErro>Associado não encontrado.</MensagemErro>
-        <Link to="/admin/associados">Voltar para a lista de associados</Link>
+        <Link to="/admin/associados" className="elo-link-solto">
+          Voltar para a lista de associados
+        </Link>
       </>
     );
   }
@@ -281,7 +283,9 @@ function Formulario({
             <Botao type="submit" disabled={enviando}>
               {enviando ? 'Salvando...' : 'Salvar'}
             </Botao>
-            <Link to={voltarPara}>Cancelar</Link>
+            <Link to={voltarPara} className="elo-link-solto">
+              Cancelar
+            </Link>
           </div>
         </Form>
       </Col>

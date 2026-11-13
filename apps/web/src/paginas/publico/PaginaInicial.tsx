@@ -58,7 +58,7 @@ export function PaginaInicial() {
     <>
       <section className="elo-abertura" aria-labelledby="titulo-inicial">
         <Container>
-          <Row className="align-items-center g-5">
+          <Row className="align-items-center g-4 g-lg-5">
             <Col lg={6}>
               <p className="elo-sobrelinha">
                 Sindicato das farmácias e drogarias de Mato Grosso
@@ -181,7 +181,7 @@ export function PaginaInicial() {
         aria-labelledby="titulo-passos"
       >
         <Container>
-          <Row className="align-items-center g-5">
+          <Row className="align-items-center g-4 g-lg-5">
             <Col lg={6} className="order-lg-2">
               <h2 id="titulo-passos" className="mb-4">
                 Criar a conta em 3 passos

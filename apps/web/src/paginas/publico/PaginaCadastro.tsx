@@ -91,7 +91,7 @@ export function PaginaCadastro() {
           </Botao>
         </Form>
       )}
-      <Link className="link-voltar-cadastro" to="/entrar">
+      <Link className="link-voltar-cadastro elo-link-solto" to="/entrar">
         Já tenho conta: entrar
       </Link>
     </section>

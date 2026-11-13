@@ -57,7 +57,9 @@ export function PaginaImportarAssociados() {
 
   return (
     <>
-      <Link to="/admin/associados">Voltar para a lista de associados</Link>
+      <Link to="/admin/associados" className="elo-link-solto">
+        Voltar para a lista de associados
+      </Link>
       <h1 className="mt-3">Importar associados</h1>
       <p>
         Para cadastrar de uma vez as farmácias, principalmente as que já pagam a

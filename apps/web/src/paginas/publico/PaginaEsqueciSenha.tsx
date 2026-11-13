@@ -74,7 +74,7 @@ export function PaginaEsqueciSenha() {
           </Botao>
         </Form>
       )}
-      <Link className="link-voltar-cadastro" to="/entrar">
+      <Link className="link-voltar-cadastro elo-link-solto" to="/entrar">
         Voltar para o login
       </Link>
     </section>

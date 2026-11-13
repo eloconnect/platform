@@ -72,16 +72,17 @@ export function PaginaEntrar() {
           onChange={(event) => setSenha(event.target.value)}
         />
 
-        <div className="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
           <Botao
             variant="outline-secondary"
             type="button"
             aria-pressed={mostrarSenha}
+            className="text-nowrap"
             onClick={() => setMostrarSenha((visivel) => !visivel)}
           >
             {mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
           </Botao>
-          <Link to="/esqueci-senha" className="link-pequeno">
+          <Link to="/esqueci-senha" className="link-pequeno elo-link-solto">
             Esqueci minha senha
           </Link>
         </div>
