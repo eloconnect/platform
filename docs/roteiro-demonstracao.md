@@ -83,7 +83,6 @@ Para voltar aos dados iniciais, use o `db:reset` de [deploy.md](deploy.md). Ele 
 - P05: o que é se inscrever numa convenção.
 - P06: lista completa de benefícios.
 - P08: comunicar a forma de criação de conta escolhida.
-- P10: regras que faltam do boleto avulso.
 - P12: quanto o sindicato pode gastar por mês com hospedagem e e-mail.
 - P13: o que muda com a inativação de um associado.
 - P14: matriz e filiais.

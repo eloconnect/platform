@@ -14,6 +14,7 @@ import type {
   ProximoBoleto,
 } from './associados.js';
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
+import type { AvulsoGerado, SituacaoAvulso } from './avulso.js';
 import type { ResultadoImportacao } from './importacao.js';
 import type {
   Comunicado,
@@ -433,6 +434,13 @@ export function createApiClient(
     /** Adesão à cobrança recorrente, com o termo aceito (RN23). */
     aderir: (dados: AderirRequest) =>
       requisitar<AdesaoFeita>('POST', '/associado/adesao', dados),
+
+    /** Se a farmácia pode pedir o boleto avulso agora, e o valor (RN24). */
+    situacaoAvulso: () =>
+      requisitar<SituacaoAvulso>('GET', '/associado/avulso'),
+
+    /** Gera o boleto avulso deste mês (RN24). */
+    pedirAvulso: () => requisitar<AvulsoGerado>('POST', '/associado/avulso'),
 
     /** Boletos em aberto do associado logado (RF12). */
     listarMeusBoletos: () =>

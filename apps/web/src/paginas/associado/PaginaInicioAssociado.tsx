@@ -72,7 +72,7 @@ const AREAS: {
  * a situação dele, o boleto em aberto mais antigo (ou que não há boleto para
  * pagar), as áreas do site em cartões grandes, quando a sede liberou o acesso, o aviso com a data de fim da
  * liberação (RN11, RN22), o convite para receber o boleto todo mês, para quem
- * ainda não recebe (RN23), e, para quem recebe, o caminho para cancelar ou o
+ * ainda não recebe (RN23), com o caminho para pagar só o mês atual (RN24), e, para quem recebe, o caminho para cancelar ou o
  * pedido que espera a sede (RN18).
  */
 export function PaginaInicioAssociado() {
@@ -189,6 +189,12 @@ export function PaginaInicioAssociado() {
               Quero receber o boleto todo mês
             </Link>
           </div>
+          {emAberto.length === 0 && Array.isArray(boletos) && (
+            <p className="mt-3 mb-0">
+              Prefere pagar uma vez só?{' '}
+              <Link to="/associado/avulso">Pagar só este mês</Link>
+            </p>
+          )}
         </section>
       )}
 

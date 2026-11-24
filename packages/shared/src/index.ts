@@ -80,6 +80,11 @@ export {
   type SituacaoAdesao,
 } from './adesao.js';
 export {
+  type AvulsoGerado,
+  type MotivoSemAvulso,
+  type SituacaoAvulso,
+} from './avulso.js';
+export {
   formatarDia,
   textoMesBoleto,
   textoSituacaoBoleto,

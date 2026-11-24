@@ -225,6 +225,52 @@ describe('Bloqueio automático (e2e)', () => {
       expect(await situacao()).toBe('INADIMPLENTE');
     });
   });
+
+  it('quem pagou o boleto avulso fica em dia até o último dia para pagar o mês seguinte (P10)', async () => {
+    await desfazendoNoFim(async (tx, bloqueio) => {
+      // Avulso de maio de 2099, pago: o mês seguinte venceria em 10/06 e
+      // poderia ser pago até 10/07. A interrupção de 1º de maio terminaria
+      // antes, em 31/05: vale o que terminar por último.
+      const avulso = await tx.associado.create({
+        data: {
+          cnpj: crypto
+            .randomUUID()
+            .replace(/\D/g, '')
+            .padEnd(14, '0')
+            .slice(0, 14),
+          razaoSocial: 'Farmácia do Avulso Ltda',
+          situacao: 'ADIMPLENTE',
+          contribuicaoAtiva: false,
+          cobrancaInterrompidaEm: new Date('2099-05-01T19:00:00Z'),
+        },
+      });
+      await tx.boleto.create({
+        data: {
+          associadoId: avulso.id,
+          tipo: 'AVULSO',
+          competencia: new Date('2099-05-01'),
+          valor: '120.00',
+          vencimento: new Date('2099-05-11'),
+          status: 'PAGO',
+          pagoEm: new Date('2099-05-05T12:00:00Z'),
+        },
+      });
+      const situacao = async () =>
+        (await tx.associado.findUniqueOrThrow({ where: { id: avulso.id } }))
+          .situacao;
+
+      await bloqueio.executar(new Date('2099-06-01T04:30:00Z'));
+      expect(await situacao()).toBe('ADIMPLENTE');
+
+      // 10 de julho, 23h30 em Mato Grosso: ainda em dia.
+      await bloqueio.executar(new Date('2099-07-11T03:30:00Z'));
+      expect(await situacao()).toBe('ADIMPLENTE');
+
+      // 11 de julho, 0h30 em Mato Grosso: perde o acesso.
+      await bloqueio.executar(new Date('2099-07-11T04:30:00Z'));
+      expect(await situacao()).toBe('INADIMPLENTE');
+    });
+  });
 });
 
 describe('Rota do bloqueio automático (e2e)', () => {
