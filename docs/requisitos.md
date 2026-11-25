@@ -118,7 +118,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RF14 | Enviar lembrete automático uma vez por semana após o vencimento, até o boleto expirar (RN07). | Must | [Validado] |
 | RF15 | Registrar automaticamente o pagamento (baixa) e atualizar o status do associado. | Must | [Validado] — baixa feita; o canal (notificação do banco ou consulta) depende do estudo do Sicredi (O2, #40) |
 | RF16 | Bloquear automaticamente o acesso a benefícios quando o boleto expira sem pagamento, 30 dias após o vencimento (RN09). | Must | [Validado] |
-| RF17 | Permitir ao associado optar pelo plano anual à vista com 20% de desconto. | Should | [Validado] — ver P04 e P15 |
+| RF17 | Permitir ao associado optar pelo plano anual à vista com 20% de desconto. | Should | [Validado] — renovação e lote decididos pelo grupo, com aval do cliente (P04, 24/11/2026) |
 | RF36 | Tela de adesão: associado pede pelo app a cobrança recorrente; a contribuição ativa é ativada automaticamente, sem aprovação da sede, e o boleto do mês é gerado na hora, com o valor cheio. Antes de confirmar, o associado aceita o termo de adesão, e o sistema guarda a data, a hora e a versão do termo aceito (RN23). | Must | [Validado] — vencimento do primeiro boleto em P16; texto do termo em P21 |
 | RF37 | Associado solicita pelo app um boleto avulso (pagamento de um único mês), sem aderir à cobrança recorrente, ou o boleto único dos meses em aberto (RN30). O avulso sai na hora para quem está em dia, um por mês; o boleto dos meses em aberto e o segundo avulso do mês passam pela sede, que aprova ou recusa (RN24, RN30). | Must | [Validado] — o que faltava foi decidido pelo grupo (P10, 24/11/2026) |
 | RF38 | Admin interrompe a cobrança recorrente de um associado (desativa a contribuição ativa), com registro no log de auditoria. O associado recebe um aviso por e-mail e mantém o acesso por mais 30 dias (RN25). | Must | [Validado] |
@@ -127,7 +127,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF18 | Alterar o valor mensal da contribuição. O valor anual é calculado: 12 vezes o mensal, com 20% de desconto (RN13). | Must | [Validado] — cálculo do anual em P23 |
+| RF18 | Alterar o valor mensal da contribuição. O valor anual é calculado: 12 vezes o mensal, com 20% de desconto (RN13). | Must | [Validado] — cálculo do anual decidido pelo grupo (P23, 24/11/2026) |
 | RF19 | Ao alterar o valor, enviar na hora um e-mail de aviso aos associados com contribuição ativa; o novo valor vale a partir do boleto do mês seguinte (RN15). | Must | [Validado] |
 | RF20 | Exibir histórico de alterações de valor. | Must | [Validado] |
 
@@ -229,7 +229,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P01 | Respondida (27 e 28/10): a validade de 30 dias conta do vencimento; depois disso, o boleto expira e os benefícios são bloqueados (respostas 10 e 13), e os meses em aberto vão para um boleto só (resposta 14). Depois do vencimento, o lembrete passa a ser semanal e para quando o boleto expira (resposta 15, RN07). | Cliente | RF14, histórico |
 | P02 | Respondida em parte (27/10): o arquivo da JUCEMAT traz o e-mail das farmácias (resposta 40). Falta: formato (provavelmente XML), frequência e forma de recebimento, que o sindicato vai levantar com a JUCEMAT. Um exemplo do layout, sem dados reais, já permite começar a importação. | Cliente | RF28, RF29 |
 | P03 | Respondida (27/10): a farmácia entra no cadastro pela sede, a pedido dela, e cria a conta pelo CNPJ (respostas 1 a 3, RN21); o primeiro boleto sai na hora, com o valor cheio (resposta 18, RN23). | Cliente | RF05, RF36 |
-| P04 | O associado do plano anual fica fora do lote mensal? Como é a renovação no fim do ano? Se o valor mudar no meio do ano, o que acontece com quem já pagou? (pergunta 21, em branco; relação com a assessoria jurídica em P15) | Cliente | RF17, RF10 |
+| P04 | Respondida (24/11/2026): o cliente deu aval para o grupo decidir. O plano cobre 12 meses, a partir do mês do pedido, ou do seguinte se o boleto do mês já saiu; o lote mensal pula esses meses. Não há renovação automática: no fim do plano, quem recebe o boleto todo mês volta a recebê-lo, e quem não recebe fica em dia até o último dia para pagar o mês seguinte. O valor é o do anual em vigor no pedido; quem já pagou não paga diferença se o valor mudar. | Cliente | RF17, RF10 |
 | P05 | O que significa "se registrar em uma convenção" na prática (inscrição em assembleia, evento, outro)? (pergunta 34, em branco) | Cliente | RF23 |
 | P06 | Respondida em parte (27/10): os benefícios ficam em dois grupos, assessoria jurídica e consultoria (resposta 9, RN32). Falta a lista completa (pergunta 35, em branco). | Cliente | RF24, RF25, landing page |
 | P07 | LGPD e tratamento de dados cadastrais e financeiros. | Prof. Poli | RNF05 |
@@ -248,7 +248,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P20 | Respondida (28/10, conversa por vídeo): a revisão do lote sai. Os boletos são gerados e enviados sozinhos no primeiro dia útil, e a sede pode editar o boleto do mês seguinte, com aviso por e-mail na hora (RN04, RF10, RF11). A mesma conversa respondeu à pergunta 23: o aviso de mudança de valor sai na hora (RN15). | Cliente | RN04, RN15, RF10, RF11 |
 | P21 | Texto do termo de adesão à cobrança recorrente, que os advogados do sindicato vão escrever (resposta 19). | Cliente | RN23, RF36 |
 | P22 | O sindicato pediu um exemplo de termo de adesão para os advogados usarem de base (resposta 19). O grupo pode indicar um modelo? Que cuidados isso exige? O aceite do compartilhamento do acesso com o contador (P11) pode entrar no mesmo termo? | Professores | RN23, RN29, RF36 |
-| P23 | Qual é o valor atual da contribuição mensal? O plano anual é o valor de 12 meses com 20% de desconto? (pergunta 22, em branco) Enquanto não houver resposta, a sede digita o valor mensal, e o sistema calcula o anual assim. | Cliente | RF18, RN13, RF17 |
+| P23 | Respondida em parte (24/11/2026): o grupo decidiu, com aval do cliente, que o anual é o valor de 12 meses com 20% de desconto. Falta o valor atual da contribuição mensal, que a sede digita no painel de valores. | Cliente | RF18, RF17 |
 | P24 | Respondida em parte (24/11/2026): o cliente deu aval para o grupo decidir o formato da tabela de reajuste. Ela tem uma linha por função, com o piso salarial anterior e o novo, e o sistema mostra o reajuste em porcentagem; só quem está em dia a vê, junto com o PDF completo. Falta saber se os PDFs costumam passar de 4 MB, o limite atual do envio. | Cliente | RF21, RF22 |
 | P25 | O que acontece depois que o cancelamento é confirmado? Quem estava em dia mantém o acesso a benefícios e suporte por mais 30 dias, como na interrupção pela sede (RN25), ou perde na hora? O boleto do mês que já saiu continua valendo ou é cancelado no banco? Quem da sede recebe o aviso de um pedido novo? (perguntas 29 a 32, em branco) Enquanto não houver resposta, vale o mesmo da interrupção: quem estava em dia mantém o acesso por 30 dias, e o boleto que já saiu continua valendo, sem lembretes. O aviso do pedido vai para os usuários chave mestre, que decidem (decisão do grupo, 02/11/2026). | Cliente | RF27, RN18 |
 | P26 | O sindicato já tem um texto para a cobrança formal (comunicado a todos os associados)? Além da existência do sindicato, do valor e dos benefícios, o que ela precisa dizer? (pergunta 44, em branco) Enquanto não houver resposta, a sede escreve o assunto e o texto na tela, e o sistema acrescenta o valor da contribuição e a lista de benefícios cadastrados (decisão do grupo, 02/11/2026). | Cliente | RF29, RN19 |
@@ -276,7 +276,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF13, RF14 | Entregue | | #50 |
 | RF15 | Em simulação | Na demonstração, o chave mestre simula o pagamento; o canal do banco depende do estudo do Sicredi. | #48 |
 | RF16 | Entregue | | #49 |
-| RF17 | Não feito | P04, P15 e P23. | #64 |
+| RF17 | Em simulação | Plano anual à vista, com o boleto gerado na hora (P04). | #64 |
 | RF36 | Em simulação | Termo provisório (P21) e vencimento do primeiro boleto provisório (P16). | #43 |
 | RF37 | Em simulação | Boleto avulso do mês e boleto único dos meses em aberto, aprovado pelo chave mestre. | #63 |
 | RF38 | Entregue | | #51 |

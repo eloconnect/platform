@@ -225,7 +225,7 @@ O diagrama mostra os campos principais. Todas as tabelas também têm `criadoEm`
 
 **Boleto expirado é guardado** (RN03, RN09, RF16). O boleto vale até 30 dias depois do vencimento. No dia seguinte, o job diário do bloqueio marca o boleto EM_ABERTO como EXPIRADO, com o evento EXPIRADO no histórico, e torna o associado INADIMPLENTE. A decisão manual da sede (`acessoManual`) não muda. O banco não recebe mais o boleto expirado.
 
-**Lote mensal** agrupa os boletos MENSAL de uma competência, gerados e enviados sozinhos no primeiro dia útil, sem revisão (RN04). Ninguém da sede envia o lote (P20): ele nasce em RASCUNHO, com os boletos ainda por emitir no banco, e passa a ENVIADO quando todos foram emitidos. Boletos avulsos ficam fora do lote: o associado pede e o boleto sai na hora (P10). Os anuais também ficam fora do lote, até a P04.
+**Lote mensal** agrupa os boletos MENSAL de uma competência, gerados e enviados sozinhos no primeiro dia útil, sem revisão (RN04). Ninguém da sede envia o lote (P20): ele nasce em RASCUNHO, com os boletos ainda por emitir no banco, e passa a ENVIADO quando todos foram emitidos. Boletos avulsos ficam fora do lote: o associado pede e o boleto sai na hora (P10). Os anuais também ficam fora do lote: o associado pede, e o lote pula os 12 meses que o plano cobre (P04).
 
 **Valor de cada boleto.** Uma alteração de valor vale a partir do boleto do mês seguinte (RN15). O boleto de uma competência usa o `ValorContribuicao` mais recente criado antes do primeiro dia desse mês, no horário de Cuiabá. Por isso, a data de início não precisa de coluna própria.
 
@@ -280,7 +280,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Ponto do modelo | Pendência | Situação atual |
 | --- | --- | --- |
 | Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, RF42 | Conjunto mínimo provisório. Não existe lista atual dos associados (P09, respondida), então a planilha modelo da carga inicial parte deste conjunto. Novos campos entram por migration. |
-| Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
+| Boleto ANUAL | Decidido (P04, 24/11/2026) | A competência do boleto é o primeiro dos 12 meses que ele cobre; o lote pula esses meses, sem tabela nova. |
 | Boleto único dos meses em aberto (RN30) | Decidido (P10, 24/11/2026) | O tipo QUITACAO junta os meses expirados, que apontam para ele em `quitadoPorId`. O pedido fica em `PedidoQuitacao` (PENDENTE, APROVADO, RECUSADO), com quem decidiu e o boleto gerado. |
 | Termo de adesão e vencimento do primeiro boleto (RN23) | P21, P16 | O aceite fica na `AdesaoCobranca`. O texto do termo (`TERMO_ADESAO`, no `packages/shared`) e o vencimento do boleto da adesão, 10 dias depois dela, são provisórios. |
 | Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |

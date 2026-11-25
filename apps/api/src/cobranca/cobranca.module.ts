@@ -5,6 +5,8 @@ import { AdesaoService } from './adesao.service.js';
 import { AssociadoAdesaoController } from './associado-adesao.controller.js';
 import { AssociadoAvulsoController } from './associado-avulso.controller.js';
 import { AvulsoService } from './avulso.service.js';
+import { AnualService } from './anual.service.js';
+import { AssociadoAnualController } from './associado-anual.controller.js';
 import {
   AssociadoQuitacaoController,
   QuitacaoController,
@@ -35,6 +37,7 @@ import { TransacoesService } from './transacoes.service.js';
     BoletosController,
     AssociadoAdesaoController,
     AssociadoAvulsoController,
+    AssociadoAnualController,
     AssociadoQuitacaoController,
     QuitacaoController,
   ],
@@ -50,6 +53,7 @@ import { TransacoesService } from './transacoes.service.js';
     LembretesService,
     AdesaoService,
     AvulsoService,
+    AnualService,
     QuitacaoService,
     // TODO(#40): o adaptador do Sicredi entra aqui quando houver o convênio.
     { provide: GatewayPagamento, useClass: GatewaySimulado },

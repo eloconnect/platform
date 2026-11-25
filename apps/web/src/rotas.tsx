@@ -14,6 +14,7 @@ import { PaginaNoticias } from './paginas/admin/PaginaNoticias';
 import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaAdesaoAssociado } from './paginas/associado/PaginaAdesaoAssociado';
+import { PaginaAnualAssociado } from './paginas/associado/PaginaAnualAssociado';
 import { PaginaAvulsoAssociado } from './paginas/associado/PaginaAvulsoAssociado';
 import { PaginaQuitacaoAssociado } from './paginas/associado/PaginaQuitacaoAssociado';
 import { PaginaCancelamentoAssociado } from './paginas/associado/PaginaCancelamentoAssociado';
@@ -74,6 +75,8 @@ export const rotas: RouteObject[] = [
       { path: 'adesao', element: <PaginaAdesaoAssociado /> },
       // Quem não recebe o boleto todo mês paga só o mês atual (RN24).
       { path: 'avulso', element: <PaginaAvulsoAssociado /> },
+      // Plano anual à vista, com 20% de desconto (RN13).
+      { path: 'anual', element: <PaginaAnualAssociado /> },
       // Os meses em aberto num boleto só, que passa pela sede (RN30).
       { path: 'meses-em-aberto', element: <PaginaQuitacaoAssociado /> },
       // Quem recebe o boleto pede o cancelamento, que passa pela sede (RF26).

@@ -426,6 +426,36 @@ describe('Lote mensal (e2e)', () => {
     });
   });
 
+  it('pula quem tem o plano anual cobrindo o mês, pago ou para pagar (P04)', async () => {
+    await desfazendoNoFim(async (tx, lote) => {
+      await criarValores(tx);
+      // Plano de julho de 2098 a junho de 2099: cobre junho.
+      const comPlano = await criarAssociado(tx, { contribuicaoAtiva: true });
+      // Plano de junho de 2098 a maio de 2099: já terminou.
+      const planoAcabou = await criarAssociado(tx, { contribuicaoAtiva: true });
+      for (const [associadoId, competencia] of [
+        [comPlano.id, '2098-07-01'],
+        [planoAcabou.id, '2098-06-01'],
+      ]) {
+        await tx.boleto.create({
+          data: {
+            associadoId,
+            tipo: 'ANUAL',
+            competencia: new Date(competencia),
+            valor: '1000.00',
+            vencimento: new Date(competencia),
+            status: 'PAGO',
+          },
+        });
+      }
+
+      await lote().executar(DIA_DO_LOTE);
+
+      expect(await boletosDoMes(tx, comPlano.id)).toEqual([]);
+      expect(await boletosDoMes(tx, planoAcabou.id)).toHaveLength(1);
+    });
+  });
+
   it('sem valor cadastrado antes do mês, não gera o lote', async () => {
     await desfazendoNoFim(async (tx, lote) => {
       // 2 de janeiro de 1990, o primeiro dia útil do mês.

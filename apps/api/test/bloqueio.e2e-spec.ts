@@ -271,6 +271,44 @@ describe('Bloqueio automático (e2e)', () => {
       expect(await situacao()).toBe('INADIMPLENTE');
     });
   });
+
+  it('quem pagou o plano anual sem o boleto mensal fica em dia até o mês seguinte ao fim (P04)', async () => {
+    await desfazendoNoFim(async (tx, bloqueio) => {
+      // Plano de maio de 2099 a abril de 2100: maio de 2100 venceria em
+      // 10/05 e poderia ser pago até 09/06/2100.
+      const anual = await tx.associado.create({
+        data: {
+          cnpj: crypto
+            .randomUUID()
+            .replace(/\D/g, '')
+            .padEnd(14, '0')
+            .slice(0, 14),
+          razaoSocial: 'Farmácia do Plano Anual Ltda',
+          situacao: 'ADIMPLENTE',
+          contribuicaoAtiva: false,
+        },
+      });
+      await tx.boleto.create({
+        data: {
+          associadoId: anual.id,
+          tipo: 'ANUAL',
+          competencia: new Date('2099-05-01'),
+          valor: '1152.00',
+          vencimento: new Date('2099-05-11'),
+          status: 'PAGO',
+        },
+      });
+      const situacao = async () =>
+        (await tx.associado.findUniqueOrThrow({ where: { id: anual.id } }))
+          .situacao;
+
+      await bloqueio.executar(new Date('2100-06-09T15:00:00Z'));
+      expect(await situacao()).toBe('ADIMPLENTE');
+
+      await bloqueio.executar(new Date('2100-06-10T15:00:00Z'));
+      expect(await situacao()).toBe('INADIMPLENTE');
+    });
+  });
 });
 
 describe('Rota do bloqueio automático (e2e)', () => {

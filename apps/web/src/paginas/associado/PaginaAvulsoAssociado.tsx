@@ -24,6 +24,7 @@ const TEXTO_MOTIVO: Record<MotivoSemAvulso, string> = {
   BOLETO_EXPIRADO:
     'A farmácia tem meses em aberto. Para voltar a ficar em dia, pague todos num boleto só, sem juros.',
   MES_JA_PAGO: 'O boleto deste mês já foi pago. Não é preciso pagar de novo.',
+  PLANO_ANUAL: 'O plano anual da farmácia já cobre este mês.',
   SEM_VALOR:
     'O boleto ainda não está disponível. Fale com a sede do sindicato.',
   INATIVO: 'O cadastro da farmácia está inativo. Fale com a sede do sindicato.',

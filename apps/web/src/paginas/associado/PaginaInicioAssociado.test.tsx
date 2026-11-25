@@ -30,6 +30,7 @@ const contaEmDia = {
   acessoLiberadoAte: null,
   recebeBoletoMensal: true,
   cancelamentoPedidoEm: null,
+  planoAnualAte: null,
 };
 
 function abrir(state?: unknown) {
@@ -140,6 +141,7 @@ describe('PaginaInicioAssociado', () => {
       acessoLiberadoAte: null,
       recebeBoletoMensal: false,
       cancelamentoPedidoEm: null,
+      planoAnualAte: null,
     });
     abrir();
 
@@ -163,6 +165,7 @@ describe('PaginaInicioAssociado', () => {
       acessoLiberadoAte: '2026-11-04T12:00:00.000Z',
       recebeBoletoMensal: true,
       cancelamentoPedidoEm: null,
+      planoAnualAte: null,
     });
     abrir();
 
@@ -186,6 +189,7 @@ describe('PaginaInicioAssociado', () => {
       acessoLiberadoAte: null,
       recebeBoletoMensal: true,
       cancelamentoPedidoEm: null,
+      planoAnualAte: null,
     });
     abrir();
 
@@ -193,7 +197,7 @@ describe('PaginaInicioAssociado', () => {
       await screen.findByRole('link', { name: 'Cancelar o boleto mensal' }),
     ).toHaveAttribute('href', '/associado/cancelamento');
     expect(
-      screen.getByText('A farmácia recebe o boleto da contribuição todo mês.'),
+      screen.getByText(/A farmácia recebe o boleto da contribuição todo mês\./),
     ).toBeInTheDocument();
   });
 
@@ -213,6 +217,9 @@ describe('PaginaInicioAssociado', () => {
     expect(
       await screen.findByRole('link', { name: 'Pagar só este mês' }),
     ).toHaveAttribute('href', '/associado/avulso');
+    expect(
+      screen.getByRole('link', { name: 'pagar o ano à vista' }),
+    ).toHaveAttribute('href', '/associado/anual');
   });
 
   it('com um boleto em aberto, não oferece o boleto avulso', async () => {
@@ -239,6 +246,7 @@ describe('PaginaInicioAssociado', () => {
       acessoLiberadoAte: null,
       recebeBoletoMensal: true,
       cancelamentoPedidoEm: '2026-11-02T15:00:00.000Z',
+      planoAnualAte: null,
     });
     abrir({ aviso: 'Pedido de cancelamento enviado.' });
 
