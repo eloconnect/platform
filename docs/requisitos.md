@@ -135,7 +135,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF21 | Funcionário da sede publica e edita a convenção coletiva: resumo em texto, PDF completo, PDF resumido e tabela de reajuste salarial. | Must | [Validado] — formato dos documentos e da tabela de reajuste em P24 |
+| RF21 | Funcionário da sede publica e edita a convenção coletiva: resumo em texto, PDF completo, PDF resumido e tabela de reajuste salarial. | Must | [Validado] — formato da tabela decidido pelo grupo, com aval do cliente (P24, 24/11/2026) |
 | RF22 | Qualquer usuário logado vê as convenções: quem está em dia, o PDF completo; os demais (inclusive inadimplente), o resumido (RN12). O contador acessa pela conta do associado (RN29). | Must | [Validado] |
 | RF23 | Associado adimplente pode se inscrever/registrar participação em uma convenção. | Should | [A confirmar] — ver P05 |
 
@@ -249,7 +249,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P21 | Texto do termo de adesão à cobrança recorrente, que os advogados do sindicato vão escrever (resposta 19). | Cliente | RN23, RF36 |
 | P22 | O sindicato pediu um exemplo de termo de adesão para os advogados usarem de base (resposta 19). O grupo pode indicar um modelo? Que cuidados isso exige? O aceite do compartilhamento do acesso com o contador (P11) pode entrar no mesmo termo? | Professores | RN23, RN29, RF36 |
 | P23 | Qual é o valor atual da contribuição mensal? O plano anual é o valor de 12 meses com 20% de desconto? (pergunta 22, em branco) Enquanto não houver resposta, a sede digita o valor mensal, e o sistema calcula o anual assim. | Cliente | RF18, RN13, RF17 |
-| P24 | Em que formato chegam os documentos da convenção (PDF, planilha, outro)? Além do resumo, há algum conteúdo que sempre é publicado, como a tabela de reajuste? Os PDFs costumam passar de 4 MB? (pergunta 39, em branco; o envio pelo sistema tem esse limite por enquanto) Enquanto não houver resposta, a convenção tem o resumo em texto e os dois PDFs, e a tabela de reajuste espera. | Cliente | RF21, RF22 |
+| P24 | Respondida em parte (24/11/2026): o cliente deu aval para o grupo decidir o formato da tabela de reajuste. Ela tem uma linha por função, com o piso salarial anterior e o novo, e o sistema mostra o reajuste em porcentagem; só quem está em dia a vê, junto com o PDF completo. Falta saber se os PDFs costumam passar de 4 MB, o limite atual do envio. | Cliente | RF21, RF22 |
 | P25 | O que acontece depois que o cancelamento é confirmado? Quem estava em dia mantém o acesso a benefícios e suporte por mais 30 dias, como na interrupção pela sede (RN25), ou perde na hora? O boleto do mês que já saiu continua valendo ou é cancelado no banco? Quem da sede recebe o aviso de um pedido novo? (perguntas 29 a 32, em branco) Enquanto não houver resposta, vale o mesmo da interrupção: quem estava em dia mantém o acesso por 30 dias, e o boleto que já saiu continua valendo, sem lembretes. O aviso do pedido vai para os usuários chave mestre, que decidem (decisão do grupo, 02/11/2026). | Cliente | RF27, RN18 |
 | P26 | O sindicato já tem um texto para a cobrança formal (comunicado a todos os associados)? Além da existência do sindicato, do valor e dos benefícios, o que ela precisa dizer? (pergunta 44, em branco) Enquanto não houver resposta, a sede escreve o assunto e o texto na tela, e o sistema acrescenta o valor da contribuição e a lista de benefícios cadastrados (decisão do grupo, 02/11/2026). | Cliente | RF29, RN19 |
 | P27 | As farmácias que já pagam, importadas pela planilha com "Recebe boleto mensal: sim", começam em dia (Adimplente) ou só depois de pagar o primeiro boleto pelo sistema? (pergunta 43, em branco) Enquanto não houver resposta, elas entram em dia, porque já pagam fora do sistema (decisão do grupo, 02/11/2026). | Cliente | RF42 |
@@ -281,7 +281,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF37 | Em simulação | Boleto avulso do mês e boleto único dos meses em aberto, aprovado pelo chave mestre. | #63 |
 | RF38 | Entregue | | #51 |
 | RF18, RF19, RF20 | Entregue | O valor atual depende da P23. | #36, #37, #38 |
-| RF21 | Entregue | A tabela de reajuste espera a P24. | #30, #31 |
+| RF21 | Entregue | Com a tabela de reajuste no formato decidido pelo grupo (P24). | #30, #31, #150 |
 | RF22 | Entregue | | #32 |
 | RF23 | Não feito | P05. | #65 |
 | RF24 | Entregue | A lista completa depende da P06. | #35 |

@@ -61,6 +61,7 @@ export {
   type PublicarNoticiaRequest,
 } from './noticias.js';
 export type * from './convencoes.js';
+export { MAXIMO_LINHAS_REAJUSTE, textoReajuste } from './convencoes.js';
 export {
   COLUNAS_IMPORTACAO,
   planilhaModelo,

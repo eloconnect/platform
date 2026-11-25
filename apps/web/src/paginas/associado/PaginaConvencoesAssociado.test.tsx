@@ -18,6 +18,8 @@ const COM_PDF: Convencao = {
   titulo: 'Convenção Coletiva 2026',
   ano: 2026,
   resumo: 'O que mudou: piso novo.\nO resto continua igual.',
+  tabelaReajuste: [],
+  tabelaRestrita: false,
   publicadaEm: '2026-10-01T15:00:00.000Z',
   criadoEm: '2026-10-01T12:00:00.000Z',
   atualizadoEm: '2026-10-01T15:00:00.000Z',
@@ -121,6 +123,29 @@ describe('PaginaConvencoesAssociado', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Não foi possível abrir o PDF agora.',
     );
+  });
+
+  it('quem está em dia vê a tabela de reajuste; os demais, o aviso (P24)', async () => {
+    vi.mocked(api.listarConvencoesAssociado).mockResolvedValue([
+      {
+        ...COM_PDF,
+        tabelaReajuste: [
+          {
+            funcao: 'Balconista',
+            pisoAnterior: '1500.00',
+            pisoNovo: '1575.00',
+          },
+        ],
+      },
+      { ...COM_PDF, id: 'convencao-02', tabelaRestrita: true },
+    ]);
+    render(<PaginaConvencoesAssociado />);
+
+    expect(await screen.findByText('Balconista')).toBeVisible();
+    expect(screen.getByText(/reajuste de 5,0%/)).toBeVisible();
+    expect(
+      screen.getByText(/A tabela de reajuste fica disponível para quem/),
+    ).toBeVisible();
   });
 
   it('avisa quando ainda não há convenções', async () => {

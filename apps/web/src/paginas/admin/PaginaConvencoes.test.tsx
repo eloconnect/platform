@@ -23,6 +23,8 @@ const CONVENCAO: Convencao = {
   titulo: 'Convenção coletiva de teste',
   ano: 2026,
   resumo: 'Resumo fictício da convenção.',
+  tabelaReajuste: [],
+  tabelaRestrita: false,
   publicadaEm: null,
   criadoEm: '2026-01-01T12:00:00.000Z',
   atualizadoEm: '2026-01-01T12:00:00.000Z',
@@ -116,6 +118,7 @@ describe('PaginaConvencoes', () => {
       titulo: 'Convenção nova',
       ano: 2026,
       resumo: 'Resumo novo.',
+      tabelaReajuste: [],
     });
 
     expect(await screen.findByRole('status')).toHaveTextContent(
@@ -163,6 +166,50 @@ describe('PaginaConvencoes', () => {
 
     expect(await screen.findByRole('status')).toHaveTextContent(
       'Convenção alterada.',
+    );
+  });
+
+  it('preenche a tabela de reajuste e confere os valores (RF21, P24)', async () => {
+    const user = userEvent.setup();
+    vi.mocked(api.editarConvencao).mockResolvedValue(CONVENCAO);
+    await abrir();
+
+    await user.click(screen.getByRole('button', { name: 'Editar' }));
+    const janela = screen.getByRole('dialog', { name: 'Editar convenção' });
+    await user.click(
+      within(janela).getByRole('button', { name: 'Adicionar uma linha' }),
+    );
+    await user.type(
+      within(janela).getByLabelText('Função da linha 1'),
+      'Balconista',
+    );
+    await user.type(within(janela).getByLabelText('Piso anterior (R$)'), 'mil');
+    await user.click(within(janela).getByRole('button', { name: 'Salvar' }));
+
+    expect(
+      within(janela).getByText(/Confira a linha 1 da tabela/),
+    ).toBeVisible();
+    expect(api.editarConvencao).not.toHaveBeenCalled();
+
+    await user.clear(within(janela).getByLabelText('Piso anterior (R$)'));
+    await user.type(
+      within(janela).getByLabelText('Piso anterior (R$)'),
+      '1.500,00',
+    );
+    await user.type(within(janela).getByLabelText('Piso novo (R$)'), '1575,5');
+    await user.click(within(janela).getByRole('button', { name: 'Salvar' }));
+
+    expect(api.editarConvencao).toHaveBeenCalledWith(
+      'convencao-01',
+      expect.objectContaining({
+        tabelaReajuste: [
+          {
+            funcao: 'Balconista',
+            pisoAnterior: '1500.00',
+            pisoNovo: '1575.50',
+          },
+        ],
+      }),
     );
   });
 

@@ -19,6 +19,13 @@ import {
   useTituloPagina,
 } from '../../componentes';
 import { CartaoConvencao } from '../associado/CartaoConvencao';
+import { TabelaReajuste } from '../associado/TabelaReajuste';
+import {
+  conferirTabela,
+  EditorTabelaReajuste,
+  linhasDigitadas,
+  type LinhaDigitada,
+} from './EditorTabelaReajuste';
 
 /** A Vercel aceita no máximo 4,5 MB por requisição (P24). */
 const TAMANHO_MAXIMO_PDF = 4 * 1024 * 1024;
@@ -174,6 +181,15 @@ export function PaginaConvencoes() {
 
                   <p className="texto-com-quebras">{convencao.resumo}</p>
 
+                  {convencao.tabelaReajuste.length > 0 && (
+                    <p>
+                      Tabela de reajuste:{' '}
+                      {convencao.tabelaReajuste.length === 1
+                        ? '1 função'
+                        : `${convencao.tabelaReajuste.length} funções`}
+                    </p>
+                  )}
+
                   <p>
                     Situação:{' '}
                     <strong>
@@ -328,6 +344,18 @@ function JanelaConvencao({
   const [anoAtual] = useState(() => new Date().getFullYear());
 
   const editando = janela?.tipo === 'edicao' ? janela.convencao : null;
+  const [linhas, setLinhas] = useState<LinhaDigitada[]>(() =>
+    linhasDigitadas(editando?.tabelaReajuste ?? []),
+  );
+  const [erroTabela, setErroTabela] = useState<string>();
+
+  // Cada vez que a janela abre, a tabela começa com as linhas salvas.
+  const [janelaAnterior, setJanelaAnterior] = useState(janela);
+  if (janela !== janelaAnterior) {
+    setJanelaAnterior(janela);
+    setLinhas(linhasDigitadas(editando?.tabelaReajuste ?? []));
+    setErroTabela(undefined);
+  }
 
   async function salvar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
@@ -348,10 +376,18 @@ function JanelaConvencao({
     };
 
     setErros(novosErros);
+    const conferida = conferirTabela(linhas);
+    setErroTabela('erro' in conferida ? conferida.erro : undefined);
 
     if (novosErros.titulo || novosErros.ano || novosErros.resumo) return;
+    if ('erro' in conferida) return;
 
-    const dadosConvencao: CriarConvencaoRequest = { titulo, ano, resumo };
+    const dadosConvencao: CriarConvencaoRequest = {
+      titulo,
+      ano,
+      resumo,
+      tabelaReajuste: conferida.tabela,
+    };
 
     setEnviando(true);
     setErro(false);
@@ -438,6 +474,12 @@ function JanelaConvencao({
             obrigatorio
             defaultValue={editando?.resumo ?? ''}
             erro={erros.resumo}
+          />
+
+          <EditorTabelaReajuste
+            linhas={linhas}
+            erro={erroTabela}
+            aoMudar={setLinhas}
           />
         </Modal.Body>
 
@@ -629,10 +671,18 @@ function JanelaPrevia({
             ano={convencao.ano}
             resumo={convencao.resumo}
             nivelTitulo="h3"
-          />
+          >
+            {convencao.tabelaReajuste.length > 0 && (
+              <TabelaReajuste
+                linhas={convencao.tabelaReajuste}
+                nivelTitulo="h4"
+              />
+            )}
+          </CartaoConvencao>
         )}
         <p className="mt-3 mb-0">
-          Quem está em dia abre o PDF integral. Os demais abrem o PDF resumido.
+          Quem está em dia abre o PDF integral e vê a tabela de reajuste. Os
+          demais abrem o PDF resumido.
         </p>
       </Modal.Body>
 
