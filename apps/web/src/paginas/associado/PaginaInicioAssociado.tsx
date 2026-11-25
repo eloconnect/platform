@@ -1,5 +1,6 @@
 import type {
   BoletoEmAberto,
+  Filial,
   MinhaConta,
   TextoSituacao,
 } from '@eloconnect/shared';
@@ -90,6 +91,8 @@ export function PaginaInicioAssociado() {
   // Em dia ou não, o associado vê os boletos em aberto (RF12). Quem teve a
   // cobrança interrompida também pode ter um boleto que já saiu (RN25).
   const [boletos, setBoletos] = useState<EstadoBoletos>('carregando');
+  // Só a matriz tem filiais (RN31); sem resposta, a seção não aparece.
+  const [filiais, setFiliais] = useState<Filial[]>([]);
 
   useEffect(() => {
     let ativo = true;
@@ -101,6 +104,10 @@ export function PaginaInicioAssociado() {
       .listarMeusBoletos()
       .then((lista) => ativo && setBoletos(lista))
       .catch(() => ativo && setBoletos('erro'));
+    void api
+      .listarFiliais()
+      .then((lista) => ativo && setFiliais(lista))
+      .catch(() => {});
     return () => {
       ativo = false;
     };
@@ -217,6 +224,26 @@ export function PaginaInicioAssociado() {
               desconto.
             </p>
           )}
+        </section>
+      )}
+
+      {filiais.length > 0 && (
+        <section className="elo-boleto" aria-labelledby="titulo-filiais">
+          <h2 id="titulo-filiais">Filiais</h2>
+          <ul className="list-unstyled mb-3">
+            {filiais.map((filial) => (
+              <li key={filial.id} className="mb-2">
+                <strong>{filial.nome}</strong>: {filial.situacao}
+                {filial.boletos.length > 0 &&
+                  (filial.boletos.length === 1
+                    ? ', 1 boleto para pagar'
+                    : `, ${filial.boletos.length} boletos para pagar`)}
+              </li>
+            ))}
+          </ul>
+          <Link className="btn btn-primary btn-lg" to="/associado/filiais">
+            Ver as filiais
+          </Link>
         </section>
       )}
 

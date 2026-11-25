@@ -79,7 +79,19 @@ export function PaginaBoletosAssociado() {
   );
 }
 
-function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
+/**
+ * Um boleto em aberto, com o Pix, a linha digitável e o PDF. A matriz usa o
+ * mesmo cartão para os boletos das filiais (RN31), com outro `baixarPdf`.
+ */
+export function CartaoBoleto({
+  boleto,
+  baixar = (id) => api.baixarPdfMeuBoleto(id),
+  nivelTitulo = 'h2',
+}: {
+  boleto: BoletoEmAberto;
+  baixar?: (id: string) => Promise<Blob>;
+  nivelTitulo?: 'h2' | 'h3';
+}) {
   const mes = textoCompetencia(boleto.competencia);
   const qrCode = useMemo(
     () => imagemQrCode(boleto.pixCopiaECola),
@@ -119,7 +131,7 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
     setErroPdf(false);
     try {
       abrirArquivo(
-        await api.baixarPdfMeuBoleto(boleto.id),
+        await baixar(boleto.id),
         `boleto-${boleto.competencia.ano}-${String(boleto.competencia.mes).padStart(2, '0')}.pdf`,
       );
     } catch {
@@ -132,7 +144,7 @@ function CartaoBoleto({ boleto }: { boleto: BoletoEmAberto }) {
   return (
     <Card as="article" className="mb-4">
       <Card.Body>
-        <Card.Title as="h2" className="h3">
+        <Card.Title as={nivelTitulo} className="h3">
           Boleto de {mes}
         </Card.Title>
         <p className="fs-3 mb-1 elo-numero">

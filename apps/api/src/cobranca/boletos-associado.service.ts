@@ -27,7 +27,14 @@ export class BoletosAssociadoService {
     usuarioId: string,
     agora = new Date(),
   ): Promise<BoletoEmAberto[]> {
-    const associadoId = await this.associadoDe(usuarioId);
+    return this.emAbertoDe(await this.associadoDe(usuarioId), agora);
+  }
+
+  /** Boletos em aberto de um associado, também para a matriz (RN31). */
+  async emAbertoDe(
+    associadoId: string,
+    agora = new Date(),
+  ): Promise<BoletoEmAberto[]> {
     const boletos = await this.prisma.boleto.findMany({
       where: { associadoId, status: 'EM_ABERTO' },
       orderBy: [{ vencimento: 'asc' }, { id: 'asc' }],
@@ -75,7 +82,14 @@ export class BoletosAssociadoService {
     usuarioId: string,
     boletoId: string,
   ): Promise<{ arquivo: Buffer; nomeArquivo: string }> {
-    const associadoId = await this.associadoDe(usuarioId);
+    return this.pdfDe(await this.associadoDe(usuarioId), boletoId);
+  }
+
+  /** PDF de um boleto em aberto de um associado, também para a matriz. */
+  async pdfDe(
+    associadoId: string,
+    boletoId: string,
+  ): Promise<{ arquivo: Buffer; nomeArquivo: string }> {
     const boleto = await this.prisma.boleto.findFirst({
       where: { id: boletoId, associadoId, status: 'EM_ABERTO' },
       include: { associado: { select: { cnpj: true, razaoSocial: true } } },
