@@ -49,6 +49,8 @@ model Usuario {
   noticias               Noticia[]
   cancelamentosDecididos SolicitacaoCancelamento[]
   quitacoesDecididas     PedidoQuitacao[]
+  suportesEnviados       PedidoSuporte[]           @relation("SuporteEnviado")
+  suportesRespondidos    PedidoSuporte[]           @relation("SuporteRespondido")
   adesoes                AdesaoCobranca[]
   comunicados            Comunicado[]
 }
@@ -129,6 +131,7 @@ model Associado {
   adesoes       AdesaoCobranca[]
   comunicados   EnvioComunicado[]
   quitacoes     PedidoQuitacao[]
+  suportes      PedidoSuporte[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -516,4 +519,25 @@ model PedidoQuitacao {
 
   @@index([associadoId, status])
   @@index([status])
+}
+
+/// Pedido de suporte do associado em dia (RF25). Vai por e-mail para a sede,
+/// que responde por e-mail e marca aqui como respondido.
+model PedidoSuporte {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  associadoId     String    @db.Uuid
+  /// Quem enviou, com o login do associado (RN29).
+  usuarioId       String    @db.Uuid
+  assunto         String
+  mensagem        String    @db.Text
+  criadoEm        DateTime  @default(now())
+  respondidoEm    DateTime?
+  respondidoPorId String?   @db.Uuid
+
+  associado     Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  usuario       Usuario   @relation("SuporteEnviado", fields: [usuarioId], references: [id], onDelete: Restrict)
+  respondidoPor Usuario?  @relation("SuporteRespondido", fields: [respondidoPorId], references: [id], onDelete: Restrict)
+
+  @@index([respondidoEm, criadoEm])
+  @@index([associadoId])
 }

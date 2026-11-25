@@ -15,6 +15,8 @@ import { PaginaPerfilAssociado } from './paginas/admin/PaginaPerfilAssociado';
 import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaAdesaoAssociado } from './paginas/associado/PaginaAdesaoAssociado';
 import { PaginaAnualAssociado } from './paginas/associado/PaginaAnualAssociado';
+import { PaginaBeneficiosAssociado } from './paginas/associado/PaginaBeneficiosAssociado';
+import { PaginaSuporte } from './paginas/admin/PaginaSuporte';
 import { PaginaAvulsoAssociado } from './paginas/associado/PaginaAvulsoAssociado';
 import { PaginaQuitacaoAssociado } from './paginas/associado/PaginaQuitacaoAssociado';
 import { PaginaCancelamentoAssociado } from './paginas/associado/PaginaCancelamentoAssociado';
@@ -77,6 +79,9 @@ export const rotas: RouteObject[] = [
       { path: 'avulso', element: <PaginaAvulsoAssociado /> },
       // Plano anual à vista, com 20% de desconto (RN13).
       { path: 'anual', element: <PaginaAnualAssociado /> },
+      // Em dia ou não, o associado vê os benefícios; o suporte é de quem está
+      // em dia (RF25).
+      { path: 'beneficios', element: <PaginaBeneficiosAssociado /> },
       // Os meses em aberto num boleto só, que passa pela sede (RN30).
       { path: 'meses-em-aberto', element: <PaginaQuitacaoAssociado /> },
       // Quem recebe o boleto pede o cancelamento, que passa pela sede (RF26).
@@ -115,6 +120,8 @@ export const rotas: RouteObject[] = [
       { path: 'beneficios', element: <PaginaBeneficios /> },
       { path: 'convencoes', element: <PaginaConvencoes /> },
       { path: 'noticias', element: <PaginaNoticias /> },
+      // Os dois perfis da sede atendem o suporte (RF25).
+      { path: 'suporte', element: <PaginaSuporte /> },
       {
         path: 'associados/:id/editar',
         element: (

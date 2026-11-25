@@ -230,6 +230,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Tabela de reajuste (#150): no formulário da convenção, a sede preenche a tabela de reajuste salarial, uma linha por função, com o piso anterior e o novo, e pode deixar a tabela vazia (RF21). Formato decidido pelo grupo, com aval do cliente (P24, 24/11/2026). A sede digita os valores como está acostumada ("1.500,00"), e a API guarda com ponto e duas casas, no campo `tabelaReajuste` da convenção. Mudar a tabela fica no log de auditoria, com uma linha de texto por função. O associado em dia vê a tabela no cartão da convenção, em lista, uma função por bloco, com o reajuste em porcentagem, para caber no celular sem rolar para o lado (RNF03). Quem não está em dia vê um aviso no lugar, porque a tabela fica junto com o PDF completo (RN12).
 
+- Benefícios e suporte (#66): a área do associado tem a página "Benefícios e suporte", com os benefícios que a sede cadastra, separados nos dois grupos, e se cada grupo já está liberado para a farmácia (RF25, RN32). Quem não está em dia também vê a lista, com o que falta para usar. Regras da P15, decididas pelo grupo com aval do cliente (24/11/2026): a consultoria vale para quem está em dia, a partir do primeiro boleto pago; a assessoria jurídica, que exige o "ano inteiro antecipado", vale com o plano anual pago em vigor (#64); a liberação manual da sede (RN11) libera os dois grupos, e o bloqueio manual tira os dois. Quem está em dia pede suporte por um formulário com assunto e mensagem; a rota usa o guarda de acesso financeiro, que recusa quem não está em dia. O pedido fica guardado e vai por e-mail para todos os usuários da sede, com o e-mail da farmácia como endereço de resposta, para a sede responder pelo próprio e-mail. Os dois perfis da sede veem os pedidos em "Suporte", com os sem resposta primeiro, e marcam cada um como respondido, o que fica no log de auditoria (RN26). O painel da sede mostra quantos esperam resposta. A lista completa de benefícios continua sendo conteúdo do cliente (P06), cadastrado pela sede.
+
 ## Acesso
 
 - Login com e-mail + senha [validado], para o associado e para a sede.
@@ -271,8 +273,6 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes 
 - P13: o que a inativação de um associado muda (conta de acesso e cobrança recorrente) e se a sede pode reativá-lo.
 
 - P14: matriz e filiais: como a conta da matriz acompanha as filiais.
-
-- P15: o que é "ano inteiro antecipado" para a assessoria jurídica, e quando a consultoria começa.
 
 - P16: vencimento do primeiro boleto, gerado na hora da adesão.
 

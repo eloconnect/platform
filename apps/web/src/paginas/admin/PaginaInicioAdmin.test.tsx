@@ -10,6 +10,7 @@ vi.mock('../../api', () => ({
   api: {
     listarAssociados: vi.fn<ApiClient['listarAssociados']>(),
     listarPedidosQuitacao: vi.fn<ApiClient['listarPedidosQuitacao']>(),
+    listarSuporte: vi.fn<ApiClient['listarSuporte']>(),
   },
 }));
 
@@ -34,6 +35,30 @@ describe('PaginaInicioAdmin', () => {
     vi.mocked(api.listarAssociados).mockReset();
     vi.mocked(api.listarPedidosQuitacao).mockReset();
     vi.mocked(api.listarPedidosQuitacao).mockResolvedValue([]);
+    vi.mocked(api.listarSuporte).mockResolvedValue([]);
+  });
+
+  it('os dois perfis veem os pedidos de suporte sem resposta (RF25)', async () => {
+    entrarComo('ADMIN_BASICO');
+    const pedido = {
+      id: 's1',
+      associado: { id: 'a1', razaoSocial: 'Farmácia', email: null },
+      assunto: 'Dúvida',
+      mensagem: 'Texto',
+      criadoEm: '2026-11-20T12:00:00.000Z',
+      respondidoPor: null,
+    };
+    vi.mocked(api.listarSuporte).mockResolvedValue([
+      { ...pedido, respondidoEm: null },
+      { ...pedido, id: 's2', respondidoEm: '2026-11-21T12:00:00.000Z' },
+    ]);
+    abrir();
+
+    expect(
+      await screen.findByRole('heading', {
+        name: '1 pedido de suporte espera resposta',
+      }),
+    ).toBeVisible();
   });
 
   it('o chave mestre vê os pedidos do boleto dos meses em aberto (RN30)', async () => {

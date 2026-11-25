@@ -17,6 +17,11 @@ import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type { AnualGerado, SituacaoAnual } from './anual.js';
 import type { AvulsoGerado, SituacaoAvulso } from './avulso.js';
 import type {
+  BeneficiosAssociado,
+  EnviarSuporteRequest,
+  PedidoSuporte,
+} from './suporte.js';
+import type {
   DecidirQuitacaoRequest,
   PedidoQuitacaoSede,
   SituacaoQuitacao,
@@ -447,6 +452,24 @@ export function createApiClient(
 
     /** Gera o boleto avulso deste mês (RN24). */
     pedirAvulso: () => requisitar<AvulsoGerado>('POST', '/associado/avulso'),
+
+    /** Benefícios e o que está liberado para o associado logado (RF25). */
+    meusBeneficios: () =>
+      requisitar<BeneficiosAssociado>('GET', '/associado/beneficios'),
+
+    /** Pedido de suporte, só para quem está em dia (RF25). */
+    enviarSuporte: (dados: EnviarSuporteRequest) =>
+      requisitar<{ enviadoEm: string }>('POST', '/associado/suporte', dados),
+
+    /** Pedidos de suporte para a sede, os sem resposta primeiro (RF25). */
+    listarSuporte: () => requisitar<PedidoSuporte[]>('GET', '/suporte'),
+
+    /** A sede marca o pedido como respondido (RF25). */
+    marcarSuporteRespondido: (id: string) =>
+      requisitar<PedidoSuporte>(
+        'POST',
+        `/suporte/${encodeURIComponent(id)}/respondido`,
+      ),
 
     /** Se a farmácia pode pedir o plano anual agora, e o valor (RN13). */
     situacaoAnual: () => requisitar<SituacaoAnual>('GET', '/associado/anual'),

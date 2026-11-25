@@ -79,7 +79,7 @@ Para voltar aos dados iniciais, use o `db:reset` de [deploy.md](deploy.md). Ele 
 
 - Convênio de cobrança e acesso à API do Sicredi (#40): sem eles, a cobrança continua em simulação.
 - P02: arquivo da JUCEMAT (formato, frequência e envio).
-- P15 e P23: assessoria jurídica antecipada e valor atual da contribuição.
+- P23: valor atual da contribuição.
 - P05: o que é se inscrever numa convenção.
 - P06: lista completa de benefícios.
 - P08: comunicar a forma de criação de conta escolhida.
