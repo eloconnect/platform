@@ -297,7 +297,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 
 As duas perguntas que surgiram na modelagem foram respondidas em 27/10/2026: a sede não tem base com os dados das farmácias que já pagam (resposta 42), e a sede pode recusar um pedido de cancelamento em até 15 dias (resposta 28), o que confirma o status RECUSADA.
 
-**Fica para as próximas fases**, com migrations próprias: importação da base da JUCEMAT (P02), envio da cobrança formal (RF29) e o registro de e-mails enviados.
+**Fica para as próximas fases**, com migrations próprias: o registro de e-mails enviados. A importação da JUCEMAT (#67) usa os campos atuais do `Associado`, sem tabela nova.
 
 ## Dados de desenvolvimento
 

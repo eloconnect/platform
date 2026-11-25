@@ -28,6 +28,7 @@ import type {
   SituacaoQuitacao,
 } from './quitacao.js';
 import type { ResultadoImportacao } from './importacao.js';
+import type { ResultadoJucemat } from './jucemat.js';
 import type {
   Comunicado,
   CriarComunicadoRequest,
@@ -284,6 +285,16 @@ export function createApiClient(
       corpo.append('planilha', planilha);
       return requisitarMultipart<ResultadoImportacao>(
         '/associados/importacao',
+        corpo,
+      );
+    },
+
+    /** Importa o arquivo XML da JUCEMAT (RF28). */
+    importarJucemat: (arquivo: File) => {
+      const corpo = new FormData();
+      corpo.append('arquivo', arquivo);
+      return requisitarMultipart<ResultadoJucemat>(
+        '/associados/importacao-jucemat',
         corpo,
       );
     },

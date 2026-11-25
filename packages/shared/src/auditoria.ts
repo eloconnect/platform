@@ -11,6 +11,9 @@ export const ACOES_AUDITORIA = [
   'ASSOCIADO_REATIVADO',
   // Carga inicial dos que já pagam, pela planilha modelo (RF42)
   'ASSOCIADO_IMPORTADO',
+  // Importação do arquivo da JUCEMAT (RF28)
+  'ASSOCIADO_IMPORTADO_JUCEMAT',
+  'ASSOCIADO_COMPLETADO_JUCEMAT',
   'CONTRIBUICAO_ATIVADA',
   'CONTRIBUICAO_INTERROMPIDA',
   // Pedido de cancelamento do associado (RN18, RF27)
@@ -62,6 +65,8 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   ASSOCIADO_INATIVADO: 'Associado inativado',
   ASSOCIADO_REATIVADO: 'Associado reativado',
   ASSOCIADO_IMPORTADO: 'Associado importado da planilha',
+  ASSOCIADO_IMPORTADO_JUCEMAT: 'Associado importado da JUCEMAT',
+  ASSOCIADO_COMPLETADO_JUCEMAT: 'Cadastro completado pela JUCEMAT',
   CONTRIBUICAO_ATIVADA: 'Boleto mensal ativado',
   CONTRIBUICAO_INTERROMPIDA: 'Boleto mensal interrompido',
   CANCELAMENTO_APROVADO: 'Cancelamento aprovado',

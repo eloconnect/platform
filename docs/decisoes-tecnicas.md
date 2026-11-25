@@ -73,7 +73,7 @@ Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requis
 
 - Fora do escopo desta entrega: chatbot WhatsApp [confirmado pelo cliente], app mobile nativo, módulos de gestão fiscal/contábil.
 
-- Em avaliação: importação automática da base de associados via arquivo da JUCEMAT, que traz o e-mail das farmácias (formato e frequência dependem da pendência P02).
+- Importação da base de associados pelo arquivo da JUCEMAT, que traz o e-mail das farmácias, com um layout provisório até a resposta da P02 (ver "Importação da JUCEMAT" em Cobrança).
 
 - Carga inicial dos associados que já pagam: não existe lista, então o grupo monta uma planilha modelo para a sede preencher, e o sistema a importa.
 
@@ -222,6 +222,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Matriz e filiais (#133): a conta da matriz vê, no início, cada filial com a situação e quantos boletos tem para pagar, e, na página "Filiais", os boletos em aberto de cada uma, com o QR Code do Pix, os botões de copiar e o PDF, como em "Meus boletos" (RF43, RN31). Decisão do grupo, com aval do cliente (P14, 24/11/2026): a matriz é o CNPJ de ordem 0001, e as filiais são os CNPJs com a mesma raiz (os 8 primeiros dígitos), sem a sede precisar ligar nada à mão (RN27). A contribuição continua por CNPJ: cada filial tem a própria situação, o próprio boleto e o próprio acesso a benefícios. A filial que tem conta própria continua entrando nela e não vê a matriz. As filiais inativadas pela sede ficam de fora até a resposta da P13.
 
+- Importação da JUCEMAT (#67): na página "Importar associados", o chave mestre envia o arquivo XML da JUCEMAT (RF28). Sem um exemplo do arquivo real (P02), o grupo decidiu, com aval do cliente (24/11/2026), um layout provisório e simples: uma `<empresa>` por farmácia, com `cnpj`, `razaoSocial`, `nomeFantasia`, `email`, `telefone` e `municipio` (`exemploXmlJucemat`, no `packages/shared`; a página oferece o exemplo para baixar). A leitura fica num arquivo só (`apps/api/src/associados/jucemat.ts`), sem biblioteca, e aceita UTF-8 ou ISO-8859-1, conforme o próprio XML declara. Quando o arquivo real chegar, só ela muda. Diferente da planilha, a importação não é tudo ou nada, porque o arquivo vem de fora e se repete: a empresa com problema fica de fora e aparece na tela; a farmácia nova entra sem receber o boleto mensal, e assim passa a receber a cobrança formal (RN19); a farmácia que já está no cadastro só ganha os dados que faltam, e o que a sede digitou nunca muda, para não trocar o e-mail de acesso de quem tem conta (RN34) sem a sede saber. Cada farmácia nova ou completada fica no log de auditoria. O arquivo tem até 4 MB, abaixo do limite de 4,5 MB por requisição da Vercel.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.
@@ -264,7 +266,7 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes em [Requisitos](requisitos.md), seção 8.
 
-- P02: formato, frequência e forma de recebimento do arquivo da JUCEMAT (ele traz o e-mail das farmácias).
+- P02: formato real, frequência e forma de recebimento do arquivo da JUCEMAT (a importação usa um layout provisório).
 
 - P06: lista completa de benefícios (os dois grupos já estão definidos).
 

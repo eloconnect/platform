@@ -157,7 +157,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
-| RF28 | Importar a base de associados a partir do arquivo da JUCEMAT (provavelmente XML, filtrado pelo CNAE), que traz o e-mail das farmácias. | Should | [A confirmar] — formato e frequência em P02 |
+| RF28 | Importar a base de associados a partir do arquivo da JUCEMAT (provavelmente XML, filtrado pelo CNAE), que traz o e-mail das farmácias. | Should | [Validado] — layout provisório decidido pelo grupo, com aval do cliente, até o arquivo real (P02, 24/11/2026) |
 | RF29 | Enviar a cobrança formal (comunicado, sem boleto) por e-mail a todos os associados da base. | Must | [Validado] — depende de P02 |
 
 ### 4.9 Histórico e auditoria
@@ -288,7 +288,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF25 | Entregue | Pedido de suporte por e-mail para a sede, que marca como respondido. A lista de benefícios é a que a sede cadastra (P06). | #66 |
 | RF26 | Entregue | | #55 |
 | RF27 | Entregue | O acesso e o boleto do mês depois do cancelamento são provisórios até a P25. | #56 |
-| RF28 | Não feito | P02. | #67 |
+| RF28 | Entregue | Com um layout XML provisório, documentado, até a JUCEMAT mandar o arquivo real (P02). | #67 |
 | RF29 | Entregue | Vai para o cadastro até a importação da JUCEMAT (P02); o texto do cliente depende da P26; o limite diário, da P12. | #57 |
 | RF30 | Entregue | | #42 |
 | RF31 | Entregue | | #53 |

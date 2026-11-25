@@ -8,7 +8,10 @@ import { api } from '../../api';
 import { PaginaImportarAssociados } from './PaginaImportarAssociados';
 
 vi.mock('../../api', () => ({
-  api: { importarAssociados: vi.fn<ApiClient['importarAssociados']>() },
+  api: {
+    importarAssociados: vi.fn<ApiClient['importarAssociados']>(),
+    importarJucemat: vi.fn<ApiClient['importarJucemat']>(),
+  },
 }));
 
 function abrir() {
@@ -128,5 +131,32 @@ describe('PaginaImportarAssociados', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Um CNPJ da planilha entrou no cadastro enquanto isso.',
     );
+  });
+
+  it('importa o arquivo da JUCEMAT e mostra o que entrou e o que ficou de fora (RF28)', async () => {
+    vi.mocked(api.importarJucemat).mockResolvedValue({
+      novas: 2,
+      completadas: 1,
+      semMudanca: 0,
+      erros: [{ empresa: 4, mensagem: 'CNPJ inválido.' }],
+    });
+    abrir();
+    const arquivo = new File(['<empresas/>'], 'jucemat.xml', {
+      type: 'application/xml',
+    });
+
+    await userEvent.upload(
+      screen.getByLabelText(/Arquivo da JUCEMAT \(XML\)/),
+      arquivo,
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Importar o arquivo' }),
+    );
+
+    expect(api.importarJucemat).toHaveBeenCalledWith(arquivo);
+    expect(
+      await screen.findByText(/2 farmácias novas\. 1 cadastro completado\./),
+    ).toBeVisible();
+    expect(screen.getByText('Empresa 4: CNPJ inválido.')).toBeVisible();
   });
 });
