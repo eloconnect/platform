@@ -90,9 +90,10 @@ describe('Adesão à cobrança recorrente (e2e)', () => {
     await app.init();
     prisma = app.get(PrismaService);
     jwt = app.get(JwtService);
-    // Sem nenhum valor, não há adesão. O valor de 2000 nunca é o atual
-    // quando outro teste já cadastrou um.
-    if (!(await prisma.valorContribuicao.findFirst())) {
+    // Sem nenhum valor, não há adesão. Outro teste pode ter
+    // cadastrado um valor hoje, que só vale no mês seguinte; o de 2000 vale
+    // para este mês e nunca passa na frente de um valor mais novo.
+    if (!(await valorDoMes(prisma, competencia()))) {
       const admin = await prisma.usuario.create({
         data: {
           email: `adesao-admin-${crypto.randomUUID()}@example.com`,
