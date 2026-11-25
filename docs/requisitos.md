@@ -79,7 +79,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RN28 | O feed de notícias é visível a qualquer associado logado, adimplente ou inadimplente. Visitantes não têm acesso. | [Validado] |
 | RN29 | Não existe conta para contador. O contador acessa com o e-mail e a senha da conta do associado, vinculada ao CNPJ da farmácia, e tem exatamente o mesmo acesso dela. O compartilhamento do acesso é responsabilidade exclusiva do titular da conta, e toda ação feita com esse login é considerada ação do associado. O contador que atende várias farmácias entra em cada uma separadamente (resposta 5). | [Validado] — forma de deixar explícito em P11 |
 | RN30 | Para voltar a ficar em dia, o associado paga todos os meses em aberto, sem juros, num boleto só, que junta os valores (como o DAS do MEI). Ele pede esse boleto pelo app, e o pedido passa pela sede antes da emissão (resposta 20). | [Validado] — o que falta em P10 |
-| RN31 | A contribuição é por CNPJ: a matriz e cada filial pagam a sua. O dono só precisa entrar na conta da matriz. | [Validado] — como a conta da matriz acompanha as filiais em P14 |
+| RN31 | A contribuição é por CNPJ: a matriz e cada filial pagam a sua. O dono só precisa entrar na conta da matriz. | [Validado] — como a conta da matriz acompanha as filiais decidido pelo grupo, com aval do cliente (P14, 24/11/2026) |
 | RN32 | Os benefícios têm dois grupos. A assessoria jurídica (atuação do advogado em tribunal) exige o ano inteiro pago antecipado. A consultoria (todos os outros benefícios) vale a partir do primeiro boleto. | [Validado] — interpretação em P15 |
 | RN33 | A sede tem dois perfis (resposta 7). O **chave mestre** faz tudo. O **básico** publica notícias, convenções e benefícios e consulta os associados, mas não altera cadastro, acesso, cobrança, valores nem cancelamentos, e não vê o log de auditoria. | [Validado] — as funções que o cliente não citou ficam com o chave mestre, e a consulta de associados fica com os dois (decisão do grupo) |
 | RN34 | A sede pode trocar o e-mail da conta do associado (resposta 6). O e-mail do cadastro é o mesmo da conta: trocar um troca o outro, e o associado é avisado no e-mail antigo e no novo. | [Validado] — e-mail único por farmácia: decisão do grupo a partir da resposta 5 |
@@ -105,7 +105,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | RF08 | Cadastrar, editar e inativar associados manualmente, incluindo marcar ou desmarcar a contribuição ativa e trocar o e-mail, que também é o de acesso (RN34). | Must | [Validado] — reativar um associado inativado: [A confirmar] (P13) |
 | RF09 | Bloquear/desbloquear manualmente o acesso de um associado a benefícios. A liberação vale 7 dias e aparece como aviso na área do associado (RN11). | Must | [Validado] |
 | RF42 | Carga inicial dos associados que já pagam: planilha modelo, montada pelo grupo, que a sede preenche, e importação dessa planilha. | Must | [Validado] |
-| RF43 | A conta da matriz acompanha as filiais do mesmo dono (RN31). | Should | [A confirmar] — ver P14 |
+| RF43 | A conta da matriz acompanha as filiais do mesmo dono (RN31). | Should | [Validado] — decidido pelo grupo, com aval do cliente (P14, 24/11/2026) |
 
 ### 4.3 Cobrança (integração Sicredi)
 
@@ -239,7 +239,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P11 | Responsabilidade pelo compartilhamento do acesso com o contador (RN29): um aviso com caixa de aceite no primeiro cadastro basta, ou é preciso um termo de uso formal? O sistema deve registrar data/hora do aceite? Permitir o compartilhamento de credenciais entra em conflito com a LGPD para os dados financeiros do associado? | Prof. Poli | RN29, RF04, RNF05 |
 | P12 | Quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção? A demonstração do PI usa o plano grátis da Vercel, que é só para uso não comercial e por isso não serve para o sistema em produção. | Cliente | Hospedagem e e-mail de produção (decisoes-tecnicas.md), RNF09 |
 | P13 | O que a inativação de um associado muda? A conta de acesso dele continua entrando? A cobrança recorrente para? A sede pode reativar um associado inativado (por exemplo, depois de uma inativação por engano)? | Cliente | RF08 |
-| P14 | Matriz e filiais (resposta 4): a conta da matriz vê e paga os boletos das filiais? O acesso a benefícios de cada filial depende do pagamento dela ou do da matriz? | Cliente | RN31, RF43 |
+| P14 | Respondida (24/11/2026): o cliente deu aval para o grupo decidir. A conta da matriz (CNPJ de ordem 0001) vê e paga os boletos das filiais com a mesma raiz do CNPJ; o acesso a benefícios de cada filial depende do pagamento dela, porque a contribuição é por CNPJ. A ligação é automática, pelo CNPJ. | Cliente | RN31, RF43 |
 | P15 | Respondida (24/11/2026): o cliente deu aval para o grupo decidir. A assessoria jurídica ("ano inteiro antecipado") vale com o plano anual pago em vigor; a consultoria e o suporte valem a partir do primeiro boleto pago, para quem está em dia. A liberação manual da sede (RN11) libera os dois grupos. | Cliente | RN32, RF17, RF24, RF25 |
 | P16 | Primeiro boleto da adesão (resposta 18): ele sai na hora, mas qual é o vencimento dele? | Cliente | RN23, RF36 |
 | P17 | Respondida (28/10): a liberação manual vale 1 semana, com um aviso na conta do associado (resposta 11, RN11). | Cliente | RF09 |
@@ -269,7 +269,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF08 | Entregue | Reativar o inativado depende da P13. | #22, #23, #143 |
 | RF09 | Entregue | | #27, #142 |
 | RF42 | Entregue | Quem já paga entra em dia até a resposta da P27. | #68 |
-| RF43 | Não feito | P14. | #133 |
+| RF43 | Entregue | A matriz vê a situação e os boletos das filiais e baixa o PDF deles (P14). | #133 |
 | RF10 | Em simulação | Lote no primeiro dia útil, pelo cron da Vercel. | #44 |
 | RF11 | Em simulação | Só o valor do boleto; outros dados dependem do que o Sicredi aceita. | #45 |
 | RF12 | Em simulação | E-mail com QR Code, Pix Copia e Cola, linha digitável e PDF, e "Meus boletos" no site. | #46, #47 |

@@ -220,6 +220,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Plano anual (#64): na tela inicial, quem não tem boleto para pagar vê "pagar o ano à vista, com 20% de desconto", recebendo ou não o boleto todo mês. A página mostra os 12 meses cobertos, o valor do ano, a economia em relação a 12 boletos mensais e o vencimento, e um clique gera o boleto, já emitido no banco (RF17, RN13). Regras da P04, decididas pelo grupo com aval do cliente (24/11/2026): o plano cobre 12 meses, a partir do mês do pedido, ou do seguinte se o boleto deste mês já saiu; o valor é o anual em vigor no pedido, como no lote (RN15); o lote mensal pula os meses cobertos pelo plano pago ou ainda para pagar; não há renovação automática, e, no fim do plano, quem recebe o boleto todo mês volta a recebê-lo. Quem não recebe o boleto todo mês fica em dia até o último dia para pagar o mês seguinte ao fim do plano, como no avulso. Como o avulso, o boleto vence 10 dias depois do pedido e fica em "Meus boletos", sem e-mail. O início do associado mostra até quando vai o plano pago, e com ele em vigor não sai avulso.
 
+- Matriz e filiais (#133): a conta da matriz vê, no início, cada filial com a situação e quantos boletos tem para pagar, e, na página "Filiais", os boletos em aberto de cada uma, com o QR Code do Pix, os botões de copiar e o PDF, como em "Meus boletos" (RF43, RN31). Decisão do grupo, com aval do cliente (P14, 24/11/2026): a matriz é o CNPJ de ordem 0001, e as filiais são os CNPJs com a mesma raiz (os 8 primeiros dígitos), sem a sede precisar ligar nada à mão (RN27). A contribuição continua por CNPJ: cada filial tem a própria situação, o próprio boleto e o próprio acesso a benefícios. A filial que tem conta própria continua entrando nela e não vê a matriz. As filiais inativadas pela sede ficam de fora até a resposta da P13.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.
@@ -271,8 +273,6 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes 
 - P12: quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção.
 
 - P13: o que a inativação de um associado muda (conta de acesso e cobrança recorrente) e se a sede pode reativá-lo.
-
-- P14: matriz e filiais: como a conta da matriz acompanha as filiais.
 
 - P16: vencimento do primeiro boleto, gerado na hora da adesão.
 

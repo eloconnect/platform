@@ -16,6 +16,7 @@ import { PaginaValores } from './paginas/admin/PaginaValores';
 import { PaginaAdesaoAssociado } from './paginas/associado/PaginaAdesaoAssociado';
 import { PaginaAnualAssociado } from './paginas/associado/PaginaAnualAssociado';
 import { PaginaBeneficiosAssociado } from './paginas/associado/PaginaBeneficiosAssociado';
+import { PaginaFiliaisAssociado } from './paginas/associado/PaginaFiliaisAssociado';
 import { PaginaSuporte } from './paginas/admin/PaginaSuporte';
 import { PaginaAvulsoAssociado } from './paginas/associado/PaginaAvulsoAssociado';
 import { PaginaQuitacaoAssociado } from './paginas/associado/PaginaQuitacaoAssociado';
@@ -82,6 +83,8 @@ export const rotas: RouteObject[] = [
       // Em dia ou não, o associado vê os benefícios; o suporte é de quem está
       // em dia (RF25).
       { path: 'beneficios', element: <PaginaBeneficiosAssociado /> },
+      // A matriz acompanha e paga os boletos das filiais (RN31).
+      { path: 'filiais', element: <PaginaFiliaisAssociado /> },
       // Os meses em aberto num boleto só, que passa pela sede (RN30).
       { path: 'meses-em-aberto', element: <PaginaQuitacaoAssociado /> },
       // Quem recebe o boleto pede o cancelamento, que passa pela sede (RF26).

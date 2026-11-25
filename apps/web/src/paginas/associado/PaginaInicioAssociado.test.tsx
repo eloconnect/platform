@@ -10,6 +10,7 @@ vi.mock('../../api', () => ({
   api: {
     minhaConta: vi.fn<ApiClient['minhaConta']>(),
     listarMeusBoletos: vi.fn<ApiClient['listarMeusBoletos']>(),
+    listarFiliais: vi.fn<ApiClient['listarFiliais']>(),
   },
 }));
 
@@ -46,6 +47,27 @@ describe('PaginaInicioAssociado', () => {
     vi.mocked(api.minhaConta).mockReset();
     vi.mocked(api.listarMeusBoletos).mockReset();
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([]);
+    vi.mocked(api.listarFiliais).mockResolvedValue([]);
+  });
+
+  it('a matriz vê as filiais, com a situação e os boletos (RN31)', async () => {
+    vi.mocked(api.minhaConta).mockResolvedValue(contaEmDia);
+    vi.mocked(api.listarFiliais).mockResolvedValue([
+      {
+        id: 'f1',
+        cnpj: '11222333000281',
+        nome: 'Drogaria Exemplo Filial',
+        situacao: 'Inadimplente',
+        boletos: [boleto],
+      },
+    ]);
+    abrir();
+
+    expect(await screen.findByText('Drogaria Exemplo Filial')).toBeVisible();
+    expect(screen.getByText(/Inadimplente, 1 boleto para pagar/)).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'Ver as filiais' }),
+    ).toHaveAttribute('href', '/associado/filiais');
   });
 
   it('mostra o boleto em aberto com o valor, o vencimento e o caminho para pagar (RF12)', async () => {

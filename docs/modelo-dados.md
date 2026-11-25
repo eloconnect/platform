@@ -287,7 +287,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Tabela de reajuste da convenção | Decidido (P24, 24/11/2026) | O campo `tabelaReajuste` (JSON) guarda uma lista de `{ funcao, pisoAnterior, pisoNovo }`, com os valores em texto, ponto e duas casas. |
 | Inscrição em convenção | Decidido (P05, 24/11/2026) | Tabela `InscricaoConvencao`, uma por convenção e farmácia, com quem inscreveu e a data. |
 | Lista de benefícios | P06 (conteúdo); P15 decidida (24/11/2026) | Tabela genérica (título, descrição, grupo e ordem), cadastrada pela sede. O `grupo` separa assessoria jurídica e consultoria (RN32); a regra de acesso de cada grupo depende da P15. |
-| Matriz e filiais (RN31) | P14 | **Fora do modelo**. Provavelmente, uma ligação da filial com a matriz no `Associado`. |
+| Matriz e filiais (RN31) | Decidido (P14, 24/11/2026) | Sem coluna nova: a filial é ligada à matriz pela raiz do CNPJ (os 8 primeiros dígitos), e a matriz é a de ordem 0001. |
 | Confirmação automática do cancelamento (RN18) | — | Status próprio, CONFIRMADA_AUTOMATICAMENTE, com `decididaPorId` nulo: confirmado pelo sistema no dia seguinte ao fim do prazo de 15 dias, sem recusa (#56, decisão do grupo, 02/11/2026). |
 | Aceite do compartilhamento com o contador | P11 | **Fora do modelo**. Se for preciso registrar data e hora do aceite, entra um campo em `Usuario`. |
 | Retenção e exclusão de dados (LGPD) | P07 | Inativação em vez de exclusão. Revisar quando houver orientação. |

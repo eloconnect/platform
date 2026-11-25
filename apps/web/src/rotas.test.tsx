@@ -21,6 +21,7 @@ vi.mock('./api', () => ({
     listarConvencoes: vi.fn<ApiClient['listarConvencoes']>(),
     listarConvencoesAssociado: vi.fn<ApiClient['listarConvencoesAssociado']>(),
     listarMeusBoletos: vi.fn<ApiClient['listarMeusBoletos']>(),
+    listarFiliais: vi.fn<ApiClient['listarFiliais']>(),
     listarMeuHistorico: vi.fn<ApiClient['listarMeuHistorico']>(),
     situacaoAdesao: vi.fn<ApiClient['situacaoAdesao']>(),
     situacaoAvulso: vi.fn<ApiClient['situacaoAvulso']>(),
@@ -129,6 +130,7 @@ describe('Áreas logadas', () => {
     vi.mocked(api.listarConvencoes).mockResolvedValue([]);
     vi.mocked(api.listarConvencoesAssociado).mockResolvedValue([]);
     vi.mocked(api.listarMeusBoletos).mockResolvedValue([]);
+    vi.mocked(api.listarFiliais).mockResolvedValue([]);
     vi.mocked(api.listarMeuHistorico).mockResolvedValue([]);
     vi.mocked(api.situacaoAdesao).mockResolvedValue({
       recebeBoletoMensal: false,
@@ -227,6 +229,7 @@ describe('Áreas logadas', () => {
     ['/associado/avulso', 'ASSOCIADO', 'Pagar só este mês'],
     ['/associado/anual', 'ASSOCIADO', 'Pagar o ano à vista'],
     ['/associado/beneficios', 'ASSOCIADO', 'Benefícios e suporte'],
+    ['/associado/filiais', 'ASSOCIADO', 'Filiais'],
     ['/admin/suporte', 'ADMIN_BASICO', 'Pedidos de suporte'],
     ['/associado/meses-em-aberto', 'ASSOCIADO', 'Voltar a ficar em dia'],
     ['/associado/cancelamento', 'ASSOCIADO', 'Cancelar o boleto mensal'],

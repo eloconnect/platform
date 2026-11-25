@@ -16,6 +16,7 @@ import type {
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type { AnualGerado, SituacaoAnual } from './anual.js';
 import type { AvulsoGerado, SituacaoAvulso } from './avulso.js';
+import type { Filial } from './filiais.js';
 import type {
   BeneficiosAssociado,
   EnviarSuporteRequest,
@@ -469,6 +470,14 @@ export function createApiClient(
 
     /** Gera o boleto avulso deste mês (RN24). */
     pedirAvulso: () => requisitar<AvulsoGerado>('POST', '/associado/avulso'),
+
+    /** Filiais da matriz logada, com a situação e os boletos (RN31). */
+    listarFiliais: () => requisitar<Filial[]>('GET', '/associado/filiais'),
+
+    baixarPdfBoletoFilial: (filialId: string, boletoId: string) =>
+      requisitarArquivo(
+        `/associado/filiais/${encodeURIComponent(filialId)}/boletos/${encodeURIComponent(boletoId)}/pdf`,
+      ),
 
     /** Benefícios e o que está liberado para o associado logado (RF25). */
     meusBeneficios: () =>

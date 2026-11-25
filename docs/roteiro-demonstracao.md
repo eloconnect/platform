@@ -84,7 +84,6 @@ Para voltar aos dados iniciais, use o `db:reset` de [deploy.md](deploy.md). Ele 
 - P08: comunicar a forma de criação de conta escolhida.
 - P12: quanto o sindicato pode gastar por mês com hospedagem e e-mail.
 - P13: o que muda com a inativação de um associado.
-- P14: matriz e filiais.
 - P16: vencimento do boleto gerado na adesão.
 - P19: e-mail dos pedidos de cadastro e endereço de envio dos e-mails.
 - P21: texto do termo de adesão.
