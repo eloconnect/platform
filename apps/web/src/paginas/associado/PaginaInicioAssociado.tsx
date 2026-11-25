@@ -54,6 +54,12 @@ const AREAS: {
     texto: 'Todos os boletos, pagos ou não.',
   },
   {
+    para: '/associado/beneficios',
+    icone: 'escudo',
+    titulo: 'Benefícios e suporte',
+    texto: 'Consultoria, assessoria jurídica e ajuda da sede.',
+  },
+  {
     para: '/associado/noticias',
     icone: 'noticia',
     titulo: 'Notícias',

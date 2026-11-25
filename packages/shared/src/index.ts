@@ -86,6 +86,12 @@ export {
   type SituacaoAvulso,
 } from './avulso.js';
 export {
+  LIMITES_SUPORTE,
+  type BeneficiosAssociado,
+  type EnviarSuporteRequest,
+  type PedidoSuporte,
+} from './suporte.js';
+export {
   type AnualGerado,
   type MotivoSemAnual,
   type SituacaoAnual,

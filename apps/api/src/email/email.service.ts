@@ -21,6 +21,8 @@ export interface EmailMessage {
   subject: string;
   text: string;
   html?: string;
+  /** Para onde vai a resposta, como o e-mail da farmácia no suporte. */
+  replyTo?: string;
   attachments?: EmailAttachment[];
 }
 

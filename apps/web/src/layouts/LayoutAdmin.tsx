@@ -46,6 +46,7 @@ function gruposDoMenu(chaveMestre: boolean): GrupoMenu[] {
       itens: [
         { para: '/admin', texto: 'Painel', icone: 'painel' },
         { para: '/admin/associados', texto: 'Associados', icone: 'pessoas' },
+        { para: '/admin/suporte', texto: 'Suporte', icone: 'conversa' },
       ],
     },
     {

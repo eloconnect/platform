@@ -8,5 +8,6 @@ import { BeneficiosService } from './beneficios.service.js';
   imports: [AuthModule, AuditoriaModule],
   controllers: [BeneficiosController],
   providers: [BeneficiosService],
+  exports: [BeneficiosService],
 })
 export class BeneficiosModule {}

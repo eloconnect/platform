@@ -144,7 +144,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | **ID** | **Requisito** | **Prioridade** | **Status** |
 | --- | --- | --- | --- |
 | RF24 | Admin cadastra/edita os benefícios exibidos no app e na landing page, em dois grupos: assessoria jurídica e consultoria (RN32). | Must | [Validado] — lista completa em P06 |
-| RF25 | Associado acessa os benefícios conforme a regra de cada grupo (RN32) e solicita suporte. | Should | [A confirmar] — depende da P06 e da P15 |
+| RF25 | Associado acessa os benefícios conforme a regra de cada grupo (RN32) e solicita suporte. | Should | [Validado] — regras decididas pelo grupo, com aval do cliente (P15, 24/11/2026) |
 
 ### 4.7 Cancelamento
 
@@ -240,7 +240,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P12 | Quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção? A demonstração do PI usa o plano grátis da Vercel, que é só para uso não comercial e por isso não serve para o sistema em produção. | Cliente | Hospedagem e e-mail de produção (decisoes-tecnicas.md), RNF09 |
 | P13 | O que a inativação de um associado muda? A conta de acesso dele continua entrando? A cobrança recorrente para? A sede pode reativar um associado inativado (por exemplo, depois de uma inativação por engano)? | Cliente | RF08 |
 | P14 | Matriz e filiais (resposta 4): a conta da matriz vê e paga os boletos das filiais? O acesso a benefícios de cada filial depende do pagamento dela ou do da matriz? | Cliente | RN31, RF43 |
-| P15 | Benefícios (resposta 9): "ano inteiro antecipado" para a assessoria jurídica quer dizer o plano anual pago à vista ou 12 meses já pagos? A consultoria começa quando o primeiro boleto é emitido ou quando ele é pago? | Cliente | RN32, RF17, RF25 |
+| P15 | Respondida (24/11/2026): o cliente deu aval para o grupo decidir. A assessoria jurídica ("ano inteiro antecipado") vale com o plano anual pago em vigor; a consultoria e o suporte valem a partir do primeiro boleto pago, para quem está em dia. A liberação manual da sede (RN11) libera os dois grupos. | Cliente | RN32, RF17, RF24, RF25 |
 | P16 | Primeiro boleto da adesão (resposta 18): ele sai na hora, mas qual é o vencimento dele? | Cliente | RN23, RF36 |
 | P17 | Respondida (28/10): a liberação manual vale 1 semana, com um aviso na conta do associado (resposta 11, RN11). | Cliente | RF09 |
 | P18 | Respondida (28/10): a sede pode trocar o e-mail da conta (resposta 6, RN34), e o contador entra em cada farmácia separadamente (resposta 5). Quando o mesmo e-mail está no cadastro de mais de uma farmácia, a sede troca o de uma delas. | Cliente | RF05, RN29 |
@@ -285,7 +285,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF22 | Entregue | | #32 |
 | RF23 | Não feito | P05. | #65 |
 | RF24 | Entregue | A lista completa depende da P06. | #35 |
-| RF25 | Não feito | P06 e P15. | #66 |
+| RF25 | Entregue | Pedido de suporte por e-mail para a sede, que marca como respondido. A lista de benefícios é a que a sede cadastra (P06). | #66 |
 | RF26 | Entregue | | #55 |
 | RF27 | Entregue | O acesso e o boleto do mês depois do cancelamento são provisórios até a P25. | #56 |
 | RF28 | Não feito | P02. | #67 |

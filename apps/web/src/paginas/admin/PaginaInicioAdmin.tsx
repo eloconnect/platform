@@ -8,20 +8,29 @@ import { MensagemErro, useTituloPagina } from '../../componentes';
 import { ehChaveMestre } from '../../sessao';
 
 /**
- * Início do painel da sede. O chave mestre, que decide os cancelamentos e os
- * boletos dos meses em aberto, vê os pedidos que esperam resposta (US27:
- * RF27, RN30, RN33).
+ * Início do painel da sede. Os dois perfis veem os pedidos de suporte sem
+ * resposta (RF25). O chave mestre, que decide os cancelamentos e os boletos
+ * dos meses em aberto, também vê esses pedidos (US27: RF27, RN30, RN33).
  */
 export function PaginaInicioAdmin() {
   useTituloPagina('Painel da sede');
   const chaveMestre = ehChaveMestre();
   const [pendentes, setPendentes] = useState<number | 'erro' | null>(null);
+  const [suporte, setSuporte] = useState<number | 'erro' | null>(null);
   const [quitacoes, setQuitacoes] = useState<
     PedidoQuitacaoSede[] | 'erro' | null
   >(null);
 
   useEffect(() => {
     let ativo = true;
+    // Os dois perfis atendem o suporte (RF25).
+    void api
+      .listarSuporte()
+      .then(
+        (lista) =>
+          ativo && setSuporte(lista.filter((p) => !p.respondidoEm).length),
+      )
+      .catch(() => ativo && setSuporte('erro'));
     if (chaveMestre) {
       void api
         .listarAssociados({ status: 'CANCELAMENTO_SOLICITADO' })
@@ -85,6 +94,24 @@ export function PaginaInicioAdmin() {
               </li>
             ))}
           </ul>
+        </Alert>
+      )}
+      {suporte === 'erro' && (
+        <MensagemErro>
+          Não foi possível conferir os pedidos de suporte agora. Tente de novo
+          em alguns minutos.
+        </MensagemErro>
+      )}
+      {typeof suporte === 'number' && suporte > 0 && (
+        <Alert variant="warning">
+          <Alert.Heading as="h2" className="h5">
+            {suporte === 1
+              ? '1 pedido de suporte espera resposta'
+              : `${suporte} pedidos de suporte esperam resposta`}
+          </Alert.Heading>
+          <Link className="btn btn-primary btn-lg" to="/admin/suporte">
+            Ver os pedidos
+          </Link>
         </Alert>
       )}
       <p>Em construção.</p>
