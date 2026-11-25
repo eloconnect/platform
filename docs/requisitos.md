@@ -137,7 +137,7 @@ Público majoritariamente de terceira idade: simplicidade de interface é requis
 | --- | --- | --- | --- |
 | RF21 | Funcionário da sede publica e edita a convenção coletiva: resumo em texto, PDF completo, PDF resumido e tabela de reajuste salarial. | Must | [Validado] — formato da tabela decidido pelo grupo, com aval do cliente (P24, 24/11/2026) |
 | RF22 | Qualquer usuário logado vê as convenções: quem está em dia, o PDF completo; os demais (inclusive inadimplente), o resumido (RN12). O contador acessa pela conta do associado (RN29). | Must | [Validado] |
-| RF23 | Associado adimplente pode se inscrever/registrar participação em uma convenção. | Should | [A confirmar] — ver P05 |
+| RF23 | Associado adimplente pode se inscrever/registrar participação em uma convenção. | Should | [Validado] — forma decidida pelo grupo, com aval do cliente (P05, 24/11/2026) |
 
 ### 4.6 Benefícios e suporte
 
@@ -230,7 +230,7 @@ Os números de pergunta e de resposta são os do questionário de 14/10/2026 ([R
 | P02 | Respondida em parte (27/10): o arquivo da JUCEMAT traz o e-mail das farmácias (resposta 40). Falta: formato (provavelmente XML), frequência e forma de recebimento, que o sindicato vai levantar com a JUCEMAT. Um exemplo do layout, sem dados reais, já permite começar a importação. | Cliente | RF28, RF29 |
 | P03 | Respondida (27/10): a farmácia entra no cadastro pela sede, a pedido dela, e cria a conta pelo CNPJ (respostas 1 a 3, RN21); o primeiro boleto sai na hora, com o valor cheio (resposta 18, RN23). | Cliente | RF05, RF36 |
 | P04 | Respondida (24/11/2026): o cliente deu aval para o grupo decidir. O plano cobre 12 meses, a partir do mês do pedido, ou do seguinte se o boleto do mês já saiu; o lote mensal pula esses meses. Não há renovação automática: no fim do plano, quem recebe o boleto todo mês volta a recebê-lo, e quem não recebe fica em dia até o último dia para pagar o mês seguinte. O valor é o do anual em vigor no pedido; quem já pagou não paga diferença se o valor mudar. | Cliente | RF17, RF10 |
-| P05 | O que significa "se registrar em uma convenção" na prática (inscrição em assembleia, evento, outro)? (pergunta 34, em branco) | Cliente | RF23 |
+| P05 | Respondida (24/11/2026): o cliente deu aval para o grupo decidir. A farmácia em dia se inscreve na convenção publicada, declarando que segue as regras dela, e baixa um comprovante em PDF com a farmácia, o CNPJ, a convenção e a data; a sede vê a lista das inscritas. A leitura como inscrição em assembleia ou evento ficou de fora. | Cliente | RF23 |
 | P06 | Respondida em parte (27/10): os benefícios ficam em dois grupos, assessoria jurídica e consultoria (resposta 9, RN32). Falta a lista completa (pergunta 35, em branco). | Cliente | RF24, RF25, landing page |
 | P07 | LGPD e tratamento de dados cadastrais e financeiros. | Prof. Poli | RNF05 |
 | P08 | Comunicar ao cliente a decisão sobre a criação de conta: o login continua com e-mail e senha, e o CNPJ entra só na criação da conta, com um link enviado ao e-mail do cadastro (a alternativa que ele aceitou na resposta 3; O1). | Cliente | RF05, RN21 |
@@ -283,7 +283,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF18, RF19, RF20 | Entregue | O valor atual depende da P23. | #36, #37, #38 |
 | RF21 | Entregue | Com a tabela de reajuste no formato decidido pelo grupo (P24). | #30, #31, #150 |
 | RF22 | Entregue | | #32 |
-| RF23 | Não feito | P05. | #65 |
+| RF23 | Entregue | Inscrição com comprovante em PDF e lista das inscritas para a sede (P05). | #65 |
 | RF24 | Entregue | A lista completa depende da P06. | #35 |
 | RF25 | Entregue | Pedido de suporte por e-mail para a sede, que marca como respondido. A lista de benefícios é a que a sede cadastra (P06). | #66 |
 | RF26 | Entregue | | #55 |

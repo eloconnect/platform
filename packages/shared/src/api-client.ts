@@ -63,6 +63,7 @@ import type {
   Convencao,
   CriarConvencaoRequest,
   EditarConvencaoRequest,
+  InscricaoConvencao,
   TipoAnexoConvencao,
 } from './convencoes.js';
 import type { HealthResponse } from './health.js';
@@ -431,6 +432,22 @@ export function createApiClient(
     baixarPdfConvencaoAssociado: (id: string) =>
       requisitarArquivo(
         `/associado/convencoes/${encodeURIComponent(id)}/anexos/INTEGRAL`,
+      ),
+    /** Inscreve a farmácia em dia na convenção (RF23). */
+    inscreverNaConvencao: (id: string) =>
+      requisitar<{ inscritaEm: string }>(
+        'POST',
+        `/associado/convencoes/${encodeURIComponent(id)}/inscricao`,
+      ),
+    baixarComprovanteInscricao: (id: string) =>
+      requisitarArquivo(
+        `/associado/convencoes/${encodeURIComponent(id)}/inscricao/comprovante`,
+      ),
+    /** Farmácias inscritas na convenção, para a sede (RF23). */
+    listarInscricoesConvencao: (id: string) =>
+      requisitar<InscricaoConvencao[]>(
+        'GET',
+        `/convencoes/${encodeURIComponent(id)}/inscricoes`,
       ),
     publicarConvencao: (id: string) =>
       requisitar<Convencao>(

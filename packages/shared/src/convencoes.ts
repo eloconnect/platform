@@ -44,6 +44,15 @@ export interface Convencao {
   tabelaReajuste: LinhaReajuste[];
   /** A convenção tem tabela, mas o associado não está em dia para vê-la. */
   tabelaRestrita: boolean;
+  /**
+   * Para o associado: quando a farmácia se inscreveu (data e hora ISO), ou
+   * nulo. Para a sede, sempre nulo (RF23).
+   */
+  inscritaEm: string | null;
+  /** Para o associado: está em dia e pode se inscrever (RF23). */
+  inscricaoPermitida: boolean;
+  /** Para a sede: quantas farmácias se inscreveram. */
+  inscritas: number;
   publicadaEm: string | null;
   criadoEm: string;
   atualizadoEm: string;
@@ -58,3 +67,12 @@ export interface CriarConvencaoRequest {
 }
 
 export type EditarConvencaoRequest = Partial<CriarConvencaoRequest>;
+
+/** Farmácia inscrita numa convenção, como a sede vê (RF23). */
+export interface InscricaoConvencao {
+  associadoId: string;
+  cnpj: string;
+  razaoSocial: string;
+  /** Data e hora ISO. */
+  inscritaEm: string;
+}

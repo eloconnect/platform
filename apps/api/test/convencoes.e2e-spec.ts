@@ -349,6 +349,66 @@ describe('Convenções (e2e)', () => {
     expect(semTabela.body).toMatchObject({ tabelaReajuste: [] });
   });
 
+  it('em dia, a farmácia se inscreve e baixa o comprovante; a sede vê a lista (RF23)', async () => {
+    const { id } = await publicada();
+
+    await http()
+      .post(`/associado/convencoes/${id}/inscricao`)
+      .set('Authorization', `Bearer ${tokenInadimplente}`)
+      .expect(403);
+    const primeira = await http()
+      .post(`/associado/convencoes/${id}/inscricao`)
+      .set('Authorization', `Bearer ${tokenEmDia}`)
+      .expect(201);
+    // De novo: a data da inscrição não muda.
+    const segunda = await http()
+      .post(`/associado/convencoes/${id}/inscricao`)
+      .set('Authorization', `Bearer ${tokenEmDia}`)
+      .expect(201);
+    expect(segunda.body).toEqual(primeira.body);
+
+    const comprovante = await http()
+      .get(`/associado/convencoes/${id}/inscricao/comprovante`)
+      .set('Authorization', `Bearer ${tokenEmDia}`)
+      .buffer(true)
+      .expect(200);
+    expect(comprovante.headers['content-type']).toBe('application/pdf');
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    expect((comprovante.body as Buffer).subarray(0, 5).toString()).toBe(
+      '%PDF-',
+    );
+    await http()
+      .get(`/associado/convencoes/${id}/inscricao/comprovante`)
+      .set('Authorization', `Bearer ${tokenInadimplente}`)
+      .expect(404);
+
+    const { body } = await http()
+      .get('/associado/convencoes')
+      .set('Authorization', `Bearer ${tokenEmDia}`)
+      .expect(200);
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    expect((body as Convencao[]).find((c) => c.id === id)).toMatchObject({
+      inscritaEm: (primeira.body as { inscritaEm: string }).inscritaEm,
+      inscricaoPermitida: true,
+    });
+
+    const inscritas = await http()
+      .get(`/convencoes/${id}/inscricoes`)
+      .set('Authorization', `Bearer ${tokenBasico}`)
+      .expect(200);
+    expect(inscritas.body).toEqual([
+      expect.objectContaining({ razaoSocial: 'Farmácia de Teste ADIMPLENTE' }),
+    ]);
+    const daSede = await http()
+      .get('/convencoes')
+      .set('Authorization', `Bearer ${tokenBasico}`)
+      .expect(200);
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    expect((daSede.body as Convencao[]).find((c) => c.id === id)).toMatchObject(
+      { inscritas: 1 },
+    );
+  });
+
   it('trocar um PDF apaga o arquivo anterior', async () => {
     const { id } = await criar();
     await enviarPdfs(id, { integral: INTEGRAL, resumida: RESUMIDA }).expect(

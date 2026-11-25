@@ -9,6 +9,7 @@ import {
   useTituloPagina,
 } from '../../componentes';
 import { CartaoConvencao } from './CartaoConvencao';
+import { InscricaoConvencao } from './InscricaoConvencao';
 import { TabelaReajuste } from './TabelaReajuste';
 
 type Estado =
@@ -108,6 +109,7 @@ export function PaginaConvencoesAssociado() {
                 O PDF desta convenção ainda não está disponível.
               </p>
             )}
+            <InscricaoConvencao convencao={convencao} />
           </CartaoConvencao>
         ))}
     </>

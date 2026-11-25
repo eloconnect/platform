@@ -232,6 +232,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Benefícios e suporte (#66): a área do associado tem a página "Benefícios e suporte", com os benefícios que a sede cadastra, separados nos dois grupos, e se cada grupo já está liberado para a farmácia (RF25, RN32). Quem não está em dia também vê a lista, com o que falta para usar. Regras da P15, decididas pelo grupo com aval do cliente (24/11/2026): a consultoria vale para quem está em dia, a partir do primeiro boleto pago; a assessoria jurídica, que exige o "ano inteiro antecipado", vale com o plano anual pago em vigor (#64); a liberação manual da sede (RN11) libera os dois grupos, e o bloqueio manual tira os dois. Quem está em dia pede suporte por um formulário com assunto e mensagem; a rota usa o guarda de acesso financeiro, que recusa quem não está em dia. O pedido fica guardado e vai por e-mail para todos os usuários da sede, com o e-mail da farmácia como endereço de resposta, para a sede responder pelo próprio e-mail. Os dois perfis da sede veem os pedidos em "Suporte", com os sem resposta primeiro, e marcam cada um como respondido, o que fica no log de auditoria (RN26). O painel da sede mostra quantos esperam resposta. A lista completa de benefícios continua sendo conteúdo do cliente (P06), cadastrado pela sede.
 
+- Inscrição em convenção (#65): no cartão de cada convenção publicada, quem está em dia vê "Inscrever minha farmácia" e, depois da inscrição, a data e o botão "Baixar o comprovante" (RF23). Forma decidida pelo grupo, com aval do cliente (P05, 24/11/2026): a inscrição é a farmácia declarar que segue a convenção, e o comprovante em PDF traz a farmácia, o CNPJ, a convenção e a data e a hora no horário de Mato Grosso, para a farmácia mostrar quando precisar. O PDF é montado pela API, com o mesmo gerador do boleto simulado. Uma inscrição por convenção e farmácia: inscrever de novo não muda a data, e o comprovante continua disponível mesmo se a farmácia atrasar depois. A rota da inscrição usa o guarda de acesso financeiro. Na área da sede, cada convenção publicada mostra quantas farmácias se inscreveram e a lista delas, com o link do perfil. A inscrição é uma ação do associado, então não entra no log de auditoria da sede (RN26).
+
 ## Acesso
 
 - Login com e-mail + senha [validado], para o associado e para a sede.
@@ -261,8 +263,6 @@ Decididas no setup inicial do repositório (09/10/2026):
 Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes em [Requisitos](requisitos.md), seção 8.
 
 - P02: formato, frequência e forma de recebimento do arquivo da JUCEMAT (ele traz o e-mail das farmácias).
-
-- P05: o que significa "se registrar em uma convenção" na prática.
 
 - P06: lista completa de benefícios (os dois grupos já estão definidos).
 
