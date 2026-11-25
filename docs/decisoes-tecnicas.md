@@ -1,6 +1,6 @@
 # Elo Connect — Decisões de Escopo e Técnicas
 
-Última atualização: 02/11/2026.
+Última atualização: 24/11/2026.
 
 Documentos relacionados: [Requisitos](requisitos.md) (regras de negócio, requisitos, pendências detalhadas e, na seção 9, o que foi entregue no MVP), [Roteiro da demonstração](roteiro-demonstracao.md), [Registro da Entrevista](registro-entrevista.md), [ADR-001](adr/0001-tecnologia-frontend.md) (tecnologia de front-end), [ADR-002](adr/0002-biblioteca-componentes.md) (biblioteca de componentes) e o backlog no GitHub Projects da organização.
 
@@ -214,6 +214,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Adesão pelo associado (#43): na tela inicial, quem ainda não recebe o boleto vê o convite "Quero receber o boleto todo mês". A página de adesão mostra o valor do mês e o termo, e o associado marca que leu e aceita. A contribuição ativa liga na hora, sem aprovação da sede, e o aceite fica guardado com a data, a hora e a versão do termo, numa tabela que só aceita inclusão. O boleto do mês sai na hora, com o valor cheio, já emitido no banco, e vai por e-mail. Se o banco falhar, a adesão é desfeita e o associado tenta de novo. Provisórios: o texto do termo, até o texto dos advogados (P21), e o vencimento do boleto da adesão, 10 dias depois dela (P16).
 
+- Boleto avulso (#63): na tela inicial, quem não recebe o boleto mensal e não tem boleto para pagar vê "Pagar só este mês". A página mostra o valor do mês, o vencimento e até quando a farmácia fica em dia, e um clique gera o boleto, já emitido no banco, sem aprovação da sede (RN24, RF37). As regras que a P10 deixava em aberto foram decididas pelo grupo, com aval do cliente (24/11/2026): o boleto vence 10 dias depois do pedido, como o da adesão; não vai por e-mail nem tem lembretes, porque, no card sorting, a sede lembrou de quem quer pagar uma vez sem receber nada por e-mail; e fica em "Meus boletos". É um por mês: enquanto o boleto do mês está em aberto ou pago, não sai outro. Quem tem um mês expirado não pede o avulso, porque os meses em aberto se pagam num boleto só (RN30). Pago, o avulso deixa a farmácia em dia até o último dia para pagar o mês seguinte, ou seja, o dia 10 desse mês mais 30 dias, a mesma folga de quem recebe o boleto todo mês e não paga o próximo. O cron do bloqueio cuida do fim do acesso; se a cobrança também foi interrompida pela sede (RN25), vale o prazo que terminar por último.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.
@@ -257,8 +259,6 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes 
 - P06: lista completa de benefícios (os dois grupos já estão definidos).
 
 - P08: comunicar ao cliente a decisão sobre a criação de conta.
-
-- P10: o que falta das regras do boleto avulso (vencimento do pedido feito depois do dia 10 e período de acesso de quem paga só um mês).
 
 - P12: quanto o sindicato pode gastar por mês com hospedagem e envio de e-mail em produção.
 

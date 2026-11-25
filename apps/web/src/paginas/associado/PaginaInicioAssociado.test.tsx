@@ -197,6 +197,41 @@ describe('PaginaInicioAssociado', () => {
     ).toBeInTheDocument();
   });
 
+  it('quem não recebe o boleto vê o convite e o caminho para pagar só este mês (RN23, RN24)', async () => {
+    vi.mocked(api.minhaConta).mockResolvedValue({
+      ...contaEmDia,
+      situacao: 'Sem contribuição ativa',
+      recebeBoletoMensal: false,
+    });
+    abrir();
+
+    expect(
+      await screen.findByRole('link', {
+        name: 'Quero receber o boleto todo mês',
+      }),
+    ).toHaveAttribute('href', '/associado/adesao');
+    expect(
+      await screen.findByRole('link', { name: 'Pagar só este mês' }),
+    ).toHaveAttribute('href', '/associado/avulso');
+  });
+
+  it('com um boleto em aberto, não oferece o boleto avulso', async () => {
+    vi.mocked(api.minhaConta).mockResolvedValue({
+      ...contaEmDia,
+      situacao: 'Sem contribuição ativa',
+      recebeBoletoMensal: false,
+    });
+    vi.mocked(api.listarMeusBoletos).mockResolvedValue([boleto]);
+    abrir();
+
+    expect(
+      await screen.findByRole('link', { name: 'Ver meu boleto' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Pagar só este mês' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('com o pedido de cancelamento enviado, mostra o prazo da sede (RN18)', async () => {
     vi.mocked(api.minhaConta).mockResolvedValue({
       nome: 'Drogaria Exemplo',
