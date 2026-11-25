@@ -5,11 +5,12 @@ import { AuthModule } from '../auth/auth.module.js';
 import { ConvencoesController } from './convencoes.controller.js';
 import { ConvencoesService } from './convencoes.service.js';
 import { AssociadosConvencoesController } from './associados-convencoes.controller.js';
+import { InscricoesService } from './inscricoes.service.js';
 
 @Module({
   imports: [AuthModule, AuditoriaModule, ArmazenamentoModule],
   controllers: [ConvencoesController, AssociadosConvencoesController],
-  providers: [ConvencoesService],
+  providers: [ConvencoesService, InscricoesService],
   exports: [ConvencoesService],
 })
 export class ConvencoesModule {}

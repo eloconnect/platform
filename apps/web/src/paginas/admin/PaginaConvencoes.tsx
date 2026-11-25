@@ -19,6 +19,7 @@ import {
   useTituloPagina,
 } from '../../componentes';
 import { CartaoConvencao } from '../associado/CartaoConvencao';
+import { JanelaInscritas } from './JanelaInscritas';
 import { TabelaReajuste } from '../associado/TabelaReajuste';
 import {
   conferirTabela,
@@ -52,6 +53,7 @@ export function PaginaConvencoes() {
   const [aviso, setAviso] = useState<string>();
   const [erroPublicacao, setErroPublicacao] = useState(false);
   const [erroPdf, setErroPdf] = useState(false);
+  const [vendoInscritas, setVendoInscritas] = useState<Convencao | null>(null);
 
   async function carregar() {
     try {
@@ -197,6 +199,25 @@ export function PaginaConvencoes() {
                     </strong>
                   </p>
 
+                  {convencao.publicadaEm && (
+                    <p>
+                      Farmácias inscritas: {convencao.inscritas}
+                      {convencao.inscritas > 0 && (
+                        <>
+                          {' '}
+                          <Botao
+                            variant="link"
+                            size="sm"
+                            className="align-baseline p-0"
+                            onClick={() => setVendoInscritas(convencao)}
+                          >
+                            Ver as inscritas
+                          </Botao>
+                        </>
+                      )}
+                    </p>
+                  )}
+
                   <p>
                     Documentos:{' '}
                     {convencao.anexos
@@ -301,6 +322,11 @@ export function PaginaConvencoes() {
       <JanelaPrevia
         convencao={janela?.tipo === 'previa' ? janela.convencao : null}
         aoFechar={() => setJanela(null)}
+      />
+
+      <JanelaInscritas
+        convencao={vendoInscritas}
+        aoFechar={() => setVendoInscritas(null)}
       />
 
       <JanelaAnexos

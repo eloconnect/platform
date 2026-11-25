@@ -39,6 +39,7 @@ const CAMPOS = {
   tabelaReajuste: true,
   publicadaEm: true,
   criadoEm: true,
+  _count: { select: { inscricoes: true } },
   atualizadoEm: true,
   anexos: {
     select: {
@@ -97,6 +98,7 @@ export class ConvencoesService {
         perfil: true,
         associado: {
           select: {
+            id: true,
             inativadoEm: true,
             situacao: true,
             acessoManual: true,
@@ -135,7 +137,20 @@ export class ConvencoesService {
         usuario.associado.acessoManualAte,
       ),
     );
-    return convencoes.map((convencao) => paraConvencao(convencao, emDia));
+    const inscricoes = await this.prisma.inscricaoConvencao.findMany({
+      where: { associadoId: usuario.associado.id },
+      select: { convencaoId: true, inscritaEm: true },
+    });
+    const inscritaEm = new Map(
+      inscricoes.map((i) => [i.convencaoId, i.inscritaEm.toISOString()]),
+    );
+    return convencoes.map((convencao) => ({
+      ...paraConvencao(convencao, emDia),
+      inscritaEm: inscritaEm.get(convencao.id) ?? null,
+      inscricaoPermitida: emDia,
+      // O associado não vê quantas farmácias se inscreveram.
+      inscritas: 0,
+    }));
   }
 
   /**
@@ -628,6 +643,9 @@ function paraConvencao(
     resumo: convencao.resumo,
     tabelaReajuste: comTabela ? tabela : [],
     tabelaRestrita: !comTabela && tabela.length > 0,
+    inscritaEm: null,
+    inscricaoPermitida: false,
+    inscritas: convencao._count.inscricoes,
     publicadaEm: convencao.publicadaEm?.toISOString() ?? null,
     criadoEm: convencao.criadoEm.toISOString(),
     atualizadoEm: convencao.atualizadoEm.toISOString(),

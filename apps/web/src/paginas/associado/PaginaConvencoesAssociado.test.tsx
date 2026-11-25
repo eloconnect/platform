@@ -10,6 +10,9 @@ vi.mock('../../api', () => ({
     listarConvencoesAssociado: vi.fn<ApiClient['listarConvencoesAssociado']>(),
     baixarPdfConvencaoAssociado:
       vi.fn<ApiClient['baixarPdfConvencaoAssociado']>(),
+    inscreverNaConvencao: vi.fn<ApiClient['inscreverNaConvencao']>(),
+    baixarComprovanteInscricao:
+      vi.fn<ApiClient['baixarComprovanteInscricao']>(),
   },
 }));
 
@@ -20,6 +23,9 @@ const COM_PDF: Convencao = {
   resumo: 'O que mudou: piso novo.\nO resto continua igual.',
   tabelaReajuste: [],
   tabelaRestrita: false,
+  inscritaEm: null,
+  inscricaoPermitida: true,
+  inscritas: 0,
   publicadaEm: '2026-10-01T15:00:00.000Z',
   criadoEm: '2026-10-01T12:00:00.000Z',
   atualizadoEm: '2026-10-01T15:00:00.000Z',
@@ -80,7 +86,9 @@ describe('PaginaConvencoesAssociado', () => {
         'O PDF desta convenção ainda não está disponível.',
       ),
     ).toBeInTheDocument();
-    expect(within(segunda).queryByRole('button')).not.toBeInTheDocument();
+    expect(
+      within(segunda).queryByRole('button', { name: /Abrir o PDF/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('abre o PDF que a API entrega numa aba nova', async () => {
@@ -145,6 +153,52 @@ describe('PaginaConvencoesAssociado', () => {
     expect(screen.getByText(/reajuste de 5,0%/)).toBeVisible();
     expect(
       screen.getByText(/A tabela de reajuste fica disponível para quem/),
+    ).toBeVisible();
+  });
+
+  it('em dia, inscreve a farmácia e baixa o comprovante (RF23, P05)', async () => {
+    vi.mocked(api.listarConvencoesAssociado).mockResolvedValue([COM_PDF]);
+    vi.mocked(api.inscreverNaConvencao).mockResolvedValue({
+      inscritaEm: '2026-11-25T15:00:00.000Z',
+    });
+    vi.mocked(api.baixarComprovanteInscricao).mockResolvedValue(
+      new Blob(['%PDF-']),
+    );
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: () => 'blob:comprovante',
+      revokeObjectURL: () => {},
+    });
+    render(<PaginaConvencoesAssociado />);
+
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'Inscrever minha farmácia: Convenção Coletiva 2026',
+      }),
+    );
+
+    expect(api.inscreverNaConvencao).toHaveBeenCalledWith('convencao-01');
+    expect(
+      await screen.findByText('Farmácia inscrita em 25/11/2026.'),
+    ).toBeVisible();
+    await userEvent.click(
+      screen.getByRole('button', {
+        name: 'Baixar o comprovante de inscrição: Convenção Coletiva 2026',
+      }),
+    );
+    expect(api.baixarComprovanteInscricao).toHaveBeenCalledWith('convencao-01');
+  });
+
+  it('quem não está em dia não vê o botão de inscrição', async () => {
+    vi.mocked(api.listarConvencoesAssociado).mockResolvedValue([
+      { ...COM_PDF, inscricaoPermitida: false },
+    ]);
+    render(<PaginaConvencoesAssociado />);
+
+    expect(
+      await screen.findByText(
+        'A inscrição na convenção é para quem está com a contribuição em dia.',
+      ),
     ).toBeVisible();
   });
 

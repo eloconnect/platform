@@ -20,6 +20,7 @@ import { UsuarioAtual } from '../auth/decorators/usuario-atual.decorator.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { CriarConvencaoDto, EditarConvencaoDto } from './dto/convencao.dto.js';
 import { ConvencoesService } from './convencoes.service.js';
+import { InscricoesService } from './inscricoes.service.js';
 
 const TAMANHO_MAXIMO_PDF = 4 * 1024 * 1024;
 
@@ -27,11 +28,20 @@ const TAMANHO_MAXIMO_PDF = 4 * 1024 * 1024;
 @UseGuards(RolesGuard)
 @Roles('ADMIN', 'ADMIN_BASICO')
 export class ConvencoesController {
-  constructor(private readonly convencoes: ConvencoesService) {}
+  constructor(
+    private readonly convencoes: ConvencoesService,
+    private readonly inscricoes: InscricoesService,
+  ) {}
 
   @Get()
   listar() {
     return this.convencoes.listar();
+  }
+
+  /** Farmácias inscritas na convenção (RF23). */
+  @Get(':id/inscricoes')
+  listarInscricoes(@Param('id', ParseUUIDPipe) id: string) {
+    return this.inscricoes.listar(id);
   }
 
   @Post()

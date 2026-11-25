@@ -53,6 +53,7 @@ model Usuario {
   suportesRespondidos    PedidoSuporte[]           @relation("SuporteRespondido")
   adesoes                AdesaoCobranca[]
   comunicados            Comunicado[]
+  inscricaoConvencaos    InscricaoConvencao[]
 }
 
 enum TipoToken {
@@ -132,6 +133,7 @@ model Associado {
   comunicados   EnvioComunicado[]
   quitacoes     PedidoQuitacao[]
   suportes      PedidoSuporte[]
+  inscricoes    InscricaoConvencao[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -419,8 +421,9 @@ model Convencao {
   criadoEm       DateTime  @default(now())
   atualizadoEm   DateTime  @updatedAt
 
-  autor  Usuario          @relation(fields: [autorId], references: [id], onDelete: Restrict)
-  anexos ConvencaoAnexo[]
+  autor      Usuario              @relation(fields: [autorId], references: [id], onDelete: Restrict)
+  anexos     ConvencaoAnexo[]
+  inscricoes InscricaoConvencao[]
 
   @@index([ano])
 }
@@ -539,5 +542,24 @@ model PedidoSuporte {
   respondidoPor Usuario?  @relation("SuporteRespondido", fields: [respondidoPorId], references: [id], onDelete: Restrict)
 
   @@index([respondidoEm, criadoEm])
+  @@index([associadoId])
+}
+
+/// Inscrição da farmácia em dia numa convenção (RF23, P05): a farmácia
+/// declara que segue a convenção e recebe um comprovante em PDF. Uma por
+/// convenção e farmácia.
+model InscricaoConvencao {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  convencaoId String   @db.Uuid
+  associadoId String   @db.Uuid
+  /// Quem inscreveu, com o login do associado (RN29).
+  usuarioId   String   @db.Uuid
+  inscritaEm  DateTime @default(now())
+
+  convencao Convencao @relation(fields: [convencaoId], references: [id], onDelete: Restrict)
+  associado Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@unique([convencaoId, associadoId])
   @@index([associadoId])
 }
