@@ -25,7 +25,7 @@ export type FormaPagamento = 'BOLETO' | 'PIX';
 export type StatusBoleto =
   'RASCUNHO' | 'EM_ABERTO' | 'PAGO' | 'CANCELADO' | 'EXPIRADO';
 
-export type TipoBoleto = 'MENSAL' | 'AVULSO' | 'ANUAL';
+export type TipoBoleto = 'MENSAL' | 'AVULSO' | 'ANUAL' | 'QUITACAO';
 
 /**
  * Boleto no histórico de boletos e pagamentos, no perfil do associado, para a
@@ -44,6 +44,8 @@ export interface BoletoHistorico {
   /** Data e hora ISO do pagamento. */
   pagoEm: string | null;
   formaPagamento: FormaPagamento | null;
+  /** Expirado, mas pago depois no boleto dos meses em aberto (RN30). */
+  pagoJunto: boolean;
 }
 
 /** Formatos em que a sede exporta o histórico de um associado (RF32). */
@@ -81,6 +83,7 @@ const TIPOS: Record<TipoBoleto, string> = {
   MENSAL: '',
   AVULSO: ' (avulso)',
   ANUAL: ' (plano anual)',
+  QUITACAO: ' (meses em aberto)',
 };
 
 const SITUACOES: Record<Exclude<StatusBoleto, 'EM_ABERTO' | 'PAGO'>, string> = {
@@ -109,8 +112,12 @@ export function textoSituacaoBoleto(
   boleto: Pick<
     BoletoHistorico,
     'status' | 'vencido' | 'pagoEm' | 'formaPagamento'
-  >,
+  > &
+    Partial<Pick<BoletoHistorico, 'pagoJunto'>>,
 ): string {
+  if (boleto.status === 'EXPIRADO' && boleto.pagoJunto) {
+    return 'Pago no boleto dos meses em aberto';
+  }
   if (boleto.status === 'EM_ABERTO') {
     return boleto.vencido ? 'Vencido' : 'Em aberto';
   }

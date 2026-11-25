@@ -32,7 +32,7 @@ const MENSAGEM = {
   BOLETO_EM_ABERTO:
     'A farmácia já tem um boleto para pagar. Ele está em "Meus boletos".',
   BOLETO_EXPIRADO:
-    'A farmácia tem meses em aberto. Fale com a sede para pagar todos num boleto só.',
+    'A farmácia tem meses em aberto. Para voltar a ficar em dia, peça o boleto dos meses em aberto.',
   MES_JA_PAGO: 'O boleto deste mês já foi pago.',
   SEM_VALOR: 'A sede ainda não cadastrou o valor da contribuição.',
   INATIVO: 'O cadastro da farmácia está inativo. Fale com a sede do sindicato.',

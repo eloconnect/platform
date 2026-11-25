@@ -14,14 +14,16 @@ import {
 } from './gateway-pagamento.js';
 import { GatewaySimulado } from './gateway-simulado.js';
 import { TransacoesService } from './transacoes.service.js';
+import { mesesExpiradosSemPagamento } from './quitacao.service.js';
 import { competenciaDaData } from './valor-do-mes.js';
 
 /**
  * Baixa automática do pagamento e desbloqueio (US15: RF15, RN10). Quando o
  * banco confirma o pagamento, o boleto vira PAGO, com o evento no histórico, e
  * o associado volta a adimplente, o que desbloqueia benefícios e suporte. Se
- * ele ainda tiver outro boleto expirado, continua inadimplente: os meses em
- * aberto se pagam num boleto só, que passa pela sede (RN30).
+ * ele ainda tiver outro mês expirado, continua inadimplente: os meses em
+ * aberto se pagam num boleto só, que passa pela sede (RN30). Pago esse
+ * boleto, os meses que ele junta contam como pagos.
  *
  * TODO(#40): o canal da confirmação (notificação do banco ou consulta
  * periódica) depende do estudo. Ele chama `confirmar` com o que o
@@ -140,9 +142,11 @@ export class PagamentosService {
       },
     );
 
-    // Desbloqueio (RN10), se não sobrou outro boleto expirado.
+    // Desbloqueio (RN10), se não sobrou outro mês expirado. O mês pago no
+    // boleto dos meses em aberto conta como pago, e o boleto dos meses em
+    // aberto que expirou não conta: os meses dele continuam expirados (RN30).
     const expirados = await tx.boleto.count({
-      where: { associadoId: boleto.associadoId, status: 'EXPIRADO' },
+      where: mesesExpiradosSemPagamento(boleto.associadoId),
     });
     const { count: desbloqueados } =
       expirados === 0

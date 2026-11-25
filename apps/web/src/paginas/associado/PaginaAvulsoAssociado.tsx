@@ -22,7 +22,7 @@ const TEXTO_MOTIVO: Record<MotivoSemAvulso, string> = {
   BOLETO_EM_ABERTO:
     'A farmácia já tem um boleto para pagar. Ele está em "Meus boletos".',
   BOLETO_EXPIRADO:
-    'A farmácia tem meses em aberto. Para voltar a ficar em dia, fale com a sede do sindicato.',
+    'A farmácia tem meses em aberto. Para voltar a ficar em dia, pague todos num boleto só, sem juros.',
   MES_JA_PAGO: 'O boleto deste mês já foi pago. Não é preciso pagar de novo.',
   SEM_VALOR:
     'O boleto ainda não está disponível. Fale com a sede do sindicato.',
@@ -86,9 +86,18 @@ export function PaginaAvulsoAssociado() {
       {situacao?.motivo && (
         <>
           <p>{TEXTO_MOTIVO[situacao.motivo]}</p>
-          <Link className="btn btn-primary btn-lg" to="/associado/boletos">
-            Ver meus boletos
-          </Link>
+          {situacao.motivo === 'BOLETO_EXPIRADO' ? (
+            <Link
+              className="btn btn-primary btn-lg"
+              to="/associado/meses-em-aberto"
+            >
+              Pagar os meses em aberto
+            </Link>
+          ) : (
+            <Link className="btn btn-primary btn-lg" to="/associado/boletos">
+              Ver meus boletos
+            </Link>
+          )}
         </>
       )}
       {situacao && !situacao.motivo && situacao.valor && (

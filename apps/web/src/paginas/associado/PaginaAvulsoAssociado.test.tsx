@@ -77,8 +77,8 @@ describe('PaginaAvulsoAssociado', () => {
       screen.queryByRole('button', { name: 'Gerar o boleto' }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole('link', { name: 'Ver meus boletos' }),
-    ).toHaveAttribute('href', '/associado/boletos');
+      screen.getByRole('link', { name: 'Pagar os meses em aberto' }),
+    ).toHaveAttribute('href', '/associado/meses-em-aberto');
   });
 
   it('mostra o erro da API e deixa tentar de novo', async () => {

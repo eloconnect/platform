@@ -11,6 +11,7 @@ const JULHO: BoletoHistorico = {
   vencido: true,
   pagoEm: null,
   formaPagamento: null,
+  pagoJunto: false,
 };
 
 const JUNHO: BoletoHistorico = {

@@ -91,7 +91,8 @@ erDiagram
         uuid id PK
         uuid associadoId FK
         uuid loteId FK "nulo: avulso e anual"
-        TipoBoleto tipo "MENSAL, AVULSO, ANUAL"
+        TipoBoleto tipo "MENSAL, AVULSO, ANUAL, QUITACAO"
+        uuid quitadoPorId FK "boleto dos meses em aberto"
         date competencia
         decimal valor
         date vencimento
@@ -280,7 +281,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | --- | --- | --- |
 | Campos cadastrais do `Associado` (razão social, nome fantasia, e-mail, telefone, município) | P02, RF42 | Conjunto mínimo provisório. Não existe lista atual dos associados (P09, respondida), então a planilha modelo da carga inicial parte deste conjunto. Novos campos entram por migration. |
 | Boleto ANUAL: fora do lote? renovação? | P04, P15 | Tipo existe; regras de geração ainda não. |
-| Boleto único dos meses em aberto (RN30) | Decidido (P10, 24/11/2026) | O boleto AVULSO de um mês já usa a tabela `Boleto`, sem tabela nova. O pedido que passa pela sede (boleto dos meses em aberto e segundo avulso do mês) precisa de um registro de pedido, com aprovação ou recusa. Um boleto que junta vários meses precisa de uma ligação com as competências que ele quita. Tabelas novas, desenhadas com a #63. |
+| Boleto único dos meses em aberto (RN30) | Decidido (P10, 24/11/2026) | O tipo QUITACAO junta os meses expirados, que apontam para ele em `quitadoPorId`. O pedido fica em `PedidoQuitacao` (PENDENTE, APROVADO, RECUSADO), com quem decidiu e o boleto gerado. |
 | Termo de adesão e vencimento do primeiro boleto (RN23) | P21, P16 | O aceite fica na `AdesaoCobranca`. O texto do termo (`TERMO_ADESAO`, no `packages/shared`) e o vencimento do boleto da adesão, 10 dias depois dela, são provisórios. |
 | Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |
 | Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |

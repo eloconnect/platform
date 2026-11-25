@@ -89,6 +89,7 @@ export class HistoricoBoletosService {
           orderBy: { ocorridoEm: 'desc' },
           take: 1,
         },
+        quitadoPor: { select: { status: true } },
       },
     });
     const hoje = hojeEmMatoGrosso(agora);
@@ -102,6 +103,8 @@ export class HistoricoBoletosService {
       vencido: boleto.status === 'EM_ABERTO' && boleto.vencimento < hoje,
       pagoEm: boleto.pagoEm?.toISOString() ?? null,
       formaPagamento: boleto.transacoes[0]?.formaPagamento ?? null,
+      pagoJunto:
+        boleto.status === 'EXPIRADO' && boleto.quitadoPor?.status === 'PAGO',
     }));
   }
 }

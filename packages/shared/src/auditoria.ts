@@ -16,6 +16,9 @@ export const ACOES_AUDITORIA = [
   // Pedido de cancelamento do associado (RN18, RF27)
   'CANCELAMENTO_APROVADO',
   'CANCELAMENTO_RECUSADO',
+  // Boleto único dos meses em aberto (RN30, RF37)
+  'QUITACAO_APROVADA',
+  'QUITACAO_RECUSADA',
   // Cobrança formal a todos os associados, sem boleto (RN19, RF29)
   'COMUNICADO_CRIADO',
   // Troca do e-mail de acesso junto com o do cadastro (RN34)
@@ -61,6 +64,8 @@ export const TEXTO_ACAO_AUDITORIA: Record<AcaoAuditoria, string> = {
   CONTRIBUICAO_INTERROMPIDA: 'Boleto mensal interrompido',
   CANCELAMENTO_APROVADO: 'Cancelamento aprovado',
   CANCELAMENTO_RECUSADO: 'Cancelamento recusado',
+  QUITACAO_APROVADA: 'Boleto dos meses em aberto aprovado',
+  QUITACAO_RECUSADA: 'Boleto dos meses em aberto recusado',
   COMUNICADO_CRIADO: 'Cobrança formal enviada',
   CONTA_EMAIL_ALTERADO: 'E-mail de acesso trocado',
   ACESSO_BLOQUEADO: 'Acesso bloqueado',

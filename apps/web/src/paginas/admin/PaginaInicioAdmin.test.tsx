@@ -7,7 +7,10 @@ import { entrarComo } from '../../test/sessao';
 import { PaginaInicioAdmin } from './PaginaInicioAdmin';
 
 vi.mock('../../api', () => ({
-  api: { listarAssociados: vi.fn<ApiClient['listarAssociados']>() },
+  api: {
+    listarAssociados: vi.fn<ApiClient['listarAssociados']>(),
+    listarPedidosQuitacao: vi.fn<ApiClient['listarPedidosQuitacao']>(),
+  },
 }));
 
 function abrir() {
@@ -29,6 +32,32 @@ describe('PaginaInicioAdmin', () => {
   beforeEach(() => {
     entrarComo('ADMIN');
     vi.mocked(api.listarAssociados).mockReset();
+    vi.mocked(api.listarPedidosQuitacao).mockReset();
+    vi.mocked(api.listarPedidosQuitacao).mockResolvedValue([]);
+  });
+
+  it('o chave mestre vê os pedidos do boleto dos meses em aberto (RN30)', async () => {
+    vi.mocked(api.listarAssociados).mockResolvedValue(lista(0));
+    vi.mocked(api.listarPedidosQuitacao).mockResolvedValue([
+      {
+        id: 'p1',
+        associadoId: 'a1',
+        razaoSocial: 'Farmácia Exemplo Ltda',
+        solicitadoEm: '2026-11-20T12:00:00.000Z',
+        meses: [],
+        total: '250.00',
+      },
+    ]);
+    abrir();
+
+    expect(
+      await screen.findByRole('heading', {
+        name: '1 pedido do boleto dos meses em aberto espera resposta',
+      }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'Farmácia Exemplo Ltda' }),
+    ).toHaveAttribute('href', '/admin/associados/a1');
   });
 
   it('o chave mestre vê quantos pedidos de cancelamento esperam resposta (RF27)', async () => {
