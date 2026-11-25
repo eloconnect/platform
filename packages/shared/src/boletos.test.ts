@@ -56,6 +56,15 @@ describe('textoSituacaoBoleto', () => {
     ).toBe('Pago, com boleto');
   });
 
+  it('o mês expirado e pago no boleto dos meses em aberto aparece como pago (RN30)', () => {
+    expect(
+      textoSituacaoBoleto({ ...boleto, status: 'EXPIRADO', pagoJunto: true }),
+    ).toBe('Pago no boleto dos meses em aberto');
+    expect(
+      textoMesBoleto({ competencia: { ano: 2099, mes: 7 }, tipo: 'QUITACAO' }),
+    ).toBe('julho de 2099 (meses em aberto)');
+  });
+
   it('mostra os boletos em emissão, cancelados e expirados', () => {
     expect(textoSituacaoBoleto({ ...boleto, status: 'RASCUNHO' })).toBe(
       'Em emissão',

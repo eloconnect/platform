@@ -48,6 +48,7 @@ model Usuario {
   convencoes             Convencao[]
   noticias               Noticia[]
   cancelamentosDecididos SolicitacaoCancelamento[]
+  quitacoesDecididas     PedidoQuitacao[]
   adesoes                AdesaoCobranca[]
   comunicados            Comunicado[]
 }
@@ -127,6 +128,7 @@ model Associado {
   edicoesBoleto EdicaoBoleto[]
   adesoes       AdesaoCobranca[]
   comunicados   EnvioComunicado[]
+  quitacoes     PedidoQuitacao[]
 
   @@index([situacao])
   @@index([contribuicaoAtiva])
@@ -204,6 +206,9 @@ enum TipoBoleto {
   AVULSO
   /// Plano anual à vista (RN13). Regras em P04.
   ANUAL
+  /// Boleto único dos meses em aberto, aprovado pela sede (RN30). Junta os
+  /// valores dos boletos expirados, que apontam para ele em `quitadoPorId`.
+  QUITACAO
 }
 
 enum StatusBoleto {
@@ -242,12 +247,18 @@ model Boleto {
   /// Quando saiu o último lembrete: 2 dias antes do vencimento e, depois
   /// dele, um por semana (RF13, RF14, RN07).
   ultimoLembreteEm   DateTime?
+  /// Boleto expirado: o boleto dos meses em aberto que o junta com os outros
+  /// (RN30). Pago esse boleto, este mês conta como pago.
+  quitadoPorId       String?      @db.Uuid
   criadoEm           DateTime     @default(now())
   atualizadoEm       DateTime     @updatedAt
 
-  associado  Associado   @relation(fields: [associadoId], references: [id], onDelete: Restrict)
-  lote       LoteMensal? @relation(fields: [loteId], references: [id], onDelete: Restrict)
+  associado  Associado       @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  lote       LoteMensal?     @relation(fields: [loteId], references: [id], onDelete: Restrict)
   transacoes Transacao[]
+  quitadoPor Boleto?         @relation("Quitacao", fields: [quitadoPorId], references: [id], onDelete: Restrict)
+  quita      Boleto[]        @relation("Quitacao")
+  pedido     PedidoQuitacao?
 
   @@index([associadoId, competencia])
   @@index([status, vencimento])
@@ -477,4 +488,32 @@ model ConvencaoAnexo {
   /// Um PDF de cada tipo por convenção.
   @@unique([convencaoId, tipo])
   @@index([convencaoId])
+}
+
+enum StatusPedidoQuitacao {
+  PENDENTE
+  APROVADO
+  RECUSADO
+}
+
+/// Pedido do boleto único dos meses em aberto (RN30, RF37): o associado pede,
+/// e o chave mestre aprova ou recusa. Aprovado, o boleto sai na hora.
+model PedidoQuitacao {
+  id             String               @id @default(uuid(7)) @db.Uuid
+  associadoId    String               @db.Uuid
+  status         StatusPedidoQuitacao @default(PENDENTE)
+  solicitadoEm   DateTime             @default(now())
+  decididoEm     DateTime?
+  decididoPorId  String?              @db.Uuid
+  /// Só a sede vê.
+  observacaoSede String?
+  /// O boleto gerado na aprovação.
+  boletoId       String?              @unique @db.Uuid
+
+  associado   Associado @relation(fields: [associadoId], references: [id], onDelete: Restrict)
+  decididoPor Usuario?  @relation(fields: [decididoPorId], references: [id], onDelete: Restrict)
+  boleto      Boleto?   @relation(fields: [boletoId], references: [id], onDelete: Restrict)
+
+  @@index([associadoId, status])
+  @@index([status])
 }

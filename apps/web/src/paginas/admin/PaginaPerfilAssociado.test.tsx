@@ -27,6 +27,8 @@ vi.mock('../../api', () => ({
     simularPagamento: vi.fn<ApiClient['simularPagamento']>(),
     interromperCobranca: vi.fn<ApiClient['interromperCobranca']>(),
     decidirCancelamento: vi.fn<ApiClient['decidirCancelamento']>(),
+    listarPedidosQuitacao: vi.fn<ApiClient['listarPedidosQuitacao']>(),
+    decidirQuitacao: vi.fn<ApiClient['decidirQuitacao']>(),
   },
 }));
 
@@ -113,6 +115,7 @@ const boleto = (
   vencido: false,
   pagoEm: null,
   formaPagamento: null,
+  pagoJunto: false,
   ...dados,
 });
 const BOLETOS: BoletoHistorico[] = [
@@ -160,6 +163,8 @@ describe('PaginaPerfilAssociado', () => {
     });
     vi.mocked(api.simularPagamento).mockReset();
     vi.mocked(api.baixarHistoricoBoletos).mockReset();
+    vi.mocked(api.listarPedidosQuitacao).mockResolvedValue([]);
+    vi.mocked(api.decidirQuitacao).mockReset();
     vi.mocked(api.interromperCobranca).mockReset();
     vi.mocked(api.decidirCancelamento).mockReset();
   });
@@ -816,6 +821,63 @@ describe('PaginaPerfilAssociado', () => {
       expect(await within(janela).findByRole('alert')).toHaveTextContent(
         'Não foi possível mudar o valor agora.',
       );
+    });
+  });
+
+  describe('boleto dos meses em aberto (RN30)', () => {
+    const pedido = {
+      id: 'p1',
+      associadoId: 'id-01',
+      razaoSocial: 'Farmácia Exemplo Ltda',
+      solicitadoEm: '2026-11-20T12:00:00.000Z',
+      meses: [
+        { competencia: { ano: 2026, mes: 8 }, valor: '120.00' },
+        { competencia: { ano: 2026, mes: 9 }, valor: '130.00' },
+      ],
+      total: '250.00',
+    };
+
+    it('o chave mestre vê o pedido e aprova, e o histórico carrega de novo', async () => {
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      vi.mocked(api.listarPedidosQuitacao).mockResolvedValue([pedido]);
+      vi.mocked(api.decidirQuitacao).mockResolvedValue({ boletoId: 'b1' });
+      abrir();
+
+      expect(
+        await screen.findByRole('heading', {
+          name: 'Boleto dos meses em aberto',
+        }),
+      ).toBeVisible();
+      expect(screen.getByText(/agosto de 2026/)).toBeVisible();
+      expect(screen.getByText(/Total: R\$\s250,00/)).toBeVisible();
+      const chamadas = vi.mocked(api.listarBoletosAssociado).mock.calls.length;
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Aprovar e gerar o boleto' }),
+      );
+      const janela = await screen.findByRole('dialog');
+      await userEvent.click(
+        within(janela).getByRole('button', { name: 'Sim, gerar o boleto' }),
+      );
+
+      expect(api.decidirQuitacao).toHaveBeenCalledWith('p1', {
+        decisao: 'APROVADO',
+      });
+      expect(
+        await screen.findByText(/Boleto dos meses em aberto gerado/),
+      ).toBeVisible();
+      expect(
+        vi.mocked(api.listarBoletosAssociado).mock.calls.length,
+      ).toBeGreaterThan(chamadas);
+    });
+
+    it('o perfil básico não vê nem consulta o pedido (RN33)', async () => {
+      entrarComo('ADMIN_BASICO');
+      vi.mocked(api.buscarAssociado).mockResolvedValue(associado());
+      abrir();
+
+      await screen.findByRole('heading', { level: 1 });
+      expect(api.listarPedidosQuitacao).not.toHaveBeenCalled();
     });
   });
 

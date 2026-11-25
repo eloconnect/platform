@@ -15,6 +15,11 @@ import type {
 } from './associados.js';
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
 import type { AvulsoGerado, SituacaoAvulso } from './avulso.js';
+import type {
+  DecidirQuitacaoRequest,
+  PedidoQuitacaoSede,
+  SituacaoQuitacao,
+} from './quitacao.js';
 import type { ResultadoImportacao } from './importacao.js';
 import type {
   Comunicado,
@@ -441,6 +446,31 @@ export function createApiClient(
 
     /** Gera o boleto avulso deste mês (RN24). */
     pedirAvulso: () => requisitar<AvulsoGerado>('POST', '/associado/avulso'),
+
+    /** Meses em aberto do associado logado e o último pedido (RN30). */
+    situacaoQuitacao: () =>
+      requisitar<SituacaoQuitacao>('GET', '/associado/meses-em-aberto'),
+
+    /** Pede o boleto único dos meses em aberto, que passa pela sede (RN30). */
+    pedirQuitacao: () =>
+      requisitar<SituacaoQuitacao>('POST', '/associado/meses-em-aberto'),
+
+    /** Pedidos de boleto dos meses em aberto que esperam a sede (RN30). */
+    listarPedidosQuitacao: (associadoId?: string) =>
+      requisitar<PedidoQuitacaoSede[]>(
+        'GET',
+        associadoId
+          ? `/pedidos-quitacao?associadoId=${encodeURIComponent(associadoId)}`
+          : '/pedidos-quitacao',
+      ),
+
+    /** Aprova ou recusa o pedido; aprovado, o boleto sai na hora (RN30). */
+    decidirQuitacao: (id: string, dados: DecidirQuitacaoRequest) =>
+      requisitar<{ boletoId: string | null }>(
+        'POST',
+        `/pedidos-quitacao/${encodeURIComponent(id)}/decisao`,
+        dados,
+      ),
 
     /** Boletos em aberto do associado logado (RF12). */
     listarMeusBoletos: () =>

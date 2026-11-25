@@ -214,6 +214,7 @@ describe('Meus boletos (e2e)', () => {
         vencido: false,
         pagoEm: null,
         formaPagamento: null,
+        pagoJunto: false,
       },
       expect.objectContaining({
         id: junho.id,

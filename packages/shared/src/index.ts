@@ -85,6 +85,14 @@ export {
   type SituacaoAvulso,
 } from './avulso.js';
 export {
+  type DecidirQuitacaoRequest,
+  type MesEmAberto,
+  type PedidoQuitacaoAssociado,
+  type PedidoQuitacaoSede,
+  type SituacaoQuitacao,
+  type StatusPedidoQuitacao,
+} from './quitacao.js';
+export {
   formatarDia,
   textoMesBoleto,
   textoSituacaoBoleto,

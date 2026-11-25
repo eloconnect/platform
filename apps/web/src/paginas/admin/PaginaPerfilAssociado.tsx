@@ -28,6 +28,7 @@ import {
 import { JanelaInterromperCobranca } from './JanelaInterromperCobranca';
 import { SecaoCancelamentos } from './SecaoCancelamentos';
 import { SecaoHistoricoBoletos } from './SecaoHistoricoBoletos';
+import { SecaoQuitacao } from './SecaoQuitacao';
 import { SecaoProximoBoleto } from './SecaoProximoBoleto';
 import { textosSituacao } from './situacaoAssociado';
 
@@ -165,6 +166,8 @@ function Perfil({
   const chaveMestre = ehChaveMestre();
   const [confirmando, setConfirmando] = useState(false);
   const [interrompendo, setInterrompendo] = useState(false);
+  // Muda quando sai um boleto novo, para o histórico carregar de novo.
+  const [versaoBoletos, setVersaoBoletos] = useState(0);
   const [decisaoAcesso, setDecisaoAcesso] = useState<
     (typeof DECISOES_ACESSO)[number] | null
   >(null);
@@ -312,7 +315,18 @@ function Perfil({
         }
       />
 
+      {chaveMestre && (
+        <SecaoQuitacao
+          associado={associado}
+          aoDecidir={(mensagem) => {
+            setVersaoBoletos((versao) => versao + 1);
+            aoAtualizar({}, mensagem);
+          }}
+        />
+      )}
+
       <SecaoHistoricoBoletos
+        key={versaoBoletos}
         associado={associado}
         aoPagar={(desbloqueado, mensagem) =>
           aoAtualizar(desbloqueado ? { situacao: 'ADIMPLENTE' } : {}, mensagem)

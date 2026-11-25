@@ -135,6 +135,15 @@ export function PaginaInicioAssociado() {
         )}
       </section>
 
+      {conta?.situacao === 'Inadimplente' && (
+        <p className="mb-4">
+          Meses em atraso?{' '}
+          <Link to="/associado/meses-em-aberto">
+            Pagar todos num boleto só e voltar a ficar em dia
+          </Link>
+        </p>
+      )}
+
       {conta?.acessoLiberadoAte && (
         <Alert variant="warning">
           <Alert.Heading as="h2" className="h5">

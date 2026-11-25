@@ -24,6 +24,8 @@ vi.mock('./api', () => ({
     listarMeuHistorico: vi.fn<ApiClient['listarMeuHistorico']>(),
     situacaoAdesao: vi.fn<ApiClient['situacaoAdesao']>(),
     situacaoAvulso: vi.fn<ApiClient['situacaoAvulso']>(),
+    situacaoQuitacao: vi.fn<ApiClient['situacaoQuitacao']>(),
+    listarPedidosQuitacao: vi.fn<ApiClient['listarPedidosQuitacao']>(),
   },
 }));
 
@@ -129,6 +131,13 @@ describe('Áreas logadas', () => {
       recebeBoletoMensal: false,
       valorMensal: '120.00',
     });
+    vi.mocked(api.listarPedidosQuitacao).mockResolvedValue([]);
+    vi.mocked(api.situacaoQuitacao).mockResolvedValue({
+      meses: [],
+      total: '0.00',
+      pedido: null,
+      boletoEmAberto: false,
+    });
     vi.mocked(api.situacaoAvulso).mockResolvedValue({
       motivo: null,
       valor: '120.00',
@@ -196,6 +205,7 @@ describe('Áreas logadas', () => {
     ['/associado/historico', 'ASSOCIADO', 'Histórico de pagamentos'],
     ['/associado/adesao', 'ASSOCIADO', 'Receber o boleto todo mês'],
     ['/associado/avulso', 'ASSOCIADO', 'Pagar só este mês'],
+    ['/associado/meses-em-aberto', 'ASSOCIADO', 'Voltar a ficar em dia'],
     ['/associado/cancelamento', 'ASSOCIADO', 'Cancelar o boleto mensal'],
   ] as const)('%s abre para o perfil %s', async (caminho, perfil, titulo) => {
     entrarComo(perfil);

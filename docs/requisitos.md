@@ -278,7 +278,7 @@ Situação em 02/11/2026, ao fim da M4. A coluna "Status" das tabelas da seção
 | RF16 | Entregue | | #49 |
 | RF17 | Não feito | P04, P15 e P23. | #64 |
 | RF36 | Em simulação | Termo provisório (P21) e vencimento do primeiro boleto provisório (P16). | #43 |
-| RF37 | Em simulação | Boleto avulso do mês. O boleto único dos meses em aberto, que passa pela sede, ainda não. | #63 |
+| RF37 | Em simulação | Boleto avulso do mês e boleto único dos meses em aberto, aprovado pelo chave mestre. | #63 |
 | RF38 | Entregue | | #51 |
 | RF18, RF19, RF20 | Entregue | O valor atual depende da P23. | #36, #37, #38 |
 | RF21 | Entregue | A tabela de reajuste espera a P24. | #30, #31 |
