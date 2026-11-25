@@ -224,6 +224,10 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - O boleto nunca é enviado a todos os ~2.000 associados, só aos que têm contribuição ativa (evita custo de emissão).
 
+## Convenções e benefícios
+
+- Tabela de reajuste (#150): no formulário da convenção, a sede preenche a tabela de reajuste salarial, uma linha por função, com o piso anterior e o novo, e pode deixar a tabela vazia (RF21). Formato decidido pelo grupo, com aval do cliente (P24, 24/11/2026). A sede digita os valores como está acostumada ("1.500,00"), e a API guarda com ponto e duas casas, no campo `tabelaReajuste` da convenção. Mudar a tabela fica no log de auditoria, com uma linha de texto por função. O associado em dia vê a tabela no cartão da convenção, em lista, uma função por bloco, com o reajuste em porcentagem, para caber no celular sem rolar para o lado (RNF03). Quem não está em dia vê um aviso no lugar, porque a tabela fica junto com o PDF completo (RN12).
+
 ## Acesso
 
 - Login com e-mail + senha [validado], para o associado e para a sede.
@@ -278,7 +282,7 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes 
 
 - P23: valor atual da contribuição mensal, e se o plano anual é o valor de 12 meses com 20% de desconto.
 
-- P24: formato dos documentos da convenção, conteúdo que sempre é publicado (como a tabela de reajuste) e tamanho dos PDFs.
+- P24: tamanho dos PDFs das convenções (o formato da tabela de reajuste foi decidido pelo grupo, com aval do cliente).
 
 - P25: o que acontece depois do cancelamento confirmado (acesso e boleto do mês) e quem da sede recebe o aviso de um pedido novo.
 

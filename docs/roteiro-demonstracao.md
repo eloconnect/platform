@@ -89,7 +89,7 @@ Para voltar aos dados iniciais, use o `db:reset` de [deploy.md](deploy.md). Ele 
 - P16: vencimento do boleto gerado na adesão.
 - P19: e-mail dos pedidos de cadastro e endereço de envio dos e-mails.
 - P21: texto do termo de adesão.
-- P24: documentos da convenção e tabela de reajuste.
+- P24: tamanho dos PDFs das convenções.
 - P25: acesso e boleto do mês depois do cancelamento, e quem recebe o aviso do pedido.
 - P26: texto da cobrança formal.
 - P27: se quem já paga, importado pela planilha, começa em dia.

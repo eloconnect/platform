@@ -9,6 +9,7 @@ import {
   useTituloPagina,
 } from '../../componentes';
 import { CartaoConvencao } from './CartaoConvencao';
+import { TabelaReajuste } from './TabelaReajuste';
 
 type Estado =
   | { tipo: 'carregando' }
@@ -17,8 +18,8 @@ type Estado =
 
 /**
  * Convenções coletivas publicadas pela sede (US22, RF22), das mais novas para
- * as mais antigas. Quem está em dia abre o PDF completo; os demais, o resumo
- * (RN12). A API decide qual dos dois entregar.
+ * as mais antigas. Quem está em dia abre o PDF completo e vê a tabela de
+ * reajuste; os demais, o resumo (RN12). A API decide o que entregar.
  */
 export function PaginaConvencoesAssociado() {
   useTituloPagina('Convenções coletivas');
@@ -85,6 +86,15 @@ export function PaginaConvencoesAssociado() {
             ano={convencao.ano}
             resumo={convencao.resumo}
           >
+            {convencao.tabelaReajuste.length > 0 && (
+              <TabelaReajuste linhas={convencao.tabelaReajuste} />
+            )}
+            {convencao.tabelaRestrita && (
+              <p>
+                A tabela de reajuste fica disponível para quem está com a
+                contribuição em dia.
+              </p>
+            )}
             {convencao.anexos.length > 0 ? (
               <Botao
                 disabled={abrindo === convencao.id}

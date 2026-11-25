@@ -5,7 +5,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { Convencao, TipoAnexoConvencao } from '@eloconnect/shared';
+import type {
+  Convencao,
+  LinhaReajuste,
+  TipoAnexoConvencao,
+} from '@eloconnect/shared';
 import {
   acessoManualEmVigor,
   podeAcessarRecursoRestrito,
@@ -14,7 +18,7 @@ import {
   AuditoriaService,
   diferencas,
 } from '../auditoria/auditoria.service.js';
-import type { Prisma } from '../generated/prisma/client.js';
+import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
   CriarConvencaoDto,
@@ -32,6 +36,7 @@ const CAMPOS = {
   titulo: true,
   ano: true,
   resumo: true,
+  tabelaReajuste: true,
   publicadaEm: true,
   criadoEm: true,
   atualizadoEm: true,
@@ -78,7 +83,7 @@ export class ConvencoesService {
       select: CAMPOS,
     });
 
-    return convencoes.map(paraConvencao);
+    return convencoes.map((convencao) => paraConvencao(convencao));
   }
 
   /**
@@ -93,6 +98,9 @@ export class ConvencoesService {
         associado: {
           select: {
             inativadoEm: true,
+            situacao: true,
+            acessoManual: true,
+            acessoManualAte: true,
           },
         },
       },
@@ -118,7 +126,16 @@ export class ConvencoesService {
       select: CAMPOS,
     });
 
-    return convencoes.map(paraConvencao);
+    // A tabela de reajuste fica com o PDF completo, para quem está em dia
+    // (RN12, P24).
+    const emDia = podeAcessarRecursoRestrito(
+      usuario.associado.situacao,
+      acessoManualEmVigor(
+        usuario.associado.acessoManual,
+        usuario.associado.acessoManualAte,
+      ),
+    );
+    return convencoes.map((convencao) => paraConvencao(convencao, emDia));
   }
 
   /**
@@ -266,6 +283,8 @@ export class ConvencoesService {
    */
   async criar(usuarioId: string, dados: CriarConvencaoDto): Promise<Convencao> {
     const { titulo, ano, resumo } = dados;
+    const tabela =
+      dados.tabelaReajuste && normalizarTabela(dados.tabelaReajuste);
 
     return this.prisma.$transaction(async (tx) => {
       const convencao = await tx.convencao.create({
@@ -273,6 +292,7 @@ export class ConvencoesService {
           titulo,
           ano,
           resumo,
+          ...(tabela?.length && { tabelaReajuste: paraJson(tabela) }),
           autorId: usuarioId,
         },
         select: CAMPOS,
@@ -283,7 +303,12 @@ export class ConvencoesService {
         acao: 'CONVENCAO_CRIADA',
         entidade: ENTIDADE,
         entidadeId: convencao.id,
-        valorNovo: { titulo, ano, resumo },
+        valorNovo: {
+          titulo,
+          ano,
+          resumo,
+          ...(tabela?.length && { tabelaReajuste: textoTabela(tabela) }),
+        },
       });
 
       return paraConvencao(convencao);
@@ -300,23 +325,36 @@ export class ConvencoesService {
   ): Promise<Convencao> {
     const { titulo, ano, resumo } = dados;
     const alteracoes = { titulo, ano, resumo };
+    const tabela =
+      dados.tabelaReajuste && normalizarTabela(dados.tabelaReajuste);
 
     return this.prisma.$transaction(async (tx) => {
       const antes = await this.buscar(tx, id);
 
       const convencao = await tx.convencao.update({
         where: { id },
-        data: alteracoes,
+        data: {
+          ...alteracoes,
+          // Sem linhas, a convenção fica sem tabela.
+          ...(tabela && {
+            tabelaReajuste: tabela.length ? paraJson(tabela) : Prisma.DbNull,
+          }),
+        },
         select: CAMPOS,
       });
 
+      // A tabela entra no log como texto, uma linha por função.
       const mudanca = diferencas(
         {
           titulo: antes.titulo,
           ano: antes.ano,
           resumo: antes.resumo,
+          tabelaReajuste: textoTabela(lerTabela(antes.tabelaReajuste)),
         },
-        alteracoes,
+        {
+          ...alteracoes,
+          tabelaReajuste: tabela && textoTabela(tabela),
+        },
       );
 
       if (mudanca) {
@@ -558,6 +596,7 @@ export class ConvencoesService {
         titulo: true,
         ano: true,
         resumo: true,
+        tabelaReajuste: true,
         publicadaEm: true,
         anexos: { select: { tipo: true } },
       },
@@ -579,15 +618,66 @@ function paraConvencao(
   convencao: Prisma.ConvencaoGetPayload<{
     select: typeof CAMPOS;
   }>,
+  comTabela = true,
 ): Convencao {
+  const tabela = lerTabela(convencao.tabelaReajuste);
   return {
     id: convencao.id,
     titulo: convencao.titulo,
     ano: convencao.ano,
     resumo: convencao.resumo,
+    tabelaReajuste: comTabela ? tabela : [],
+    tabelaRestrita: !comTabela && tabela.length > 0,
     publicadaEm: convencao.publicadaEm?.toISOString() ?? null,
     criadoEm: convencao.criadoEm.toISOString(),
     atualizadoEm: convencao.atualizadoEm.toISOString(),
     anexos: convencao.anexos,
   };
+}
+
+/** A tabela no formato que o Prisma grava em JSON. */
+function paraJson(linhas: LinhaReajuste[]): Prisma.InputJsonArray {
+  return linhas.map(({ funcao, pisoAnterior, pisoNovo }) => ({
+    funcao,
+    pisoAnterior,
+    pisoNovo,
+  }));
+}
+
+/** Valores com duas casas e sem espaços nas pontas. */
+function normalizarTabela(linhas: LinhaReajuste[]): LinhaReajuste[] {
+  return linhas.map(({ funcao, pisoAnterior, pisoNovo }) => ({
+    funcao: funcao.trim(),
+    pisoAnterior: Number(pisoAnterior).toFixed(2),
+    pisoNovo: Number(pisoNovo).toFixed(2),
+  }));
+}
+
+/**
+ * A tabela como o banco guarda. Aceita os números da primeira versão do
+ * seed, de antes do formato da P24.
+ */
+function lerTabela(valor: Prisma.JsonValue | null): LinhaReajuste[] {
+  if (!Array.isArray(valor)) return [];
+  return valor.flatMap((linha) => {
+    if (!linha || typeof linha !== 'object' || Array.isArray(linha)) return [];
+    const { funcao, pisoAnterior, pisoNovo } = linha;
+    if (typeof funcao !== 'string') return [];
+    return [
+      {
+        funcao,
+        pisoAnterior: Number(pisoAnterior).toFixed(2),
+        pisoNovo: Number(pisoNovo).toFixed(2),
+      },
+    ];
+  });
+}
+
+/** "Balconista: 1500.00 → 1575.00; ..." para o log de auditoria. */
+function textoTabela(linhas: LinhaReajuste[]): string | null {
+  return linhas.length
+    ? linhas
+        .map((l) => `${l.funcao}: ${l.pisoAnterior} → ${l.pisoNovo}`)
+        .join('; ')
+    : null;
 }

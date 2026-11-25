@@ -284,7 +284,7 @@ Os nomes das ações ficam no catálogo `ACOES_AUDITORIA` (`packages/shared/src/
 | Boleto único dos meses em aberto (RN30) | Decidido (P10, 24/11/2026) | O tipo QUITACAO junta os meses expirados, que apontam para ele em `quitadoPorId`. O pedido fica em `PedidoQuitacao` (PENDENTE, APROVADO, RECUSADO), com quem decidiu e o boleto gerado. |
 | Termo de adesão e vencimento do primeiro boleto (RN23) | P21, P16 | O aceite fica na `AdesaoCobranca`. O texto do termo (`TERMO_ADESAO`, no `packages/shared`) e o vencimento do boleto da adesão, 10 dias depois dela, são provisórios. |
 | Valor anual (`valorAnual`) | P23 | Calculado e gravado junto com o mensal (12 vezes o mensal, com 20% de desconto), para o histórico mostrar o que valia. |
-| Tabela de reajuste da convenção | P24 | O campo `tabelaReajuste` (JSON) existe, mas fica sem uso até a resposta. |
+| Tabela de reajuste da convenção | Decidido (P24, 24/11/2026) | O campo `tabelaReajuste` (JSON) guarda uma lista de `{ funcao, pisoAnterior, pisoNovo }`, com os valores em texto, ponto e duas casas. |
 | Inscrição em convenção | P05 | **Fora do modelo** até a resposta. |
 | Lista de benefícios | P06, P15 | Tabela genérica (título, descrição, grupo e ordem), cadastrada pela sede. O `grupo` separa assessoria jurídica e consultoria (RN32); a regra de acesso de cada grupo depende da P15. |
 | Matriz e filiais (RN31) | P14 | **Fora do modelo**. Provavelmente, uma ligação da filial com a matriz no `Associado`. |

@@ -295,6 +295,60 @@ describe('Convenções (e2e)', () => {
     expect(inadimplente.body).toEqual(RESUMIDA);
   });
 
+  it('a tabela de reajuste vai no log e só quem está em dia a vê (RF21, P24)', async () => {
+    const { id } = await publicada();
+    const tabela = [
+      { funcao: 'Balconista', pisoAnterior: '1500', pisoNovo: '1575.5' },
+    ];
+
+    const invalida = await http()
+      .patch(`/convencoes/${id}`)
+      .set('Authorization', `Bearer ${tokenBasico}`)
+      .send({ tabelaReajuste: [{ funcao: 'X', pisoAnterior: 'mil' }] });
+    expect(invalida.status).toBe(400);
+
+    const editada = await http()
+      .patch(`/convencoes/${id}`)
+      .set('Authorization', `Bearer ${tokenBasico}`)
+      .send({ tabelaReajuste: tabela })
+      .expect(200);
+    const salva = [
+      { funcao: 'Balconista', pisoAnterior: '1500.00', pisoNovo: '1575.50' },
+    ];
+    expect(editada.body).toMatchObject({ tabelaReajuste: salva });
+    const [log] = await prisma.logAuditoria.findMany({
+      where: { entidadeId: id, acao: 'CONVENCAO_EDITADA' },
+    });
+    expect(log.valorNovo).toEqual({
+      tabelaReajuste: 'Balconista: 1500.00 → 1575.50',
+    });
+
+    const doAssociado = async (token: string) => {
+      const { body } = await http()
+        .get('/associado/convencoes')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+      return (body as Convencao[]).find((c) => c.id === id);
+    };
+    expect(await doAssociado(tokenEmDia)).toMatchObject({
+      tabelaReajuste: salva,
+      tabelaRestrita: false,
+    });
+    expect(await doAssociado(tokenInadimplente)).toMatchObject({
+      tabelaReajuste: [],
+      tabelaRestrita: true,
+    });
+
+    // Sem linhas, a convenção fica sem tabela.
+    const semTabela = await http()
+      .patch(`/convencoes/${id}`)
+      .set('Authorization', `Bearer ${tokenBasico}`)
+      .send({ tabelaReajuste: [] })
+      .expect(200);
+    expect(semTabela.body).toMatchObject({ tabelaReajuste: [] });
+  });
+
   it('trocar um PDF apaga o arquivo anterior', async () => {
     const { id } = await criar();
     await enviarPdfs(id, { integral: INTEGRAL, resumida: RESUMIDA }).expect(

@@ -250,9 +250,18 @@ async function main() {
         resumo:
           'Resumo fictício da convenção coletiva, só para desenvolvimento. ' +
           'O conteúdo real é publicado pela sede.',
+        // Formato da P24 (decisão do grupo, 24/11/2026). Valores fictícios.
         tabelaReajuste: [
-          { funcao: 'Função de exemplo A', pisoAnterior: 1000, pisoNovo: 1050 },
-          { funcao: 'Função de exemplo B', pisoAnterior: 1500, pisoNovo: 1575 },
+          {
+            funcao: 'Função de exemplo A',
+            pisoAnterior: '1000.00',
+            pisoNovo: '1050.00',
+          },
+          {
+            funcao: 'Função de exemplo B',
+            pisoAnterior: '1500.00',
+            pisoNovo: '1575.00',
+          },
         ],
         publicadaEm: new Date(),
         autorId: admin.id,
