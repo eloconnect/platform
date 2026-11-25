@@ -16,6 +16,9 @@ describe('ConvencoesService', () => {
       findFirst: jest.fn(),
       findUnique: jest.fn(),
     },
+    inscricaoConvencao: {
+      findMany: jest.fn(() => Promise.resolve([])),
+    },
   };
 
   const auditoria = {};
