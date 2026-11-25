@@ -85,6 +85,11 @@ export {
   type MotivoSemAvulso,
   type SituacaoAvulso,
 } from './avulso.js';
+export {
+  exemploXmlJucemat,
+  type ErroJucemat,
+  type ResultadoJucemat,
+} from './jucemat.js';
 export { ehMatriz, raizCnpj, type Filial } from './filiais.js';
 export {
   LIMITES_SUPORTE,

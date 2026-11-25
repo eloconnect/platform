@@ -28,6 +28,8 @@ import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
 import { HistoricoBoletosService } from '../cobranca/historico-boletos.service.js';
 import { AssociadosService } from './associados.service.js';
 import { ImportacaoService } from './importacao.service.js';
+import { textoDoXml } from './jucemat.js';
+import { JucematService } from './jucemat.service.js';
 import { textoDoArquivo } from './planilha.js';
 import {
   CriarAssociadoDto,
@@ -39,6 +41,8 @@ import { FiltrosAssociadosDto } from './dto/filtros-associados.dto.js';
 
 /** Cerca de 2.000 farmácias cabem com folga em 1 MB. */
 const TAMANHO_MAXIMO_PLANILHA = 1024 * 1024;
+/** O XML repete as tags: cabe mais que a planilha, abaixo dos 4,5 MB da Vercel. */
+const TAMANHO_MAXIMO_XML = 4 * 1024 * 1024;
 
 /** Formatos da exportação do histórico, no jeito que o ParseEnumPipe lê. */
 const FORMATOS = { pdf: 'pdf', csv: 'csv' } satisfies Record<
@@ -67,6 +71,7 @@ export class AssociadosController {
     private readonly edicoes: EdicaoBoletoService,
     private readonly historico: HistoricoBoletosService,
     private readonly importacao: ImportacaoService,
+    private readonly jucemat: JucematService,
   ) {}
 
   @Get()
@@ -114,6 +119,24 @@ export class AssociadosController {
       throw new BadRequestException('Escolha a planilha.');
     }
     return this.importacao.importar(usuarioId, textoDoArquivo(arquivo.buffer));
+  }
+
+  /** Arquivo XML da JUCEMAT (RF28). Só o chave mestre, como o cadastro. */
+  @Post('importacao-jucemat')
+  @HttpCode(200)
+  @UseInterceptors(
+    FileInterceptor('arquivo', {
+      limits: { fileSize: TAMANHO_MAXIMO_XML, files: 1 },
+    }),
+  )
+  importarJucemat(
+    @UsuarioAtual() usuarioId: string,
+    @UploadedFile() arquivo?: { buffer: Buffer },
+  ) {
+    if (!arquivo) {
+      throw new BadRequestException('Escolha o arquivo da JUCEMAT.');
+    }
+    return this.jucemat.importar(usuarioId, textoDoXml(arquivo.buffer));
   }
 
   @Post(':id/inativar')

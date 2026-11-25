@@ -16,6 +16,7 @@ import {
   MensagemErro,
   useTituloPagina,
 } from '../../componentes';
+import { SecaoJucemat } from './SecaoJucemat';
 
 /**
  * Carga inicial dos associados que já pagam (RF42, O7): a sede baixa a
@@ -136,6 +137,8 @@ export function PaginaImportarAssociados() {
           {enviando ? 'Importando...' : 'Importar'}
         </Botao>
       </Form>
+
+      <SecaoJucemat />
     </>
   );
 }

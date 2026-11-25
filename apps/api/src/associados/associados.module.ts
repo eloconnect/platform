@@ -6,12 +6,13 @@ import { EmailModule } from '../email/email.module.js';
 import { AssociadosController } from './associados.controller.js';
 import { AssociadosService } from './associados.service.js';
 import { ImportacaoService } from './importacao.service.js';
+import { JucematService } from './jucemat.service.js';
 import { MinhaContaController } from './minha-conta.controller.js';
 
 @Module({
   imports: [AuthModule, AuditoriaModule, EmailModule, CobrancaModule],
   controllers: [AssociadosController, MinhaContaController],
-  providers: [AssociadosService, ImportacaoService],
+  providers: [AssociadosService, ImportacaoService, JucematService],
   exports: [AssociadosService],
 })
 export class AssociadosModule {}

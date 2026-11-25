@@ -175,4 +175,93 @@ describe('Importação de associados (e2e)', () => {
     });
     expect(await prisma.associado.count({ where: { cnpj: valido } })).toBe(0);
   });
+
+  describe('arquivo da JUCEMAT (RF28, P02)', () => {
+    const enviarXml = (conteudo: string, token = tokenAdmin) =>
+      http()
+        .post('/associados/importacao-jucemat')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('arquivo', Buffer.from(conteudo, 'utf8'), 'jucemat.xml');
+    const empresa = (dados: Record<string, string>) =>
+      `<empresa>${Object.entries(dados)
+        .map(([tag, valor]) => `<${tag}>${valor}</${tag}>`)
+        .join('')}</empresa>`;
+
+    it('só o chave mestre importa', async () => {
+      const resposta = await enviarXml(
+        '<empresas></empresas>',
+        await assinar('ADMIN_BASICO'),
+      );
+      expect(resposta.status).toBe(403);
+    });
+
+    it('cria as novas, completa o que falta das existentes e pula as com erro', async () => {
+      const nova = cnpjFicticio();
+      const existente = cnpjFicticio();
+      importados.push(nova, existente);
+      const jaCadastrada = await prisma.associado.create({
+        data: {
+          cnpj: existente,
+          razaoSocial: 'Farmácia Já Cadastrada Ltda',
+          email: 'da-sede@example.com',
+        },
+      });
+
+      const { body } = await enviarXml(
+        `<?xml version="1.0" encoding="UTF-8"?><empresas>${[
+          empresa({
+            cnpj: nova,
+            razaoSocial: 'Farmácia Nova &amp; Cia Ltda',
+            email: 'nova@example.com',
+            municipio: 'Cuiabá',
+          }),
+          empresa({
+            cnpj: existente,
+            razaoSocial: 'Outro Nome',
+            email: 'da-jucemat@example.com',
+            telefone: '(65) 3000-0000',
+          }),
+          empresa({ cnpj: '123', razaoSocial: 'Sem CNPJ válido' }),
+        ].join('')}</empresas>`,
+      ).expect(200);
+
+      expect(body).toEqual({
+        novas: 1,
+        completadas: 1,
+        semMudanca: 0,
+        erros: [{ empresa: 3, mensagem: 'CNPJ inválido.' }],
+      });
+      expect(
+        await prisma.associado.findUniqueOrThrow({ where: { cnpj: nova } }),
+      ).toMatchObject({
+        razaoSocial: 'Farmácia Nova & Cia Ltda',
+        municipio: 'Cuiabá',
+        contribuicaoAtiva: false,
+      });
+      // O que a sede digitou não muda; só o que faltava entra.
+      expect(
+        await prisma.associado.findUniqueOrThrow({
+          where: { id: jaCadastrada.id },
+        }),
+      ).toMatchObject({
+        razaoSocial: 'Farmácia Já Cadastrada Ltda',
+        email: 'da-sede@example.com',
+        telefone: '(65) 3000-0000',
+      });
+      const logs = await prisma.logAuditoria.findMany({
+        where: { associado: { cnpj: { in: [nova, existente] } } },
+        select: { acao: true },
+      });
+      expect(logs.map(({ acao }) => acao).sort()).toEqual([
+        'ASSOCIADO_COMPLETADO_JUCEMAT',
+        'ASSOCIADO_IMPORTADO_JUCEMAT',
+      ]);
+
+      // De novo: nada muda.
+      const segunda = await enviarXml(
+        `<empresas>${empresa({ cnpj: nova, razaoSocial: 'X' })}</empresas>`,
+      ).expect(200);
+      expect(segunda.body).toMatchObject({ novas: 0, semMudanca: 1 });
+    });
+  });
 });
