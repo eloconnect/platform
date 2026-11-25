@@ -14,6 +14,7 @@ import type {
   ProximoBoleto,
 } from './associados.js';
 import type { AderirRequest, AdesaoFeita, SituacaoAdesao } from './adesao.js';
+import type { AnualGerado, SituacaoAnual } from './anual.js';
 import type { AvulsoGerado, SituacaoAvulso } from './avulso.js';
 import type {
   DecidirQuitacaoRequest,
@@ -446,6 +447,12 @@ export function createApiClient(
 
     /** Gera o boleto avulso deste mês (RN24). */
     pedirAvulso: () => requisitar<AvulsoGerado>('POST', '/associado/avulso'),
+
+    /** Se a farmácia pode pedir o plano anual agora, e o valor (RN13). */
+    situacaoAnual: () => requisitar<SituacaoAnual>('GET', '/associado/anual'),
+
+    /** Gera o boleto do plano anual à vista (RN13). */
+    pedirAnual: () => requisitar<AnualGerado>('POST', '/associado/anual'),
 
     /** Meses em aberto do associado logado e o último pedido (RN30). */
     situacaoQuitacao: () =>

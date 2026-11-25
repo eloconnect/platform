@@ -218,6 +218,8 @@ Decididas no setup inicial do repositório (09/10/2026):
 
 - Boleto dos meses em aberto (#63): quem tem meses expirados vê, no início e na página do avulso, o caminho "Voltar a ficar em dia". A página lista os meses, com o valor de cada um e o total, sem juros (RN30). O associado pede o boleto, e cada usuário chave mestre recebe um e-mail com o link do perfil; o painel da sede também lista os pedidos. No perfil, o chave mestre aprova ou recusa, com uma observação que só a sede vê, e a decisão fica no log de auditoria (RN26, RN33). Aprovado, o boleto sai na hora, com a soma dos meses, vence 10 dias depois, como o da adesão, e vai por e-mail. Recusado, o associado recebe um e-mail e pode pedir de novo. Os boletos expirados continuam no histórico e apontam para o boleto que os junta; pago esse boleto, eles aparecem como "Pago no boleto dos meses em aberto", e o associado volta a ficar em dia (RN10). Se o boleto dos meses em aberto também expirar, os meses voltam a poder ser pedidos. Decisão do grupo, com aval do cliente (24/11/2026): o segundo avulso do mês, que a RN24 manda passar pela sede, não existe, porque o boleto do mês continua na tela para pagar.
 
+- Plano anual (#64): na tela inicial, quem não tem boleto para pagar vê "pagar o ano à vista, com 20% de desconto", recebendo ou não o boleto todo mês. A página mostra os 12 meses cobertos, o valor do ano, a economia em relação a 12 boletos mensais e o vencimento, e um clique gera o boleto, já emitido no banco (RF17, RN13). Regras da P04, decididas pelo grupo com aval do cliente (24/11/2026): o plano cobre 12 meses, a partir do mês do pedido, ou do seguinte se o boleto deste mês já saiu; o valor é o anual em vigor no pedido, como no lote (RN15); o lote mensal pula os meses cobertos pelo plano pago ou ainda para pagar; não há renovação automática, e, no fim do plano, quem recebe o boleto todo mês volta a recebê-lo. Quem não recebe o boleto todo mês fica em dia até o último dia para pagar o mês seguinte ao fim do plano, como no avulso. Como o avulso, o boleto vence 10 dias depois do pedido e fica em "Meus boletos", sem e-mail. O início do associado mostra até quando vai o plano pago, e com ele em vigor não sai avulso.
+
 - A confirmar: modelo de tarifa (por boleto emitido ou só por boleto pago).
 
 - A estudar: baixa automática do pagamento via webhook (o Sicredi avisa o sistema) ou polling (o sistema consulta a API periodicamente) — necessária porque o desbloqueio automático foi validado.
@@ -258,8 +260,6 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes 
 
 - P02: formato, frequência e forma de recebimento do arquivo da JUCEMAT (ele traz o e-mail das farmácias).
 
-- P04: o plano anual fica fora do lote mensal? Como é a renovação?
-
 - P05: o que significa "se registrar em uma convenção" na prática.
 
 - P06: lista completa de benefícios (os dois grupos já estão definidos).
@@ -280,7 +280,7 @@ Respondidas: P03 e P09 (27/10/2026), P01, P17, P18 e P20 (28/10/2026). Detalhes 
 
 - P21: texto do termo de adesão (advogados do sindicato).
 
-- P23: valor atual da contribuição mensal, e se o plano anual é o valor de 12 meses com 20% de desconto.
+- P23: valor atual da contribuição mensal.
 
 - P24: tamanho dos PDFs das convenções (o formato da tabela de reajuste foi decidido pelo grupo, com aval do cliente).
 

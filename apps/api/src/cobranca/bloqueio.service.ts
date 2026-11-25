@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { ultimoDiaDaCobertura } from './cobertura.js';
+import { ultimoDiaDaCobertura, ultimoMesCoberto } from './cobertura.js';
 import { TransacoesService } from './transacoes.service.js';
 import { hojeEmMatoGrosso, textoDia } from './valor-do-mes.js';
 
@@ -17,7 +17,7 @@ export interface ResultadoBloqueio {
   /**
    * Associados em dia sem o boleto mensal que perderam o acesso nesta
    * execução: a cobrança foi interrompida há mais de 30 dias (RN25), ou o mês
-   * pago no boleto avulso deixou de valer (P10).
+   * pago no boleto avulso ou no plano anual deixou de valer (P10, P04).
    */
   fimDoAcesso: number;
 }
@@ -31,7 +31,8 @@ export interface ResultadoBloqueio {
  *
  * Também bloqueia quem está em dia sem receber o boleto todo mês, quando o
  * acesso que resta termina: 30 dias depois da interrupção da cobrança pela
- * sede (RN25) ou o fim do mês pago no boleto avulso (P10, `cobertura.ts`).
+ * sede (RN25) ou o fim do que foi pago no boleto avulso (P10) ou no plano
+ * anual (P04), em `cobertura.ts`.
  * Vale o que terminar por último.
  */
 @Injectable()
@@ -87,17 +88,22 @@ export class BloqueioService {
         ...semBoletoMensal,
         OR: [
           { cobrancaInterrompidaEm: { not: null } },
-          { boletos: { some: { tipo: 'AVULSO', status: 'PAGO' } } },
+          {
+            boletos: {
+              some: { tipo: { in: ['AVULSO', 'ANUAL'] }, status: 'PAGO' },
+            },
+          },
         ],
       },
       select: {
         id: true,
         cobrancaInterrompidaEm: true,
+        // Os mais novos bastam: o avulso não sai com o plano anual em vigor.
         boletos: {
-          where: { tipo: 'AVULSO', status: 'PAGO' },
+          where: { tipo: { in: ['AVULSO', 'ANUAL'] }, status: 'PAGO' },
           orderBy: { competencia: 'desc' },
-          take: 1,
-          select: { competencia: true },
+          take: 3,
+          select: { tipo: true, competencia: true },
         },
       },
     });
@@ -109,7 +115,9 @@ export class BloqueioService {
             new Date(
               hojeEmMatoGrosso(cobrancaInterrompidaEm).getTime() + 30 * UM_DIA,
             ),
-          boletos[0] && ultimoDiaDaCobertura(boletos[0].competencia),
+          ...boletos.map((boleto) =>
+            ultimoDiaDaCobertura(ultimoMesCoberto(boleto)),
+          ),
         ].filter((fim): fim is Date => fim instanceof Date);
         return fins.every((fim) => fim < hoje);
       })

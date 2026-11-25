@@ -22,7 +22,13 @@ import {
 } from '@eloconnect/shared';
 import { respostaAte } from '../cancelamentos/prazo.js';
 import { EdicaoBoletoService } from '../cobranca/edicao-boleto.service.js';
-import { hojeEmMatoGrosso, textoDia } from '../cobranca/valor-do-mes.js';
+import { planoAnualAte } from '../cobranca/cobertura.js';
+import {
+  competenciaDaData,
+  dataDaCompetencia,
+  hojeEmMatoGrosso,
+  textoDia,
+} from '../cobranca/valor-do-mes.js';
 import { EmailService } from '../email/email.service.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -568,6 +574,7 @@ export class AssociadosService {
             razaoSocial: true,
             nomeFantasia: true,
             situacao: true,
+            id: true,
             contribuicaoAtiva: true,
             acessoManual: true,
             acessoManualAte: true,
@@ -586,6 +593,11 @@ export class AssociadosService {
     const liberado =
       acessoManualEmVigor(associado.acessoManual, associado.acessoManualAte) ===
       'LIBERADO';
+    const plano = await planoAnualAte(
+      this.prisma,
+      associado.id,
+      dataDaCompetencia(competenciaDaData(hojeEmMatoGrosso(new Date()))),
+    );
     return {
       nome: associado.nomeFantasia ?? associado.razaoSocial,
       situacao: textoSituacao(associado),
@@ -595,6 +607,7 @@ export class AssociadosService {
       recebeBoletoMensal: associado.contribuicaoAtiva,
       cancelamentoPedidoEm:
         associado.cancelamentos[0]?.solicitadaEm.toISOString() ?? null,
+      planoAnualAte: plano && competenciaDaData(plano),
     };
   }
 

@@ -12,7 +12,7 @@ import {
 import type { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { DIAS_VENCIMENTO_ADESAO } from './adesao.service.js';
-import { ultimoDiaDaCobertura } from './cobertura.js';
+import { planoAnualAte, ultimoDiaDaCobertura } from './cobertura.js';
 import { emitirBoleto } from './emissao.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
 import { TransacoesService } from './transacoes.service.js';
@@ -34,6 +34,7 @@ const MENSAGEM = {
   BOLETO_EXPIRADO:
     'A farmácia tem meses em aberto. Para voltar a ficar em dia, peça o boleto dos meses em aberto.',
   MES_JA_PAGO: 'O boleto deste mês já foi pago.',
+  PLANO_ANUAL: 'O plano anual da farmácia já cobre este mês.',
   SEM_VALOR: 'A sede ainda não cadastrou o valor da contribuição.',
   INATIVO: 'O cadastro da farmácia está inativo. Fale com a sede do sindicato.',
 } satisfies Record<MotivoSemAvulso, string>;
@@ -117,7 +118,7 @@ export class AvulsoService {
     agora: Date,
   ): Promise<{ motivo: Motivo | null; valor: Prisma.Decimal | null }> {
     const competencia = competenciaAtual(agora);
-    const [associado, valor, boletos] = await Promise.all([
+    const [associado, valor, boletos, plano] = await Promise.all([
       tx.associado.findUniqueOrThrow({
         where: { id: associadoId },
         select: { contribuicaoAtiva: true, inativadoEm: true },
@@ -133,6 +134,7 @@ export class AvulsoService {
         },
         select: { status: true },
       }),
+      planoAnualAte(tx, associadoId, competencia),
     ]);
     const tem = (status: string) => boletos.some((b) => b.status === status);
     let motivo: Motivo | null = null;
@@ -141,6 +143,7 @@ export class AvulsoService {
     else if (associado.contribuicaoAtiva) motivo = 'RECEBE_BOLETO_MENSAL';
     else if (tem('EXPIRADO')) motivo = 'BOLETO_EXPIRADO';
     else if (tem('EM_ABERTO') || tem('RASCUNHO')) motivo = 'BOLETO_EM_ABERTO';
+    else if (plano) motivo = 'PLANO_ANUAL';
     else if (tem('PAGO')) motivo = 'MES_JA_PAGO';
     else if (!valor) motivo = 'SEM_VALOR';
     return { motivo, valor };

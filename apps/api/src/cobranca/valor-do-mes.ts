@@ -51,3 +51,22 @@ export async function valorDoMes(
   });
   return valor?.valorMensal ?? null;
 }
+
+/**
+ * Valor do plano anual à vista para um ano que começa em `competencia`: o
+ * último alterado antes do dia 1 desse mês, como o mensal (RN13, RN15).
+ */
+export async function valorAnualDoMes(
+  tx: Prisma.TransactionClient,
+  competencia: Date,
+): Promise<Prisma.Decimal | null> {
+  const inicioDoMes = new Date(
+    competencia.getTime() - FUSO_SEDE_HORAS * UMA_HORA,
+  );
+  const valor = await tx.valorContribuicao.findFirst({
+    where: { criadoEm: { lt: inicioDoMes } },
+    orderBy: [{ criadoEm: 'desc' }, { id: 'desc' }],
+    select: { valorAnual: true },
+  });
+  return valor?.valorAnual ?? null;
+}

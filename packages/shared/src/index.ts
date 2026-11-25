@@ -86,6 +86,11 @@ export {
   type SituacaoAvulso,
 } from './avulso.js';
 export {
+  type AnualGerado,
+  type MotivoSemAnual,
+  type SituacaoAnual,
+} from './anual.js';
+export {
   type DecidirQuitacaoRequest,
   type MesEmAberto,
   type PedidoQuitacaoAssociado,

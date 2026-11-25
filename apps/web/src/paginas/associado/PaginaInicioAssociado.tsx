@@ -131,6 +131,11 @@ export function PaginaInicioAssociado() {
                 {FRASE_SITUACAO[conta.situacao]}
               </span>
             </p>
+            {conta.planoAnualAte && (
+              <p className="mt-2 mb-0">
+                Plano anual pago até {textoCompetencia(conta.planoAnualAte)}.
+              </p>
+            )}
           </>
         )}
       </section>
@@ -201,7 +206,9 @@ export function PaginaInicioAssociado() {
           {emAberto.length === 0 && Array.isArray(boletos) && (
             <p className="mt-3 mb-0">
               Prefere pagar uma vez só?{' '}
-              <Link to="/associado/avulso">Pagar só este mês</Link>
+              <Link to="/associado/avulso">Pagar só este mês</Link> ou{' '}
+              <Link to="/associado/anual">pagar o ano à vista</Link>, com 20% de
+              desconto.
             </p>
           )}
         </section>
@@ -235,6 +242,12 @@ export function PaginaInicioAssociado() {
           ) : (
             <p className="mb-0">
               A farmácia recebe o boleto da contribuição todo mês.{' '}
+              {!conta.planoAnualAte && emAberto.length === 0 && (
+                <>
+                  <Link to="/associado/anual">Pagar o ano à vista</Link>, com
+                  20% de desconto.{' '}
+                </>
+              )}
               <Link to="/associado/cancelamento">Cancelar o boleto mensal</Link>
             </p>
           )}

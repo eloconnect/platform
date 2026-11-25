@@ -22,6 +22,7 @@ const CONTA: MinhaConta = {
   acessoLiberadoAte: null,
   recebeBoletoMensal: true,
   cancelamentoPedidoEm: null,
+  planoAnualAte: null,
 };
 
 const BENEFICIOS: Beneficio[] = [
@@ -132,6 +133,7 @@ describe('PaginaCancelamentoAssociado', () => {
     vi.mocked(api.minhaConta).mockResolvedValue({
       ...CONTA,
       cancelamentoPedidoEm: '2026-11-02T15:00:00.000Z',
+      planoAnualAte: null,
     });
     abrir();
 

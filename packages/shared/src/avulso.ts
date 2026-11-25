@@ -14,6 +14,8 @@ export type MotivoSemAvulso =
   | 'BOLETO_EXPIRADO'
   /** O boleto deste mês já foi pago. */
   | 'MES_JA_PAGO'
+  /** O plano anual pago cobre este mês (RN13). */
+  | 'PLANO_ANUAL'
   /** A sede ainda não cadastrou o valor da contribuição. */
   | 'SEM_VALOR'
   /** O cadastro da farmácia está inativo (P13). */

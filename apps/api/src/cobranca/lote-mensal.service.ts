@@ -6,6 +6,7 @@ import { primeiroDiaUtil } from './dia-util.js';
 import { EmailBoletoService } from './email-boleto.service.js';
 import { emitirBoleto } from './emissao.js';
 import { GatewayPagamento } from './gateway-pagamento.js';
+import { MESES_PLANO_ANUAL, somarMeses } from './cobertura.js';
 import { TransacoesService } from './transacoes.service.js';
 import { valorDoMes } from './valor-do-mes.js';
 
@@ -171,11 +172,29 @@ export class LoteMensalService {
             // TODO(P13): o que a inativação muda na cobrança recorrente. Até
             // a resposta, quem a sede inativou fica fora do lote.
             inativadoEm: null,
-            // Quem já tem o boleto do mês, como o da adesão (RN23), não
-            // recebe outro.
-            boletos: {
-              none: { competencia, status: { not: 'CANCELADO' } },
-            },
+            AND: [
+              // Quem já tem o boleto do mês, como o da adesão (RN23), não
+              // recebe outro.
+              {
+                boletos: {
+                  none: { competencia, status: { not: 'CANCELADO' } },
+                },
+              },
+              // Quem tem o plano anual, pago ou esperando o pagamento, não
+              // recebe o boleto dos meses que ele cobre (P04).
+              {
+                boletos: {
+                  none: {
+                    tipo: 'ANUAL',
+                    status: { in: ['PAGO', 'EM_ABERTO'] },
+                    competencia: {
+                      gt: somarMeses(competencia, -MESES_PLANO_ANUAL),
+                      lte: competencia,
+                    },
+                  },
+                },
+              },
+            ],
           },
           select: {
             id: true,

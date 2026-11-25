@@ -191,6 +191,8 @@ export interface MinhaConta {
    * nulo sem pedido pendente (RN18).
    */
   cancelamentoPedidoEm: string | null;
+  /** Último mês do plano anual pago em vigor; nulo sem plano (RN13). */
+  planoAnualAte: Competencia | null;
 }
 
 /** Pedido de cancelamento do boleto mensal feito pelo associado (RF26). */
